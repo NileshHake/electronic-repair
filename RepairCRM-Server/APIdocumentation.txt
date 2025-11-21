@@ -1,0 +1,7 @@
+| Role Name             | `user_type` Value | Description                                                               |
+| --------------------- | ----------------: | ------------------------------------------------------------------------- |
+| 🧑‍💼 **Super Admin** |               `1` | Has full access to all modules, settings, and data.                       |
+| 👨‍💻 **Admin**       |               `2` | Can manage users, products, and operations under their branch or control. |
+| 👷‍♂️ **User**        |               `3` | Regular employee — limited access to assigned modules or tasks.           |
+| 🧠 **Tech**           |               `4` | Technical team member — handles support, maintenance, or repairs.         |
+| 🚚 **Delivery Boy**   |               `5` | Responsible for pickup and delivery tasks.                                |

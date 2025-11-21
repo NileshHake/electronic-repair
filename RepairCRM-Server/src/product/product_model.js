@@ -1,0 +1,56 @@
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/db");
+
+const Product = sequelize.define("tbl_product", {
+  product_id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  product_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  product_tax: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  product_created_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  product_description: {
+    type: DataTypes.TEXT("long"),
+    allowNull: true,
+  },
+  product_brand: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  product_category: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  product_image: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  product_purchase_price: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  product_sale_price: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  product_mrp: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  product_status: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+  },
+});
+
+module.exports = Product;

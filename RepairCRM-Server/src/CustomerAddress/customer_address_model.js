@@ -1,0 +1,45 @@
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/db");
+
+const CustomerAddress = sequelize.define("tbl_customer_address", {
+  customer_address__id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  customer_address_state: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  customer_address_district: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
+  customer_address_block: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  customer_address_city: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  customer_address_pincode: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  customer_address_description: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  customer_address_created_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  customer_address_status: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+  },
+});
+
+module.exports = CustomerAddress;
