@@ -1,22 +1,83 @@
 import React from "react";
 import { Row, Col, Label, Input } from "reactstrap";
 import Select from "react-select";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { getDeviceTypesList } from "../../../store/DeviceType";
+import { getBrandsList } from "../../../store/Brand";
+import { getAccessoriesList } from "../../../store/Accessories";
+import { getStorageLocationsList } from "../../../store/StorageLocation";
+import { getDeviceColorList } from "../../../store/DeviceColor";
+import { useEffect } from "react";
+import DeviceColorAdd from "../../DeviceColor/DeviceColorAdd";
+import DeviceModelAdd from "../../DeviceModel/DeviceModelAdd";
+import BrandAdd from "../../Brand/BrandAdd";
+import DeviceTypeAdd from "../../DeviceType/DeviceTypeAdd";
 
-const RepairTabDeviceInfo = ({
-  formData,
-  handleInputChange,
-  errorMessage,
-  deviceTypesOption,
-  brandsOption,
-  deviceModelsOption,
-  accessoriesOption,
-  storageLocationsOption,
-  deviceColorsOption,
-  setIsDeviceTypeModalOpen,
-  setIsBrandModalOpen,
-  setIsDeviceModelModalOpen,
-  setIsDeviceColorModalOpen,
-}) => {
+const RepairTabDeviceInfo = ({ formData, handleInputChange, errorMessage }) => {
+  const dispatch = useDispatch();
+  const [isDeviceTypeModalOpen, setIsDeviceTypeModalOpen] = useState(false);
+  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
+  const [isDeviceModelModalOpen, setIsDeviceModelModalOpen] = useState(false);
+  const [isDeviceColorModalOpen, setIsDeviceColorModalOpen] = useState(false);
+  useEffect(() => {
+    [
+      getDeviceColorList,
+      getStorageLocationsList,
+      getAccessoriesList,
+
+      getDeviceTypesList,
+
+      getBrandsList,
+    ].forEach((action) => dispatch(action()));
+  }, [dispatch]);
+  const deviceTypes = useSelector(
+    (state) => state.DeviceTypeReducer?.deviceTypes
+  );
+  const brands = useSelector((state) => state.BrandReducer?.brands);
+  const deviceModels = useSelector(
+    (state) => state.DeviceModelReducer?.deviceModels
+  );
+  const accessories = useSelector(
+    (state) => state.AccessoriesReducer?.accessories
+  );
+  const storageLocations = useSelector(
+    (state) => state.StorageLocationReducer?.storageLocations
+  );
+  const deviceColors = useSelector(
+    (state) => state.DeviceColorReducer?.deviceColors || []
+  );
+  const mapOptions = (list, valueKey, labelKey) =>
+    list.map((item) => ({
+      value: item[valueKey],
+      label: item[labelKey],
+    }));
+  const deviceTypesOption = mapOptions(
+    deviceTypes,
+    "device_type_id",
+    "device_type_name"
+  );
+  const brandsOption = mapOptions(brands, "brand_id", "brand_name");
+  const deviceModelsOption = mapOptions(
+    deviceModels,
+    "device_model_id",
+    "device_model_name"
+  );
+  const accessoriesOption = mapOptions(
+    accessories,
+    "accessories_id",
+    "accessories_name"
+  );
+  const storageLocationsOption = mapOptions(
+    storageLocations,
+    "storage_location_id",
+    "storage_location_name"
+  );
+  const deviceColorsOption = mapOptions(
+    deviceColors,
+    "device_color_id",
+    "device_color_name"
+  );
   return (
     <Row>
       {/* Device Type */}
@@ -152,8 +213,7 @@ const RepairTabDeviceInfo = ({
         <Label>Storage Location</Label>
         <Select
           value={storageLocationsOption.find(
-            (opt) =>
-              opt.value === formData.repair_device_storage_location_id
+            (opt) => opt.value === formData.repair_device_storage_location_id
           )}
           onChange={(opt) =>
             handleInputChange("repair_device_storage_location_id", opt.value)
@@ -200,6 +260,30 @@ const RepairTabDeviceInfo = ({
           placeholder="Enter Device Password"
         />
       </Col>
+      {isDeviceTypeModalOpen && (
+        <DeviceTypeAdd
+          isOpen={isDeviceTypeModalOpen}
+          toggle={() => setIsDeviceTypeModalOpen(false)}
+        />
+      )}
+      {isBrandModalOpen && (
+        <BrandAdd
+          isOpen={isBrandModalOpen}
+          toggle={() => setIsBrandModalOpen(false)}
+        />
+      )}
+      {isDeviceModelModalOpen && (
+        <DeviceModelAdd
+          isOpen={isDeviceModelModalOpen}
+          toggle={() => setIsDeviceModelModalOpen(false)}
+        />
+      )}
+      {isDeviceColorModalOpen && (
+        <DeviceColorAdd
+          isOpen={isDeviceColorModalOpen}
+          toggle={() => setIsDeviceColorModalOpen(false)}
+        />
+      )}
     </Row>
   );
 };

@@ -71,7 +71,7 @@ const store = async (req, res) => {
       repair_device_accessories_id,
       repair_device_services_id,
       repair_device_priority,
-      repair_expected_delivery_date,
+      repair_expected_delivery_date,  
       repair_assigned_technician_to,
       repair_delivery_and_pickup_to,
       repair_image: JSON.stringify(repair_images),

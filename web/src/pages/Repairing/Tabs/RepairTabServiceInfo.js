@@ -3,137 +3,156 @@ import { Row, Col, Label } from "reactstrap";
 import Select from "react-select";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { getHardwareConfigurations } from "../../../store/HardwareConfiguration";
+import HardwareConfigurationAdd from "../../HardwareConfiguration/HardwareConfigurationAdd";
+import { useState } from "react";
 
 const RepairTabServiceInfo = ({
   formData,
   setFormData,
   handleInputChange,
   errorMessage,
-  servicesOption,
-  hardwareConfigurationsOption,
-  setIsServicesModalOpen,
-  setIsHardwareConfigurationModalOpen,
 }) => {
+  const [
+    isHardwareConfigurationModalOpen,
+    setIsHardwareConfigurationModalOpen,
+  ] = useState(false);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    [getHardwareConfigurations].forEach((action) => dispatch(action()));
+  }, [dispatch]);
 
-    
-// Helper: ensure repair_device_services_id is always an array
-const getServicesArray = (services) => {
-  if (!services) return [{ service: "", cost: "" }];
-  if (Array.isArray(services)) return services;
+  const hardwareConfigurations = useSelector( 
+    (state) => state.HardwareConfigurationReducer?.hardwareConfigurations || []
+  );
+  const hardwareConfigurationsOption = hardwareConfigurations.map((w) => ({
+    value: w.hardware_configuration_id,
+    label: `${w.hardware_configuration_processor} | ${w.hardware_configuration_ram} | ${w.hardware_configuration_hard_disk} | ${w.hardware_configuration_ssd} | ${w.hardware_configuration_graphics_card}`,
+  }));
 
-  try {
-    const parsed = JSON.parse(services);
-    return Array.isArray(parsed) ? parsed : [{ service: "", cost: "" }];
-  } catch (err) {
-    return [{ service: "", cost: "" }];
-  }
-};
+  const getServicesArray = (services) => {
+    if (!services) return [{ service: "", cost: "" }];
+    if (Array.isArray(services)) return services;
 
-// Add a new service row
-const addServiceRow = () => {
-  setFormData((prev) => {
-    const services = getServicesArray(prev.repair_device_services_id);
-    return {
-      ...prev,
-      repair_device_services_id: [...services, { service: "", cost: "" }],
-    };
-  });
-};
+    try {
+      const parsed = JSON.parse(services);
+      return Array.isArray(parsed) ? parsed : [{ service: "", cost: "" }];
+    } catch (err) {
+      return [{ service: "", cost: "" }];
+    }
+  };
 
-// Remove a row
-const removeServiceRow = (index) => {
-  setFormData((prev) => {
-    const services = getServicesArray(prev.repair_device_services_id);
-    const updated = services.filter((_, i) => i !== index);
-    return {
-      ...prev,
-      repair_device_services_id:
-        updated.length > 0 ? updated : [{ service: "", cost: "" }],
-    };
-  });
-};
+  // Add a new service row
+  const addServiceRow = () => {
+    setFormData((prev) => {
+      const services = getServicesArray(prev.repair_device_services_id);
+      return {
+        ...prev,
+        repair_device_services_id: [...services, { service: "", cost: "" }],
+      };
+    });
+  };
 
-// Update a single field in a row
-const updateServiceRow = (index, field, value) => {
-  setFormData((prev) => {
-    const services = getServicesArray(prev.repair_device_services_id);
-    const updated = [...services];
-    updated[index] = { ...updated[index], [field]: value };
-    return {
-      ...prev,
-      repair_device_services_id: updated,
-    };
-  });
-};
+  // Remove a row
+  const removeServiceRow = (index) => {
+    setFormData((prev) => {
+      const services = getServicesArray(prev.repair_device_services_id);
+      const updated = services.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        repair_device_services_id:
+          updated.length > 0 ? updated : [{ service: "", cost: "" }],
+      };
+    });
+  };
 
+  // Update a single field in a row
+  const updateServiceRow = (index, field, value) => {
+    setFormData((prev) => {
+      const services = getServicesArray(prev.repair_device_services_id);
+      const updated = [...services];
+      updated[index] = { ...updated[index], [field]: value };
+      return {
+        ...prev,
+        repair_device_services_id: updated,
+      };
+    });
+  };
 
   return (
     <Row>
       {/* Services */}
-   <Col md={6}>
-  <div className="d-flex justify-content-between align-items-center">
-    <Label>
-      Services <span className="text-danger">*</span>
-    </Label>
+      <Col md={6}>
+        <div className="d-flex justify-content-between align-items-center">
+          <Label>
+            Services <span className="text-danger">*</span>
+          </Label>
 
-    {/* Header + button: adds new row */}
-    <span
-      role="button"
-      onClick={addServiceRow}
-      className="text-success fw-bold me-2"
-      style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
-    >
-      +
-    </span>
-  </div>
- 
+          {/* Header + button: adds new row */}
+          <span
+            role="button"
+            onClick={addServiceRow}
+            className="text-success fw-bold me-2"
+            style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
+          >
+            +
+          </span>
+        </div>
 
-{/* Dynamic service rows */}
-{getServicesArray(formData.repair_device_services_id).map((row, index) => (
-  <div
-    key={index}
-    className="d-flex align-items-center mb-2"
-    style={{ gap: "8px" }}
-  >
-    {/* Service name */}
-    <input
-      type="text"
-      className="form-control"
-      placeholder="Service name"
-      value={row.service || ""}
-      onChange={(e) => updateServiceRow(index, "service", e.target.value)}
-    />
+        {/* Dynamic service rows */}
+        {getServicesArray(formData.repair_device_services_id).map(
+          (row, index) => (
+            <div
+              key={index}
+              className="d-flex align-items-center mb-2"
+              style={{ gap: "8px" }}
+            >
+              {/* Service name */}
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Service name"
+                value={row.service || ""}
+                onChange={(e) =>
+                  updateServiceRow(index, "service", e.target.value)
+                }
+              />
 
-    {/* Cost */}
-    <input
-      type="number"
-      className="form-control"
-      placeholder="Cost"
-      value={row.cost || ""}
-      onChange={(e) => updateServiceRow(index, "cost", e.target.value)}
-    />
+              {/* Cost */}
+              <input
+                type="number"
+                className="form-control"
+                placeholder="Cost"
+                value={row.cost || ""}
+                onChange={(e) =>
+                  updateServiceRow(index, "cost", e.target.value)
+                }
+              />
 
-    {/* Remove button only */}
-    {getServicesArray(formData.repair_device_services_id).length > 1 && (
-      <button
-        type="button"
-        onClick={() => removeServiceRow(index)}
-        className="btn btn-danger btn-sm d-flex align-items-center justify-content-center rounded-circle"
-        style={{ width: "28px", height: "28px" }}
-      >
-        <i className="ri-delete-bin-5-fill fs-14"></i>
-      </button>
-    )}
-  </div>
-))}
+              {/* Remove button only */}
+              {getServicesArray(formData.repair_device_services_id).length >
+                1 && (
+                <button
+                  type="button"
+                  onClick={() => removeServiceRow(index)}
+                  className="btn btn-danger btn-sm d-flex align-items-center justify-content-center rounded-circle"
+                  style={{ width: "28px", height: "28px" }}
+                >
+                  <i className="ri-delete-bin-5-fill fs-14"></i>
+                </button>
+              )}
+            </div>
+          )
+        )}
 
-  {errorMessage.repair_device_services_id && (
-    <span className="text-danger small">
-      {errorMessage.repair_device_services_id}
-    </span>
-  )}
-</Col>
-
+        {errorMessage.repair_device_services_id && (
+          <span className="text-danger small">
+            {errorMessage.repair_device_services_id}
+          </span>
+        )}
+      </Col>
 
       {/* Hardware Configuration */}
       <Col md={6}>
@@ -175,6 +194,12 @@ const updateServiceRow = (index, field, value) => {
           }
         />
       </Col>
+      {isHardwareConfigurationModalOpen && (
+        <HardwareConfigurationAdd
+          isOpen={isHardwareConfigurationModalOpen}
+          toggle={() => setIsHardwareConfigurationModalOpen(false)}
+        />
+      )}
     </Row>
   );
 };

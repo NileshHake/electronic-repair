@@ -97,65 +97,6 @@ const RepairingUpdate = ({ isOpen, toggle, isRepairData }) => {
       });
     }
   }, [isRepairData]);
-  const {
-    ProductReducer,
-    CustomerReducer,
-    TechnicianReducer,
-    DeliveryBoyReducer,
-    WorkflowReducer,
-    RepairReducer,
-    SourceReducer,
-    RepairTypeReducer,
-    DeviceTypeReducer,
-    ServiceTypeReducer,
-    BrandReducer,
-    DeviceModelReducer,
-    AccessoriesReducer,
-    StorageLocationReducer,
-    DeviceColorReducer,
-    ServiceReducer,
-    HardwareConfigurationReducer,
-  } = useSelector((state) => state);
-
-  const customerList =
-    CustomerReducer?.customerList?.data || CustomerReducer?.customerList || [];
-  const technicianList = TechnicianReducer?.technicians || [];
-  const deliveryBoyList = DeliveryBoyReducer?.deliveryBoys || [];
-  const { workflows = [], workflowStages = [] } = WorkflowReducer;
-  const addRepairResponse = RepairReducer?.addRepairResponse;
-  const { sources } = SourceReducer;
-  const { repairTypes } = RepairTypeReducer;
-  const { deviceTypes } = DeviceTypeReducer;
-  const { serviceTypes } = ServiceTypeReducer;
-  const { brands } = BrandReducer;
-  const { deviceModels } = DeviceModelReducer;
-  const { accessories } = AccessoriesReducer;
-  const { storageLocations } = StorageLocationReducer;
-  const { deviceColors = [] } = DeviceColorReducer;
-  const { services } = ServiceReducer;
-  const { hardwareConfigurations = [] } = HardwareConfigurationReducer || {};
-
-  // ================== INITIAL DATA FETCH ==================
-  useEffect(() => {
-    // Fetch all necessary lists in one go
-    [
-      getServicesList,
-      getServiceTypeList,
-      getHardwareConfigurations,
-      getDeviceColorList,
-      getStorageLocationsList,
-      getAccessoriesList,
-      getCustomerList,
-      getDeviceTypesList,
-      getWorkflowList,
-      getTechniciansList,
-      getDeviceModelsList,
-      getDeliveryBoysList,
-      getRepairTypesList,
-      getSourcesList,
-      getBrandsList,
-    ].forEach((action) => dispatch(action()));
-  }, [dispatch]);
 
   const updateRepairResponse = useSelector(
     (state) => state.RepairReducer?.updateRepairResponse
@@ -167,77 +108,6 @@ const RepairingUpdate = ({ isOpen, toggle, isRepairData }) => {
       dispatch(getRepairList());
     }
   }, [updateRepairResponse]);
-  const mapOptions = (list, valueKey, labelKey) =>
-    list.map((item) => ({
-      value: item[valueKey],
-      label: item[labelKey],
-    }));
-
-  const customerOptions = mapOptions(
-    customerList,
-    "customer_id",
-    "customer_name"
-  );
-  const technicianOptions = mapOptions(technicianList, "user_id", "user_name");
-  const deliveryOptions = mapOptions(deliveryBoyList, "user_id", "user_name");
-  const SourceOptions = mapOptions(sources, "source_id", "source_name");
-  const repairTypesOption = mapOptions(
-    repairTypes,
-    "repair_type_id",
-    "repair_type_name"
-  );
-  const deviceTypesOption = mapOptions(
-    deviceTypes,
-    "device_type_id",
-    "device_type_name"
-  );
-  const serviceTypesOption = mapOptions(
-    serviceTypes,
-    "service_type_id",
-    "service_type_name"
-  );
-  const brandsOption = mapOptions(brands, "brand_id", "brand_name");
-  const deviceModelsOption = mapOptions(
-    deviceModels,
-    "device_model_id",
-    "device_model_name"
-  );
-  const accessoriesOption = mapOptions(
-    accessories,
-    "accessories_id",
-    "accessories_name"
-  );
-  const storageLocationsOption = mapOptions(
-    storageLocations,
-    "storage_location_id",
-    "storage_location_name"
-  );
-  const deviceColorsOption = mapOptions(
-    deviceColors,
-    "device_color_id",
-    "device_color_name"
-  );
-  const servicesOption = mapOptions(services, "service_id", "service_name");
-  const workflowOption = mapOptions(workflows, "workflow_id", "workflow_name");
-  const workfloStagewOption = mapOptions(
-    workflowStages,
-    "workflow_child_id",
-    "workflow_stage_name"
-  );
-
-  // Custom label for hardware configuration
-  const hardwareConfigurationsOption = hardwareConfigurations.map((w) => ({
-    value: w.hardware_configuration_id,
-    label: `${w.hardware_configuration_processor} | ${w.hardware_configuration_ram} | ${w.hardware_configuration_hard_disk} | ${w.hardware_configuration_ssd} | ${w.hardware_configuration_graphics_card}`,
-  }));
-
-  // Priority options
-  const priorityData = [
-    { label: "Low", value: "Low" },
-    { label: "Medium", value: "Medium" },
-    { label: "High", value: "High" },
-    { label: "Urgent", value: "Urgent" },
-  ];
 
   const formatBytes = (bytes, decimals = 2) => {
     if (bytes === 0) return "0 Bytes";
@@ -300,16 +170,6 @@ const RepairingUpdate = ({ isOpen, toggle, isRepairData }) => {
   const toggleTab = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
   };
-  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
-  const [isDeviceTypeModalOpen, setIsDeviceTypeModalOpen] = useState(false);
-  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
-  const [isDeviceModelModalOpen, setIsDeviceModelModalOpen] = useState(false);
-  const [isDeviceColorModalOpen, setIsDeviceColorModalOpen] = useState(false);
-  const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
-  const [
-    isHardwareConfigurationModalOpen,
-    setIsHardwareConfigurationModalOpen,
-  ] = useState(false);
 
   const validateForm = () => {
     const errors = {};
@@ -349,6 +209,12 @@ const UpdateHandler = (e) => {
         }
       })();
 
+  // 🔹 Calculate estimated cost from servicesArray
+   formData.repair_estimated_cost = servicesArray.reduce(
+    (total, item) => total + (Number(item.cost) || 0),
+    0
+  );
+
   const formDataToSend = new FormData();
 
   for (const key in formData) {
@@ -362,7 +228,6 @@ const UpdateHandler = (e) => {
       });
     } else if (key === "repair_device_services_id") {
       servicesArray.forEach((service) => {
-        // append each service object as JSON string
         formDataToSend.append(
           "repair_device_services_id",
           JSON.stringify(service)
@@ -372,22 +237,11 @@ const UpdateHandler = (e) => {
       formDataToSend.append(key, formData[key]);
     }
   }
+ 
 
-  console.log("FormData ready to send:", formDataToSend);
   dispatch(updateRepair(formDataToSend));
 };
 
-  useEffect(() => {
-    if (workflows.length > 0 && !formData.repair_workflow_id) {
-      setFormData((prev) => ({
-        ...prev,
-        repair_workflow_id: workflows[0].workflow_id,
-      }));
-    }
-    if (formData.repair_workflow_id) {
-      dispatch(getWorkflowStageList(formData.repair_workflow_id));
-    }
-  }, [workflows, formData.repair_workflow_id]);
   return (
     <Modal size="xl" isOpen={isOpen} centered toggle={toggle}>
       <ModalHeader toggle={toggle} className="modal-title ms-2">
@@ -451,11 +305,6 @@ const UpdateHandler = (e) => {
                   <RepairTabBasicInfo
                     formData={formData}
                     handleInputChange={handleInputChange}
-                    customerOptions={customerOptions}
-                    SourceOptions={SourceOptions}
-                    serviceTypesOption={serviceTypesOption}
-                    repairTypesOption={repairTypesOption}
-                    setIsCustomerModalOpen={setIsCustomerModalOpen}
                     errorMessage={errorMessage}
                   />
                 </TabPane>
@@ -465,16 +314,6 @@ const UpdateHandler = (e) => {
                     formData={formData}
                     handleInputChange={handleInputChange}
                     errorMessage={errorMessage}
-                    deviceTypesOption={deviceTypesOption}
-                    brandsOption={brandsOption}
-                    deviceModelsOption={deviceModelsOption}
-                    accessoriesOption={accessoriesOption}
-                    storageLocationsOption={storageLocationsOption}
-                    deviceColorsOption={deviceColorsOption}
-                    setIsDeviceTypeModalOpen={setIsDeviceTypeModalOpen}
-                    setIsBrandModalOpen={setIsBrandModalOpen}
-                    setIsDeviceModelModalOpen={setIsDeviceModelModalOpen}
-                    setIsDeviceColorModalOpen={setIsDeviceColorModalOpen}
                   />
                 </TabPane>
 
@@ -484,26 +323,15 @@ const UpdateHandler = (e) => {
                     setFormData={setFormData}
                     handleInputChange={handleInputChange}
                     errorMessage={errorMessage}
-                    servicesOption={servicesOption}
-                    hardwareConfigurationsOption={hardwareConfigurationsOption}
-                    setIsServicesModalOpen={setIsServicesModalOpen}
-                    setIsHardwareConfigurationModalOpen={
-                      setIsHardwareConfigurationModalOpen
-                    }
                   />
                 </TabPane>
 
                 <TabPane tabId="4">
                   <RepairTabAdditionalInfo
                     formData={formData}
+                    setFormData={setFormData}
                     handleInputChange={handleInputChange}
                     errorMessage={errorMessage}
-                    priorityData={priorityData}
-                    technicianOptions={technicianOptions}
-                    workflowOption={workflowOption}
-                    workfloStagewOption={workfloStagewOption}
-                    deliveryOptions={deliveryOptions}
-                    formatDateTime={formatDateTime}
                   />
                 </TabPane>
 
@@ -609,50 +437,6 @@ const UpdateHandler = (e) => {
           </Card>
         </div>
       </form>
-
-      {isCustomerModalOpen && (
-        <CustomerAdd
-          isOpen={isCustomerModalOpen}
-          toggle={() => setIsCustomerModalOpen(false)}
-        />
-      )}
-
-      {isDeviceTypeModalOpen && (
-        <DeviceTypeAdd
-          isOpen={isDeviceTypeModalOpen}
-          toggle={() => setIsDeviceTypeModalOpen(false)}
-        />
-      )}
-      {isBrandModalOpen && (
-        <BrandAdd
-          isOpen={isBrandModalOpen}
-          toggle={() => setIsBrandModalOpen(false)}
-        />
-      )}
-      {isDeviceModelModalOpen && (
-        <DeviceModelAdd
-          isOpen={isDeviceModelModalOpen}
-          toggle={() => setIsDeviceModelModalOpen(false)}
-        />
-      )}
-      {isDeviceColorModalOpen && (
-        <DeviceColorAdd
-          isOpen={isDeviceColorModalOpen}
-          toggle={() => setIsDeviceColorModalOpen(false)}
-        />
-      )}
-      {isServicesModalOpen && (
-        <ServiceAdd
-          isOpen={isServicesModalOpen}
-          toggle={() => setIsServicesModalOpen(false)}
-        />
-      )}
-      {isHardwareConfigurationModalOpen && (
-        <HardwareConfigurationAdd
-          isOpen={isHardwareConfigurationModalOpen}
-          toggle={() => setIsHardwareConfigurationModalOpen(false)}
-        />
-      )}
     </Modal>
   );
 };

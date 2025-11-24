@@ -2,18 +2,82 @@ import React from "react";
 import { Row, Col, Label, Input } from "reactstrap";
 import Select from "react-select";
 import Flatpickr from "react-flatpickr";
+import { getTechniciansList } from "../../../store/Technician";
+import { getDeliveryBoysList } from "../../../store/DeliveryAndPickUpBoy";
+import { getWorkflowList, getWorkflowStageList } from "../../../store/Workflow";
+import { formatDateTime } from "../../../helpers/date_and_time_format";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 
 const RepairTabAdditionalInfo = ({
   formData,
   handleInputChange,
   errorMessage,
-  priorityData,
-  technicianOptions,
-  workflowOption,
-  workfloStagewOption,
-  deliveryOptions,
-  formatDateTime,
+  setFormData,
 }) => {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    [getWorkflowList, getTechniciansList, getDeliveryBoysList].forEach(
+      (action) => dispatch(action())
+    );
+  }, [dispatch]);
+
+  const technicianList = useSelector(
+    (state) => state.TechnicianReducer?.technicians || []
+  );
+
+  const deliveryBoyList = useSelector(
+    (state) => state.DeliveryBoyReducer?.deliveryBoys || []
+  );
+
+  const workflows = useSelector(
+    (state) => state.WorkflowReducer?.workflows || []
+  );
+
+  const workflowStages = useSelector(
+    (state) => state.WorkflowReducer?.workflowStages || []
+  );
+  const mapOptions = (list, valueKey, labelKey) =>
+    list.map((item) => ({
+      value: item[valueKey],
+      label: item[labelKey],
+    }));
+  const technicianOptions = mapOptions(technicianList, "user_id", "user_name");
+  const deliveryOptions = mapOptions(deliveryBoyList, "user_id", "user_name");
+  const workflowOption = mapOptions(workflows, "workflow_id", "workflow_name");
+
+  const workfloStagewOption = mapOptions(
+    workflowStages,
+    "workflow_child_id",
+    "workflow_stage_name"
+  );
+  const priorityData = [
+    { label: "Low", value: "Low" },
+    { label: "Medium", value: "Medium" },
+    { label: "High", value: "High" },
+    { label: "Urgent", value: "Urgent" },
+  ];
+  useEffect(() => {
+    if (workflows.length > 0 && !formData.repair_workflow_id) {
+      const defaultWorkflowId = workflows[0].workflow_id;
+      setFormData((prev) => ({
+        ...prev,
+        repair_workflow_id: defaultWorkflowId,
+      }));
+      dispatch(getWorkflowStageList(defaultWorkflowId));
+    }
+
+    if (formData.repair_workflow_id) {
+      dispatch(getWorkflowStageList(formData.repair_workflow_id));
+    }
+
+    if (workflowStages.length > 0 && !formData.repair_workflow_stage_id) {
+      setFormData((prev) => ({
+        ...prev,
+        repair_workflow_stage_id: workflowStages[0].workflow_child_id,
+      }));
+    }
+  }, [workflows, workflowStages, formData.repair_workflow_id, dispatch]);
   return (
     <Row>
       {/* Priority */}
@@ -69,7 +133,7 @@ const RepairTabAdditionalInfo = ({
         />
       </Col>
       {/* Workflow */}
-      <Col md={4}>
+      <Col md={4} className="mt-4">
         <Label>Work Flow</Label>
         <Select
           value={workflowOption.find(
@@ -112,16 +176,17 @@ const RepairTabAdditionalInfo = ({
       </Col>
 
       {/* Expected Delivery Date */}
+      {/* Expected Delivery Date */}
       <Col md={4} className="mt-3">
         <Label>Expected Delivery Date</Label>
-        <Flatpickr
+        <Input
+          type="date"
           className="form-control"
-          data-enable-time
-          options={{ dateFormat: "d/m/Y H:i" }}
-          onChange={(dates) =>
+          value={formData.repair_expected_delivery_date || ""}
+          onChange={(e) =>
             handleInputChange(
               "repair_expected_delivery_date",
-              formatDateTime(dates[0])
+              e.target.value // "YYYY-MM-DD"
             )
           }
         />

@@ -1,17 +1,64 @@
 import React from "react";
 import { Row, Col, Label } from "reactstrap";
 import Select from "react-select";
+import { useDispatch, useSelector } from "react-redux";
+import { getServicesList } from "../../../store/Service";
+import { getCustomerList } from "../../../store/Customer";
+import { getSourcesList } from "../../../store/Source";
+import { getServiceTypeList } from "../../../store/ServiceType";
+import { getRepairTypesList } from "../../../store/RepairType";
+import { useState } from "react";
+import { useEffect } from "react";
+import CustomerAdd from "../../Customer/CustomerAdd";
 
-const RepairTabBasicInfo = ({
-  formData,
-  handleInputChange,
-  customerOptions,
-  SourceOptions,
-  repairTypesOption,
-  serviceTypesOption,
-  setIsCustomerModalOpen,
-  errorMessage
-}) => {
+const RepairTabBasicInfo = ({ formData, handleInputChange, errorMessage }) => {
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    [
+      getServiceTypeList,
+
+      getCustomerList,
+
+      getRepairTypesList,
+      getSourcesList,
+    ].forEach((action) => dispatch(action()));
+  }, [dispatch]);
+  const customerList = useSelector(
+    (state) =>
+      state.CustomerReducer?.customerList?.data ||
+      state.CustomerReducer?.customerList ||
+      []
+  );
+  const serviceTypes = useSelector(
+    (state) => state.ServiceTypeReducer?.serviceTypes
+  );
+  const sources = useSelector((state) => state.SourceReducer?.sources);
+  const repairTypes = useSelector(
+    (state) => state.RepairTypeReducer?.repairTypes
+  );
+  const mapOptions = (list, valueKey, labelKey) =>
+    list.map((item) => ({
+      value: item[valueKey],
+      label: item[labelKey],
+    }));
+
+  const customerOptions = mapOptions(
+    customerList,
+    "customer_id",
+    "customer_name"
+  );
+  const SourceOptions = mapOptions(sources, "source_id", "source_name");
+  const serviceTypesOption = mapOptions(
+    serviceTypes,
+    "service_type_id",
+    "service_type_name"
+  );
+  const repairTypesOption = mapOptions(
+    repairTypes,
+    "repair_type_id",
+    "repair_type_name"
+  );
   return (
     <Row>
       <Col md={4}>
@@ -32,9 +79,7 @@ const RepairTabBasicInfo = ({
           value={customerOptions.find(
             (opt) => opt.value === formData.repair_customer_id
           )}
-          onChange={(opt) =>
-            handleInputChange("repair_customer_id", opt.value)
-          }
+          onChange={(opt) => handleInputChange("repair_customer_id", opt.value)}
           options={customerOptions}
           placeholder="Select Customer"
         />
@@ -110,6 +155,12 @@ const RepairTabBasicInfo = ({
           </span>
         )}
       </Col>
+      {isCustomerModalOpen && (
+        <CustomerAdd
+          isOpen={isCustomerModalOpen}
+          toggle={() => setIsCustomerModalOpen(false)}
+        />
+      )}
     </Row>
   );
 };

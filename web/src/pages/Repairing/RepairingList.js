@@ -16,7 +16,7 @@ import DeleteModal from "../../Components/Common/DeleteModal";
 import RepairingAdd from "./RepairingAdd";
 import RepairingUpdate from "./RepairingUpdate";
 
-import Flatpickr from "react-flatpickr";
+
 import {
   deleteRepair,
   getRepairList,
