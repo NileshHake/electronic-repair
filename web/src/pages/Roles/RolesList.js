@@ -21,7 +21,7 @@ import {
 import RoleUpdate from "./RoleUpdate";
 
 const RoleList = () => {
-  document.title = "Role List | CRM";
+  document.title = "Access List | CRM";
 
   const dispatch = useDispatch();
 
@@ -98,11 +98,11 @@ const RoleList = () => {
               <CardHeader className="card-header border-0">
                 <Row className="align-items-center gy-3">
                   <div className="col-sm">
-                    <h5 className="mb-0 fw-bold">Role List</h5>
+                    <h5 className="mb-0 fw-bold">Access List</h5>
                   </div>
                   <div className="col-sm-auto">
                     <Button color="success" onClick={() => setIsAddOpen(true)}>
-                      + Add Role
+                      + Add Access
                     </Button>
                   </div>
                 </Row>
@@ -114,7 +114,7 @@ const RoleList = () => {
                     <thead className="table-light text-uppercase text-muted">
                       <tr>
                         <th>#</th>
-                        <th>Role Name</th>
+                        <th>Access Name</th>
                         <th>Actions</th>
                       </tr>
                     </thead>

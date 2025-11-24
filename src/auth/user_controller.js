@@ -8,6 +8,8 @@ const { saveImage, deleteImage } = require("../helper/fileUpload");
 const {
   createDefaultWorkflow,
 } = require("../CreateData/create_data_for_business");
+const { Op, QueryTypes } = require("sequelize");
+const sequelize = require("../../config/db");
 const store = async (req, res) => {
   try {
     const file = req.files?.user_profile;
@@ -91,14 +93,26 @@ const Businessindex = async (req, res) => {
 };
 const Userindex = async (req, res) => {
   try {
-    const users = await User.findAll({
-      where: {
-        user_type: 3,
-        user_created_by: getCreatedBy(req.currentUser),
-      },
-    });
+    const createdBy = getCreatedBy(req.currentUser);
+
+    const users = await sequelize.query(
+      `
+      SELECT *
+      FROM tbl_users
+      LEFT JOIN tbl_roles  
+        ON tbl_users.user_role_id = tbl_roles.role_id
+      WHERE user_type IN (3, 4, 5)
+        AND user_created_by = :createdBy
+      `,
+      {
+        replacements: { createdBy },
+        type: QueryTypes.SELECT,
+      }
+    );
+
     res.status(200).json(users);
   } catch (error) {
+    console.error("Error fetching users:", error);
     res
       .status(500)
       .json({ message: "Error fetching users", error: error.message });
@@ -134,7 +148,6 @@ const Get = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { user_id } = req.body;
- 
 
     const user = await User.findByPk(user_id);
     if (!user) {

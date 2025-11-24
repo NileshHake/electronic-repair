@@ -149,7 +149,7 @@ const RoleUpdate = (props) => {
 
   const SubmitData = () => {
     if (!roleName.trim()) {
-      setMsg("Role name is required");
+      setMsg("Access name is required");
       return;
     }
 
@@ -176,7 +176,7 @@ const RoleUpdate = (props) => {
     <div>
       <Modal id="showModal" size="xl" isOpen={modal} centered>
         <ModalHeader className="bg-light p-3 " toggle={Close}>
-          Update Role
+          Update Access
         </ModalHeader>
         <span className="tablelist-form">
           <ModalBody>
@@ -185,11 +185,11 @@ const RoleUpdate = (props) => {
                 <Row>
                   <Col lg={12}>
                     <Label
-                      htmlFor="role-name-field"
+                      htmlFor="Access-name-field"
                       className="form-label fw-bold d-flex justify-content-between"
                     >
                       <div>
-                        Role Name<span style={{ color: "red" }}> *</span>
+                        Access Name<span style={{ color: "red" }}> *</span>
                       </div>
                       <div style={{ color: "red" }}>{msg}</div>
                     </Label>

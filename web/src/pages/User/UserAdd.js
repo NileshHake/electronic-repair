@@ -199,15 +199,41 @@ const UserAdd = ({ isOpen, toggle }) => {
 
               {/* Role */}
               <Col lg={6}>
-                <Label className="form-label fw-bold">Role</Label>
+                <Label className="form-label fw-bold">Access</Label>
                 <Select
                   name="user_role_id"
-                  placeholder="Select Role"
+                  placeholder="Select Access"
                   value={roleOptions.find(
                     (role) => role.value === userData.user_role_id
                   )}
                   onChange={handleRoleChange}
                   options={roleOptions}
+                  classNamePrefix="select"
+                />
+              </Col>
+              <Col lg={6}>
+                <Label className="form-label fw-bold">Role</Label>
+                <Select
+                  name="user_type"
+                  placeholder="Select Access"
+                  value={
+                    [
+                      { label: "User", value: 3 },
+                      { label: "Technician", value: 4 },
+                      { label: "Delivery Boy", value: 5 },
+                    ].find((role) => role.value === userData.user_type) || null
+                  }
+                  onChange={(selectedOption) => {
+                    setUserData({
+                      ...userData,
+                      user_type: selectedOption?.value || null,
+                    });
+                  }}
+                  options={[
+                    { label: "User", value: 3 },
+                    { label: "Technician", value: 4 },
+                    { label: "Delivery Boy", value: 5 },
+                  ]}
                   classNamePrefix="select"
                 />
               </Col>

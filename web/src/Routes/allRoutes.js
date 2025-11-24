@@ -300,7 +300,7 @@ const authProtectedRoutes = [
   { path: "/delivery-boy-list", component: <DeliveryAndPickUpBoyList /> },
   { path: "/customer-address-list", component: <CustomerAddressList /> },
   { path: "/customer-list", component: <CustomerList /> },
-  { path: "/role-list", component: <RoleList /> },
+  { path: "/access-list", component: <RoleList /> },
   { path: "/service-list", component: <ServiceList /> },
   { path: "/business-list", component: <BusinessList /> },
   { path: "/repairing-list", component: <RepairList /> },

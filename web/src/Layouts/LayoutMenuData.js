@@ -223,9 +223,9 @@ const Navdata = () => {
           ? [
               {
                 id: "role",
-                label: "Roles",
+                label: "Access",
                 icon: "mdi mdi-account-key-outline",
-                link: "/role-list",
+                link: "/access-list",
                 parentId: "userManagement",
               },
             ]
@@ -241,36 +241,6 @@ const Navdata = () => {
                 label: "Users",
                 icon: "mdi mdi-account-outline",
                 link: "/user-list",
-                parentId: "userManagement",
-              },
-            ]
-          : []),
-        ...(permissions.find(
-          (permission) =>
-            permission.permission_category == "USERMANAGEMENT" &&
-            permission.permission_path == "3"
-        )
-          ? [
-              {
-                id: "technician",
-                label: "Technicians",
-                icon: "mdi mdi-hammer-wrench",
-                link: "/technician-list",
-                parentId: "userManagement",
-              },
-            ]
-          : []),
-        ...(permissions.find(
-          (permission) =>
-            permission.permission_category == "USERMANAGEMENT" &&
-            permission.permission_path == "4"
-        )
-          ? [
-              {
-                id: "deliveryBoy",
-                label: "Delivery / Pickup Boys",
-                icon: "mdi mdi-truck-delivery-outline",
-                link: "/delivery-boy-list",
                 parentId: "userManagement",
               },
             ]

@@ -97,6 +97,7 @@ const UserList = () => {
                         <th style={{ width: "20%" }}>Name</th>
                         <th style={{ width: "25%" }}>Email</th>
                         <th style={{ width: "15%" }}>Phone</th>
+                        <th style={{ width: "15%" }}>Access</th>
                         <th style={{ width: "15%" }}>Role</th>
                         <th style={{ width: "20%" }}>Actions</th>
                       </tr>
@@ -109,7 +110,14 @@ const UserList = () => {
                             <td>{user.user_name}</td>
                             <td>{user.user_email}</td>
                             <td>{user.user_phone_number}</td>
-                            <td>{user.user_role_name || "—"}</td>
+                            <td>{user.role_name || "—"}</td>
+                            <td>
+                              {user.user_type == 3
+                                ? "User"
+                                : user.user_type == 4
+                                ? "Technician"
+                                : "Delivery boy"}
+                            </td>
 
                             <td>
                               <ul className="list-inline hstack gap-2 mb-0">

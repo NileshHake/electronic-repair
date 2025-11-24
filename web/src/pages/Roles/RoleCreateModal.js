@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Card,
@@ -25,6 +25,7 @@ const RoleCreateModal = (props) => {
     loading = false,
     addRoleResponse,
   } = useSelector((state) => state.roleReducer || {});
+
   const [roleName, setRoleName] = useState("");
   const [permissionsLists, setPermissionsLists] = useState([]);
   const [checkNameStatus, setCheckStatus] = useState({});
@@ -57,14 +58,15 @@ const RoleCreateModal = (props) => {
     new Set(rolePermissions.map((p) => p.permission_category))
   );
 
-  // Checkbox handling
+  // Checkbox handling for single permission
   const handleCheckboxChange = (e) => {
-    const id = parseInt(e.target.value);
+    const id = parseInt(e.target.value, 10);
     setPermissionsLists((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
+  // Select / Unselect all for a category
   const handleToggleAll = (category) => {
     const categoryPermissions = rolePermissions
       .filter((p) => p.permission_category === category)
@@ -76,8 +78,8 @@ const RoleCreateModal = (props) => {
 
     setPermissionsLists((prev) =>
       allChecked
-        ? prev.filter((id) => !categoryPermissions.includes(id))
-        : [...prev, ...categoryPermissions.filter((id) => !prev.includes(id))]
+        ? prev.filter((id) => !categoryPermissions.includes(id)) // unselect all
+        : [...prev, ...categoryPermissions.filter((id) => !prev.includes(id))] // select all
     );
   };
 
@@ -85,13 +87,11 @@ const RoleCreateModal = (props) => {
   const SubmitData = () => {
     if (!roleName.trim()) {
       setCheckStatus({ borderColor: "red", borderStyle: "groove" });
-      setMsg("Role cannot be empty!");
+      setMsg("Access cannot be empty!");
       return;
     }
-    
+
     const payload = { role_name: roleName, permissionsLists };
-    
-     
     dispatch(addRole(payload));
   };
 
@@ -99,10 +99,12 @@ const RoleCreateModal = (props) => {
   const submitButtonRef = useRef();
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.altKey && (event.key === "s" || event.key === "S"))
-        submitButtonRef.current.click();
-      if (event.altKey && (event.key === "c" || event.key === "C"))
+      if (event.altKey && (event.key === "s" || event.key === "S")) {
+        submitButtonRef.current?.click();
+      }
+      if (event.altKey && (event.key === "c" || event.key === "C")) {
         props.toggle();
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -111,7 +113,7 @@ const RoleCreateModal = (props) => {
   return (
     <Modal size="xl" isOpen={props.isOpen} toggle={props.toggle} centered>
       <ModalHeader className="bg-light p-3" toggle={props.toggle}>
-        Add Role
+        Add Access
       </ModalHeader>
       <Form
         onSubmit={(e) => {
@@ -125,14 +127,14 @@ const RoleCreateModal = (props) => {
               <Col lg={12}>
                 <Label className="form-label fw-bold d-flex justify-content-between">
                   <div>
-                    Role Name<span style={{ color: "red" }}> *</span>
+                    Access Name<span style={{ color: "red" }}> *</span>
                   </div>
                   <div style={{ color: "red" }}>{msg}</div>
                 </Label>
                 <Input
                   style={checkNameStatus}
                   className="form-control fw-bold"
-                  placeholder="Role Name"
+                  placeholder="Access Name"
                   type="text"
                   value={roleName}
                   onChange={(e) => {
@@ -154,23 +156,35 @@ const RoleCreateModal = (props) => {
                         Loading permissions...
                       </div>
                     ) : (
-                      uniqueCategories.map((category) => (
-                        <Col lg={4} key={category}>
-                          <div
-                            className="text-uppercase p-2"
-                            style={{ backgroundColor: "teal", color: "white" }}
-                          >
-                            <input
-                              type="checkbox"
-                              className="m-1"
-                              onClick={() => handleToggleAll(category)}
-                            />
-                            &nbsp;{category}
-                          </div>
-                          <div className="p-2">
-                            {rolePermissions
-                              .filter((p) => p.permission_category === category)
-                              .map((permission) => (
+                      uniqueCategories.map((category) => {
+                        const categoryPermissions = rolePermissions.filter(
+                          (p) => p.permission_category === category
+                        );
+                        const allChecked =
+                          categoryPermissions.length > 0 &&
+                          categoryPermissions.every((p) =>
+                            permissionsLists.includes(p.permission_id)
+                          );
+
+                        return (
+                          <Col lg={4} key={category}>
+                            <div
+                              className="text-uppercase p-2"
+                              style={{
+                                backgroundColor: "teal",
+                                color: "white",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                className="m-1"
+                                checked={allChecked}
+                                onChange={() => handleToggleAll(category)}
+                              />
+                              &nbsp;{category}
+                            </div>
+                            <div className="p-2">
+                              {categoryPermissions.map((permission) => (
                                 <div
                                   className="d-flex"
                                   key={permission.permission_id}
@@ -191,9 +205,10 @@ const RoleCreateModal = (props) => {
                                   {permission.permission_name}
                                 </div>
                               ))}
-                          </div>
-                        </Col>
-                      ))
+                            </div>
+                          </Col>
+                        );
+                      })
                     )}
                   </Row>
                 </div>

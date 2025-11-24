@@ -30,26 +30,27 @@ const UserUpdate = ({ isOpen, toggle, userDataToEdit }) => {
     user_password: "",
     user_phone_number: "",
     user_role_id: null,
+    user_type: null,
     user_profile: null,
   });
 
   const [profilePreview, setProfilePreview] = useState(null);
   const [errors, setErrors] = useState({});
 
-   const {
-      roles = [],
-      loading = false,
-      addRoleResponse = false,
-      updateRoleResponse = false,
-    } = useSelector((state) => state.roleReducer || {});
-    useEffect(() => {
-      dispatch(getRole());
-    }, [dispatch]);
-    // 🔹 Role options
-    const roleOptions = roles.map((role) => ({
-      label: role.role_name,
-      value: role.role_id,
-    }));
+  const {
+    roles = [],
+    loading = false,
+    addRoleResponse = false,
+    updateRoleResponse = false,
+  } = useSelector((state) => state.roleReducer || {});
+  useEffect(() => {
+    dispatch(getRole());
+  }, [dispatch]);
+  // 🔹 Role options
+  const roleOptions = roles.map((role) => ({
+    label: role.role_name,
+    value: role.role_id,
+  }));
   useEffect(() => {
     if (userDataToEdit) {
       setUserData({
@@ -58,6 +59,7 @@ const UserUpdate = ({ isOpen, toggle, userDataToEdit }) => {
         user_email: userDataToEdit.user_email || "",
         user_password: userDataToEdit.user_password || "",
         user_phone_number: userDataToEdit.user_phone_number || "",
+        user_type: userDataToEdit.user_type || "",
         user_role_id: userDataToEdit.user_role_id || null,
         user_profile: null,
       });
@@ -123,6 +125,7 @@ const UserUpdate = ({ isOpen, toggle, userDataToEdit }) => {
     formData.append("user_email", userData.user_email);
     formData.append("user_password", userData.user_password);
     formData.append("user_phone_number", userData.user_phone_number);
+    formData.append("user_type", userData.user_type);
     formData.append("user_role_id", userData.user_role_id);
     if (userData.user_profile) {
       formData.append("user_profile", userData.user_profile);
@@ -213,10 +216,10 @@ const UserUpdate = ({ isOpen, toggle, userDataToEdit }) => {
               </Col>
 
               <Col lg={6}>
-                <Label className="form-label fw-bold">Role</Label>
+                <Label className="form-label fw-bold">Access</Label>
                 <Select
                   name="user_role_id"
-                  placeholder="Select Role"
+                  placeholder="Select Access"
                   value={roleOptions.find(
                     (r) => r.value === userData.user_role_id
                   )}
@@ -227,7 +230,32 @@ const UserUpdate = ({ isOpen, toggle, userDataToEdit }) => {
                   <div className="text-danger">{errors.user_role_id}</div>
                 )}
               </Col>
-
+              <Col lg={6}>
+                <Label className="form-label fw-bold">Role</Label>
+                <Select
+                  name="user_type"
+                  placeholder="Select Access"
+                  value={
+                    [
+                      { label: "User", value: 3 },
+                      { label: "Technician", value: 4 },
+                      { label: "Delivery Boy", value: 5 },
+                    ].find((role) => role.value === userData.user_type) || null
+                  }
+                  onChange={(selectedOption) => {
+                    setUserData({
+                      ...userData,
+                      user_type: selectedOption?.value || null,
+                    });
+                  }}
+                  options={[
+                    { label: "User", value: 3 },
+                    { label: "Technician", value: 4 },
+                    { label: "Delivery Boy", value: 5 },
+                  ]}
+                  classNamePrefix="select"
+                />
+              </Col>
               <Col lg={6}>
                 <Label className="form-label fw-bold">Profile</Label>
                 <div className="text-center">
