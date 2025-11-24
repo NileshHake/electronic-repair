@@ -13,5 +13,6 @@ router.get("/user/user/list", verifyToken, controller.Userindex);
 router.get("/user/single/:id",   controller.Get);
 router.put("/user/update", verifyToken, controller.update);
 router.delete("/user/delete/:id", verifyToken, controller.deleted);
+router.put("/update-password", verifyToken, controller.updatePassword);
 
 module.exports = router;

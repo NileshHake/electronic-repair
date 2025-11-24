@@ -253,7 +253,65 @@ const login = async (req, res) => {
     });
   }
 };
+const updatePassword = async (req, res) => {
+  try {
+    const userId = req.currentUser?.user_id; // from middleware
+    const { old_password, new_password } = req.body;
+ 
+    // basic validation
+    if (!old_password || !new_password) {
+      return res.status(400).json({
+        success: false,
+        message: "Old password and new password are required.",
+      });
+    }
 
+    // find logged-in user
+    const user = await User.findOne({ where: { user_id: userId } });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // compare old password
+    const isOldPasswordValid = await bcrypt.compare(
+      old_password,
+      user.user_password
+    );
+
+    if (!isOldPasswordValid) {
+      return res.status(200).json({
+        success: false,
+        message: "Old password is incorrect.",
+      });
+    }
+
+    // hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(new_password, salt);
+
+    // update in DB
+    await User.update(
+      { user_password: hashedNewPassword },
+      { where: { user_id: userId } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Password updated successfully.",
+    });
+  } catch (error) {
+    console.error("❌ Error updating password:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while updating password.",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   store,
   index,
@@ -265,4 +323,5 @@ module.exports = {
   Get,
   update,
   deleted,
+  updatePassword,
 };

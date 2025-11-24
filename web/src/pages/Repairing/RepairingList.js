@@ -27,16 +27,19 @@ import {
 import AuthUser from "../../helpers/AuthType/AuthUser";
 import Select from "react-select";
 import { getWorkflowList, getWorkflowStageList } from "../../store/Workflow";
-import { formatDateTime } from "../../helpers/date_and_time_format";
-import { Value } from "sass";
 import RepairBoard from "./RepairComponent/RepairBoard";
 
 const RepairList = () => {
   const { permissions } = AuthUser();
   const dispatch = useDispatch();
 
-  const { repairs = [], addRepairResponse ,DeleteRepairResponse,updateRepairResponse,loading = false } =
-    useSelector((state) => state.RepairReducer) || {};
+  const {
+    repairs = [],
+    addRepairResponse,
+    DeleteRepairResponse,
+    updateRepairResponse,
+    loading = false,
+  } = useSelector((state) => state.RepairReducer) || {};
 
   const { workflows = [], workflowStages = [] } = useSelector(
     (state) => state.WorkflowReducer
@@ -60,47 +63,46 @@ const RepairList = () => {
     dispatch(getWorkflowList());
     dispatch(resetAddRepairResponse());
   }, [dispatch]);
-useEffect(() => {
-  // 1) Set default workflow_id once workflows are loaded
-  if (workflows.length > 0 && !filterData.workflow_id) {
-    setfilterData((prev) => ({
-      ...prev,
-      workflow_id: workflows[0].workflow_id,
-    }));
-    return; // avoid running rest with empty workflow_id in same tick
-  }
+  useEffect(() => {
+    // 1) Set default workflow_id once workflows are loaded
+    if (workflows.length > 0 && !filterData.workflow_id) {
+      setfilterData((prev) => ({
+        ...prev,
+        workflow_id: workflows[0].workflow_id,
+      }));
+      return; // avoid running rest with empty workflow_id in same tick
+    }
 
-  // 2) When workflow_id is available, load workflow stages
-  if (filterData.workflow_id) {
-    dispatch(getWorkflowStageList(filterData.workflow_id));
-  }
+    // 2) When workflow_id is available, load workflow stages
+    if (filterData.workflow_id) {
+      dispatch(getWorkflowStageList(filterData.workflow_id));
+    }
 
-  // 3) Whenever filters OR add/update/delete response flags change,
-  //    call getRepairList
-  if (filterData) {
-    dispatch(getRepairList(filterData));
-  }
+    // 3) Whenever filters OR add/update/delete response flags change,
+    //    call getRepairList
+    if (filterData) {
+      dispatch(getRepairList(filterData));
+    }
 
-  // 4) Reset flags after using them so next add/update/delete
-  //    will again trigger this effect
-  if (addRepairResponse) {
-    dispatch(resetAddRepairResponse());
-  }
-  if (updateRepairResponse) {
-    dispatch(resetUpdateRepairResponse());
-  }
-  if (DeleteRepairResponse) {
-    dispatch(resetDeleteRepairResponse());
-  }
-}, [
-  workflows,
-  filterData,
-  addRepairResponse,
-  updateRepairResponse,
-  DeleteRepairResponse,
-  dispatch,
-]);
-
+    // 4) Reset flags after using them so next add/update/delete
+    //    will again trigger this effect
+    if (addRepairResponse) {
+      dispatch(resetAddRepairResponse());
+    }
+    if (updateRepairResponse) {
+      dispatch(resetUpdateRepairResponse());
+    }
+    if (DeleteRepairResponse) {
+      dispatch(resetDeleteRepairResponse());
+    }
+  }, [
+    workflows,
+    filterData,
+    addRepairResponse,
+    updateRepairResponse,
+    DeleteRepairResponse,
+    dispatch,
+  ]);
 
   // ================== DELETE LOGIC ==================
   const onClickDelete = (repair) => {

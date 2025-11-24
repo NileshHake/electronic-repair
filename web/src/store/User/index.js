@@ -6,6 +6,8 @@ import { APIClient } from "../../helpers/api_helper";
 export const GET_USERS = "GET_USERS";
 export const ADD_USER = "ADD_USER";
 export const UPDATE_USER = "UPDATE_USER";
+export const UPDATE_PASSWORD = "UPDATE_PASSWORD";
+export const RESET_UPDATE_PASSWORD_RESPONSE = "RESET_UPDATE_PASSWORD_RESPONSE";
 export const DELETE_USER = "DELETE_USER";
 export const GET_SINGLE_USER = "GET_SINGLE_USER";
 export const RESET_ADD_USER_RESPONSE = "RESET_ADD_USER_RESPONSE";
@@ -42,6 +44,9 @@ export const getSingleUser = (id) => {
     payload: id,
   };
 };
+export const resetUpdatePasswordResponse = () => ({
+  type: RESET_UPDATE_PASSWORD_RESPONSE,
+});
 
 export const addUser = (user) => ({
   type: ADD_USER,
@@ -51,6 +56,10 @@ export const addUser = (user) => ({
 export const updateUser = (user) => ({
   type: UPDATE_USER,
   payload: user,
+});
+export const updatePassword = (old_password, new_password) => ({
+  type: UPDATE_PASSWORD,
+  payload: { old_password, new_password },
 });
 
 export const deleteUser = (id) => ({
@@ -66,6 +75,7 @@ const INIT_STATE = {
   error: false,
   addUserResponse: false,
   updateUserResponse: false,
+  updatePasswordResponse: false,
 };
 
 export const UserReducer = (state = INIT_STATE, action) => {
@@ -96,11 +106,19 @@ export const UserReducer = (state = INIT_STATE, action) => {
                 : u
             ),
           };
+        case UPDATE_PASSWORD:
+          return {
+            ...state,
+            updatePasswordResponse: true,
+          };
+
         case DELETE_USER:
           return {
             ...state,
             users: state.users.filter((u) => u.user_id !== action.payload.data),
           };
+        case RESET_UPDATE_PASSWORD_RESPONSE:
+          return { ...state, updatePasswordResponse: false };
         default:
           return state;
       }
@@ -126,7 +144,7 @@ const addUserApi = (formData) => {
   return api.create(`/user/store`, formData);
 };
 
-const updateUserApi = (id, data) => api.put(`/user/update`, data);
+const updatePasswordApi = (data) => api.put(`/update-password`, data);
 const deleteUserApi = (id) => api.delete(`/user/delete/${id}`);
 
 // ================== SAGAS ==================
@@ -197,6 +215,26 @@ function* updateUserSaga({ payload }) {
     toast.error("❌ Failed to update user!");
   }
 }
+function* updatePasswordSaga({ payload }) {
+  try {
+    const response = yield call(updatePasswordApi, payload);
+
+    if (!response.success) {
+      // ❌ Wrong old password / validation / not found, etc.
+      toast.error(response.message || "Failed to update password!");
+      yield put(userApiResponseError(UPDATE_PASSWORD, response));
+      return;
+    }
+
+    // ✅ Success
+    toast.success(response.message || "Password updated successfully! 🔐");
+    yield put(userApiResponseSuccess(UPDATE_PASSWORD, response));
+  } catch (error) {
+    console.error("❌ Error in updatePasswordSaga:", error);
+    yield put(userApiResponseError(UPDATE_PASSWORD, error));
+    toast.error("❌ Something went wrong while updating password!");
+  }
+}
 
 function* deleteUserSaga({ payload }) {
   try {
@@ -226,6 +264,9 @@ function* watchUpdateUser() {
 function* watchDeleteUser() {
   yield takeEvery(DELETE_USER, deleteUserSaga);
 }
+function* watchUpdatePassword() {
+  yield takeEvery(UPDATE_PASSWORD, updatePasswordSaga);
+}
 
 export function* userSaga() {
   yield all([
@@ -234,5 +275,6 @@ export function* userSaga() {
     fork(watchAddUser),
     fork(watchUpdateUser),
     fork(watchDeleteUser),
+    fork(watchUpdatePassword), // 👈 add this
   ]);
 }

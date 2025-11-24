@@ -22,17 +22,20 @@ import AuthUser from "../../../../helpers/AuthType/AuthUser";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getSingleUser,
+  resetUpdatePasswordResponse,
   resetUpdateUserResponse,
+  updatePassword,
   updateUser,
 } from "../../../../store/User";
 import { api } from "../../../../config";
+import { ToastContainer } from "react-toastify";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("1");
   const { user } = AuthUser();
   const dispatch = useDispatch();
 
-  const { singleUser, updateUserResponse, loading } = useSelector(
+  const { singleUser, updateUserResponse,updatePasswordResponse, loading } = useSelector(
     (state) => state.UserReducer
   );
 
@@ -51,15 +54,26 @@ const Settings = () => {
       dispatch(getSingleUser(user.user_id));
       dispatch(resetUpdateUserResponse());
     }
-  }, [updateUserResponse]);
+    if(updatePasswordResponse){
+      dispatch(resetUpdatePasswordResponse())
+    }
+  }, [updateUserResponse ,updatePasswordResponse]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     if (user?.user_id) {
-       dispatch(getSingleUser(user.user_id));
+      dispatch(getSingleUser(user.user_id));
     }
   }, [user?.user_id]);
+  const [passwordForm, setPasswordForm] = useState({
+    old_password: "",
+    new_password: "",
+    confirm_password: "",
+  });
+
+  const [passwordErrors, setPasswordErrors] = useState({});
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (singleUser) {
@@ -108,8 +122,58 @@ const Settings = () => {
     dispatch(updateUser(updateData)); // redux action
   };
 
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordForm((prev) => ({ ...prev, [name]: value }));
+    setPasswordErrors((prev) => ({ ...prev, [name]: "" })); // clear error on change
+  };
+
+const handlePasswordUpdate = async (e) => {
+  e.preventDefault();
+
+  const errors = {};
+  const { old_password, new_password, confirm_password } = passwordForm;
+
+  // Frontend validation
+  if (!old_password.trim()) {
+    errors.old_password = "Old password is required.";
+  }
+
+  if (!new_password.trim()) {
+    errors.new_password = "New password is required.";
+  } else if (new_password.length < 6) {
+    errors.new_password = "New password must be at least 6 characters.";
+  }
+
+  if (!confirm_password.trim()) {
+    errors.confirm_password = "Confirm password is required.";
+  } else if (new_password !== confirm_password) {
+    errors.confirm_password = "New password and confirm password do not match.";
+  }
+
+  setPasswordErrors(errors);
+
+  if (Object.keys(errors).length > 0) return; // stop if there are errors
+
+  // ✅ Now use Redux Saga instead of fetch
+  setPasswordLoading(true);
+
+  // just dispatch action, saga will call API
+  dispatch(updatePassword(old_password, new_password));
+
+  // optional: clear fields immediately or after saga success flag
+  setPasswordForm({
+    old_password: "",
+    new_password: "",
+    confirm_password: "",
+  });
+  setPasswordLoading(false);
+};
+
+
   return (
     <React.Fragment>
+      <ToastContainer limit={1} closeButton={false} autoClose={1000}></ToastContainer>
       <div className="page-content">
         <Container fluid>
           <div className="position-relative mx-n4 mt-n4">
@@ -200,7 +264,7 @@ const Settings = () => {
                       </NavLink>
                     </NavItem>
 
-                    {/* <NavItem>
+                    <NavItem>
                       <NavLink
                         className={classnames({ active: activeTab === "2" })}
                         onClick={() => tabChange("2")}
@@ -208,7 +272,7 @@ const Settings = () => {
                       >
                         <i className="far fa-user"></i> Change Password
                       </NavLink>
-                    </NavItem> */}
+                    </NavItem>
                   </Nav>
                 </CardHeader>
 
@@ -272,11 +336,99 @@ const Settings = () => {
                         </Row>
                       </Form>
                     </TabPane>
- 
+
                     <TabPane tabId="2">
-                      <p className="text-muted">
-                        Change Password section here.
-                      </p>
+                      <Form onSubmit={handlePasswordUpdate}>
+                        <Row>
+                          <Col lg={4}>
+                            <Label>
+                              Old Password{" "}
+                              <span className="text-danger">*</span>
+                            </Label>
+                            <Input
+                              type="password"
+                              name="old_password"
+                              className="form-control"
+                              value={passwordForm.old_password}
+                              onChange={handlePasswordChange}
+                              placeholder="Enter old password"
+                            />
+                            {passwordErrors.old_password && (
+                              <small className="text-danger">
+                                {passwordErrors.old_password}
+                              </small>
+                            )}
+                          </Col>
+
+                          <Col lg={4}>
+                            <Label>
+                              New Password{" "}
+                              <span className="text-danger">*</span>
+                            </Label>
+                            <Input
+                              type="password"
+                              name="new_password"
+                              className="form-control"
+                              value={passwordForm.new_password}
+                              onChange={handlePasswordChange}
+                              placeholder="Enter new password"
+                            />
+                            {passwordErrors.new_password && (
+                              <small className="text-danger">
+                                {passwordErrors.new_password}
+                              </small>
+                            )}
+                          </Col>
+
+                          <Col lg={4}>
+                            <Label>
+                              Confirm Password{" "}
+                              <span className="text-danger">*</span>
+                            </Label>
+                            <Input
+                              type="password"
+                              name="confirm_password"
+                              className="form-control"
+                              value={passwordForm.confirm_password}
+                              onChange={handlePasswordChange}
+                              placeholder="Re-enter new password"
+                            />
+                            {passwordErrors.confirm_password && (
+                              <small className="text-danger">
+                                {passwordErrors.confirm_password}
+                              </small>
+                            )}
+                          </Col>
+
+                          <Col lg={12} className="mt-4">
+                            <div className="hstack gap-2 justify-content-end">
+                              <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={passwordLoading}
+                              >
+                                {passwordLoading
+                                  ? "Updating..."
+                                  : "Update Password"}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-soft-success"
+                                onClick={() => {
+                                  setPasswordForm({
+                                    old_password: "",
+                                    new_password: "",
+                                    confirm_password: "",
+                                  });
+                                  setPasswordErrors({});
+                                }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </Col>
+                        </Row>
+                      </Form>
                     </TabPane>
                   </TabContent>
                 </CardBody>
