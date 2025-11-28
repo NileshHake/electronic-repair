@@ -56,12 +56,49 @@ function* logoutUser({ payload: { history } }) {
 /**
  * SOCIAL LOGIN (optional – can disable if not needed)
  */
-function* socialLogin({ payload: { data, history, type } }) {
+function* socialLogin({ payload: { data, history } }) {
   try {
-    // Not used in your case, but kept for compatibility
-    sessionStorage.setItem("authUser", JSON.stringify(data));
-    yield put(loginSuccess(data));
-    history("/dashboard");
+    // data = Google profile (from frontend)
+    const response = yield call(api.create, "/customer/google-login", {
+      sub: data.sub,
+      name: data.name,
+      given_name: data.given_name,
+      family_name: data.family_name,
+      email: data.user_email || data.email,
+      picture: data.picture,
+      email_verified: data.email_verified,
+    });
+
+    const resData = response?.data || response;
+
+    if (resData.success) {
+      const authUser = {
+        token: resData.token,
+        user: resData.user,   
+        provider: "google",
+      };
+
+      sessionStorage.setItem("authUser", JSON.stringify(authUser));
+      yield put(loginSuccess(authUser));
+
+      toast.success("Login successful!", { autoClose: 1500 });
+
+      history("/dashboard");
+    } else if (!resData.success && resData.userNotFound) {
+      toast.info("User not found, please sign up first.", { autoClose: 2000 });
+
+      history("/register", {
+        state: {
+          email: data.user_email || data.email || "",
+          name: data.name || "",
+          picture: data.picture || "",
+          fromGoogle: true,
+        },
+      });
+      const msg = resData.message || "Login failed";
+      toast.error(msg);
+      yield put(apiError(msg));
+    }
   } catch (error) {
     yield put(apiError(error));
   }

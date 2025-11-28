@@ -5,25 +5,24 @@ import {
   LOGOUT_USER_SUCCESS,
   API_ERROR,
   SOCIAL_LOGIN,
-  RESET_LOGIN_FLAG
+  RESET_LOGIN_FLAG,
 } from "./actionTypes";
 
 export const loginUser = (user, history) => {
- 
   return {
     type: LOGIN_USER,
     payload: { user, history },
   };
 };
 
-export const loginSuccess = user => {
+export const loginSuccess = (user) => {
   return {
     type: LOGIN_SUCCESS,
     payload: user,
   };
 };
 
-export const logoutUser = history => {
+export const logoutUser = (history) => {
   return {
     type: LOGOUT_USER,
     payload: { history },
@@ -37,22 +36,22 @@ export const logoutUserSuccess = () => {
   };
 };
 
-export const apiError = error => {
+export const apiError = (error) => {
   return {
     type: API_ERROR,
     payload: error,
   };
 };
 
-export const socialLogin = (type, history) => {
+export const socialLogin = (data, history) => {
   return {
     type: SOCIAL_LOGIN,
-    payload: { type, history },
+    payload: { data, history },
   };
 };
 
 export const resetLoginFlag = () => {
   return {
     type: RESET_LOGIN_FLAG,
-  }
-}
+  };
+};

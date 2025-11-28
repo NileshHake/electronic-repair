@@ -10,30 +10,21 @@ import {
   postFakeRegister,
   postJwtRegister,
 } from "../../../helpers/fakebackend_helper";
+import { APIClient } from "../../../helpers/api_helper";
+import { toast } from "react-toastify";
 
+const api = new APIClient();
 // initialize relavant method of both Auth
 const fireBaseBackend = getFirebaseBackend();
 
 // Is user register successfull then direct plot user in redux.
 function* registerUser({ payload: { user } }) {
-  try {
-    if (process.env.REACT_APP_DEFAULTAUTH === "firebase") {
-      const response = yield call(
-        fireBaseBackend.registerUser,
-        user.email,
-        user.password
-      );
+  try { 
+    const response = yield call(api.create, "/customer/store", user);
+    if (response && response.success) {
+      sessionStorage.setItem("authUser", JSON.stringify(response));
+
       yield put(registerUserSuccessful(response));
-    } else if (process.env.REACT_APP_DEFAULTAUTH === "jwt") {
-      const response = yield call(postJwtRegister, "/post-jwt-register", user);
-      yield put(registerUserSuccessful(response));
-    } else if (process.env.REACT_APP_API_URL) {
-      const response = yield call(postFakeRegister, user);
-      if (response.message === "success") {
-        yield put(registerUserSuccessful(response));
-      } else {
-        yield put(registerUserFailed(response));
-      }
     }
   } catch (error) {
     yield put(registerUserFailed(error));

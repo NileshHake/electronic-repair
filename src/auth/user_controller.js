@@ -4,12 +4,13 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const { getCreatedBy } = require("../helper/CurrentUser");
-const { saveImage, deleteImage } = require("../helper/fileUpload");
+const { saveImage, deleteImage, downloadImageFromUrl } = require("../helper/fileUpload");
 const {
   createDefaultWorkflow,
 } = require("../CreateData/create_data_for_business");
 const { Op, QueryTypes } = require("sequelize");
 const sequelize = require("../../config/db");
+
 const store = async (req, res) => {
   try {
     const file = req.files?.user_profile;
@@ -46,6 +47,164 @@ const store = async (req, res) => {
   }
 };
 
+// GOOGLE AUTH HANDLER (REGISTER + LOGIN)
+const Customerstore = async (req, res) => {
+  try {
+ 
+
+    const {
+      sub,
+      name,
+      given_name,
+      family_name,
+      email,
+      picture,
+      email_verified,
+    } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email not found in Google response",
+      });
+    }
+ 
+    let user = await User.findOne({ where: { user_email: email } });
+
+    let user_profile_path = null;
+
+    
+    if (picture) {
+      user_profile_path = await downloadImageFromUrl(picture, "user_profile");
+    }
+
+    // 3️⃣ If user already exists -> update profile picture if empty, then login
+    if (user) {
+      // optional: update profile pic only if not set
+      if (!user.user_profile && user_profile_path) {
+        user.user_profile = user_profile_path;
+        await user.save();
+      }
+
+      // create JWT token (same like your login)
+      const token = jwt.sign(
+        {
+          user_id: user.user_id,
+          user_email: user.user_email,
+          user_type: user.user_type,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+      );
+
+      return res.status(200).json({
+        success: true,
+        isNewUser: false,
+        message: "Login successful (Google)",
+        token,
+        user,
+      });
+    } 
+    const hashedPassword = await bcrypt.hash(email, 10); 
+
+    user = await User.create({
+      user_name: name || `${given_name} ${family_name || ""}`.trim(),
+      user_email: email,
+      user_phone_number: null,
+      user_password: hashedPassword,
+      user_type: 6,  
+      user_role_id: 2,  
+      user_profile: user_profile_path,
+    });
+
+     
+ 
+    const token = jwt.sign(
+      {
+        user_id: user.user_id,
+        user_email: user.user_email,
+        user_type: user.user_type,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return res.status(201).json({
+      success: true,
+      isNewUser: true,
+      message: "✅ User created successfully (Google)",
+      token,
+      user,
+    });
+  } catch (error) {
+    console.error("❌ Error in googleCustomerAuth:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error creating/logging user with Google ❌",
+      error: error.message,
+    });
+  }
+};
+const googleCustomerLogin = async (req, res) => {
+  try {
+    const {
+      sub,
+      name,
+      given_name,
+      family_name,
+      email,
+      picture,
+      email_verified,
+    } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email not found in Google response",
+      });
+    }
+
+    // 1️⃣ Find user by email
+    const user = await User.findOne({ where: { user_email: email } });
+
+    // 2️⃣ If user does NOT exist → tell frontend to redirect to signup
+    if (!user) {
+      return res.status(200).json({
+        success: false,
+        userNotFound: true,
+        message: "User not found. Please sign up first.",
+        email,              // so frontend can prefill signup form
+        name: name || `${given_name || ""} ${family_name || ""}`.trim(),
+        picture,
+      });
+    }
+
+    // 3️⃣ If user exists → create JWT token and login
+    const token = jwt.sign(
+      {
+        user_id: user.user_id,
+        user_email: user.user_email,
+        user_type: user.user_type,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful (Google)",
+      token,
+      user,
+    });
+  } catch (error) {
+    console.error("❌ Error in googleCustomerLogin:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error logging in user with Google ❌",
+      error: error.message,
+    });
+  }
+};
 const index = async (req, res) => {
   try {
     const users = await User.findAll({
@@ -257,7 +416,7 @@ const updatePassword = async (req, res) => {
   try {
     const userId = req.currentUser?.user_id; // from middleware
     const { old_password, new_password } = req.body;
- 
+
     // basic validation
     if (!old_password || !new_password) {
       return res.status(400).json({
@@ -320,8 +479,10 @@ module.exports = {
   Deliveryindex,
   Businessindex,
   login,
+  googleCustomerLogin,
   Get,
   update,
   deleted,
+  Customerstore,
   updatePassword,
 };

@@ -5,6 +5,8 @@ const { verifyToken } = require("./Middleware/authMiddleware");
 
 router.post("/user/login", controller.login); 
 router.post("/user/store", verifyToken, controller.store);
+router.post("/customer/store",   controller.Customerstore);
+router.post("/customer/google-login",   controller.googleCustomerLogin);
 router.get("/user/list", verifyToken, controller.index);
 router.get("/technicians/list", verifyToken, controller.Techniciansindex);
 router.get("/business/list", verifyToken, controller.Businessindex);
