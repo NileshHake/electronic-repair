@@ -5,10 +5,10 @@ import {
   RESET_REGISTER_FLAG
 } from "./actionTypes"
 
-export const registerUser = user => {
+export const registerUser = (data,history) => {
   return {
     type: REGISTER_USER,
-    payload: { user },
+    payload: {data,history},
   }
 }
 

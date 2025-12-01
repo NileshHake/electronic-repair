@@ -25,7 +25,7 @@ const User = sequelize.define("tbl_user", {
   },
   user_password: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   user_phone_number: {
     type: DataTypes.STRING,

@@ -166,7 +166,7 @@ const Navdata = () => {
     // 1️⃣ Dashboard - Customer
     {
       id: "DASHBOARDCUSTOMER",
-      label: "Dashboard Customer",
+      label: "Dashboard  ",
       icon: "mdi mdi-view-dashboard-outline",
       link: "/#",
       stateVariables: isDashboardCustomer,
@@ -181,7 +181,7 @@ const Navdata = () => {
     // 2️⃣ Repairing - Customer
     {
       id: "REPAIRINGCUSTOMER",
-      label: "Repairing Customer",
+      label: "Repairing  ",
       icon: "mdi mdi-tools",        // change icon if you want
       link: "/#",
       stateVariables: isRepairingCustomer,
@@ -196,7 +196,7 @@ const Navdata = () => {
     // 3️⃣ Customer Sales
     {
       id: "CUSTOMERSALES",
-      label: "Customer Sales",
+      label: "  Sales",
       icon: "mdi mdi-cash-multiple", // change icon if you want
       link: "/#",
       stateVariables: isCustomerSales,

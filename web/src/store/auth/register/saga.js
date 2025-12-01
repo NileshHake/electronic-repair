@@ -10,35 +10,36 @@ import {
   postFakeRegister,
   postJwtRegister,
 } from "../../../helpers/fakebackend_helper";
-
+import { APIClient } from "../../../helpers/api_helper";
+const api = new APIClient();
 // initialize relavant method of both Auth
 const fireBaseBackend = getFirebaseBackend();
 
 // Is user register successfull then direct plot user in redux.
-function* registerUser({ payload: { user } }) {
+function* registerUser({ payload: { data, history } }) {
   try {
-    if (process.env.REACT_APP_DEFAULTAUTH === "firebase") {
-      const response = yield call(
-        fireBaseBackend.registerUser,
-        user.email,
-        user.password
-      );
-      yield put(registerUserSuccessful(response));
-    } else if (process.env.REACT_APP_DEFAULTAUTH === "jwt") {
-      const response = yield call(postJwtRegister, "/post-jwt-register", user);
-      yield put(registerUserSuccessful(response));
-    } else if (process.env.REACT_APP_API_URL) {
-      const response = yield call(postFakeRegister, user);
-      if (response.message === "success") {
-        yield put(registerUserSuccessful(response));
-      } else {
-        yield put(registerUserFailed(response));
-      }
+    // 1️⃣ Call the API
+  
+
+    const apiResponse = yield call(api.create, "/customer/google-register", data);
+    if (apiResponse.success) {
+      sessionStorage.setItem("authUser", JSON.stringify(apiResponse));
+
+      // 3️⃣ Dispatch success action
+      yield put(registerUserSuccessful(apiResponse.apiResponse));
+
+
+    } else {
+
+      yield put(registerUserFailed(apiResponse.message));
     }
   } catch (error) {
+    console.error("Saga error:", error);
+
     yield put(registerUserFailed(error));
   }
 }
+
 
 export function* watchUserRegister() {
   yield takeEvery(REGISTER_USER, registerUser);
