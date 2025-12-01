@@ -47,15 +47,17 @@ io.on("connection", (socket) => {
 sequelize
   .authenticate()
   .then(() => {
-    require("./src/CreateData/create_data");
     console.log("✅ Database connected successfully");
+
     return sequelize.sync({ alter: false });
   })
   .then(() => {
-    console.log("🔁 Models synchronized with database (alter: true)");
+    console.log("🔁 Models synchronized with database (force: true)");
+
+    require("./src/CreateData/create_data");
   })
   .catch((err) => {
-    console.error("❌ Database connection or sync failed:", err); 
+    console.error("❌ Database connection or sync failed:", err);
   });
 
 app.get("/", (req, res) => {

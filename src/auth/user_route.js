@@ -4,6 +4,7 @@ const controller = require("./user_controller");
 const { verifyToken } = require("./Middleware/authMiddleware");
 
 router.post("/user/login", controller.login); 
+router.post("/customer/google-login",  controller.googleCustomerLogin);
 router.post("/user/store", verifyToken, controller.store);
 router.get("/user/list", verifyToken, controller.index);
 router.get("/technicians/list", verifyToken, controller.Techniciansindex);

@@ -8,6 +8,68 @@ const { saveImage, deleteImage } = require("../helper/fileUpload");
 const {
   createDefaultWorkflow,
 } = require("../CreateData/create_data_for_business");
+
+const googleCustomerLogin = async (req, res) => {
+  try {
+    const {
+      sub,
+      name,
+      given_name,
+      family_name,
+      email,
+      picture,
+      email_verified,
+    } = req.body; 
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email not found in Google response",
+      });
+    }
+
+    // 1️⃣ Find user by email
+    const user = await User.findOne({ where: { user_email: email } });
+
+    // 2️⃣ If user does NOT exist → tell frontend to redirect to sig  nup
+    if (!user) {
+      return res.status(200).json({
+        success: false,
+        userNotFound: true,
+        message: "User not found. Please sign up first.",
+        email,              // so frontend can prefill signup form
+        name: name || `${given_name || ""} ${family_name || ""}`.trim(),
+        picture,
+      });
+    }
+
+    // 3️⃣ If user exists → create JWT token and login
+    const token = jwt.sign(
+      {
+        user_id: user.user_id,
+        user_email: user.user_email,
+        user_type: user.user_type,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful (Google)",
+      token,
+      user,
+    });
+  } catch (error) {
+    console.error("❌ Error in googleCustomerLogin:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error logging in user with Google ❌",
+      error: error.message,
+    });
+  }
+};
+
 const store = async (req, res) => {
   try {
     const file = req.files?.user_profile;
@@ -245,6 +307,7 @@ module.exports = {
   store,
   index,
   Techniciansindex,
+  googleCustomerLogin,
   Userindex,
   Deliveryindex,
   Businessindex,

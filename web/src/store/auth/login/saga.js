@@ -45,6 +45,7 @@ function* loginUser({ payload: { user, history } }) {
  */
 function* logoutUser({ payload: { history } }) {
   try {
+
     sessionStorage.removeItem("authUser");
     yield put(logoutUserSuccess());
     history("/login"); // Redirect to login
@@ -56,16 +57,52 @@ function* logoutUser({ payload: { history } }) {
 /**
  * SOCIAL LOGIN (optional – can disable if not needed)
  */
-function* socialLogin({ payload: { data, history, type } }) {
+
+function* socialLogin({ payload }) {
   try {
-    // Not used in your case, but kept for compatibility
-    sessionStorage.setItem("authUser", JSON.stringify(data));
-    yield put(loginSuccess(data));
-    history("/dashboard");
+    const { data, navigate } = payload;
+     
+    const apiResponse = yield call(api.create, "/customer/google-login", {
+      email: data.email,
+      name: data.name,
+      picture: data.picture,
+      sub: data.sub,
+      // anything else you want to send
+    });
+
+    const res = apiResponse; // rename for clarity
+    
+    if (res.userNotFound && !res.success) {
+      // if backend responds with 404 + body { userNotFound: true, email, name, picture }
+      navigate("/register", {
+        state: {
+          email: res.email,
+          name: res.name,
+          picture: res.picture,
+          fromGoogle: true,
+        },
+      });
+      return;
+    }
+
+    // ✅ If login success
+    // Example response: { success, token, user }
+    if (res.success) {
+      // Save user in storage if you already do it for normal login
+      sessionStorage.setItem("authUser", JSON.stringify(res));
+      yield put(loginSuccess(res));
+      navigate("/dashboard");
+      return;
+    }
+
+    // If something weird, treat as error
+    yield put(apiError("Unexpected social login response"));
   } catch (error) {
+    console.error("socialLogin saga error:", error);
     yield put(apiError(error));
   }
 }
+
 
 /**
  * ROOT SAGA

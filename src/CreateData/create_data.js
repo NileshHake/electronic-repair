@@ -37,6 +37,21 @@ const createSuperAdmin = async () => {
         permission_path: 1,
         permission_category: "DASHBOARD",
       },
+      {
+        permission_name: "Dashboard",
+        permission_path: 1,
+        permission_category: "DASHBOARDCUSTOMER",
+      },
+      { 
+        permission_name: "Repair",
+        permission_path: 1,
+        permission_category: "REPAIRINGCUSTOMER",
+      },
+      {
+        permission_name: "Sale",
+        permission_path: 1,
+        permission_category: "CUSTOMERSALES",
+      },
 
       {
         permission_name: "List",
@@ -223,11 +238,23 @@ const createSuperAdmin = async () => {
       },
     ];
     await Permission.bulkCreate(staticpermissions);
-    const SuperAdminpermissionsLists = await Permission.findAll();
+    const SuperAdminpermissionsLists = await Permission.findAll({
+      where: {
+        permission_category: {
+          [Op.notIn]: [
+            "DASHBOARDCUSTOMER",
+            "REPAIRINGCUSTOMER",
+            "CUSTOMERSALES",
+          ],
+        },
+      },
+    });
+
     await Role.create({
       role_name: "Super Admin",
       role_created_by: 1,
     });
+
     for (const permission of SuperAdminpermissionsLists) {
       await RoleHasPermission.create({
         rhp_role_id: 1,
@@ -237,7 +264,12 @@ const createSuperAdmin = async () => {
     const AdminpermissionsLists = await Permission.findAll({
       where: {
         permission_category: {
-          [Op.notIn]: ["BUSINESS"],
+          [Op.notIn]: [
+            "BUSINESS",
+            "DASHBOARDCUSTOMER",
+            "REPAIRINGCUSTOMER",
+            "CUSTOMERSALES",
+          ],
         },
       },
     });
@@ -253,6 +285,26 @@ const createSuperAdmin = async () => {
         rhp_permission_id: permission.permission_id,
       });
     }
+    const CustomerpermissionsLists = await Permission.findAll({
+      where: {
+        permission_category: {
+          [Op.in]: ["DASHBOARDCUSTOMER", "REPAIRINGCUSTOMER", "CUSTOMERSALES"],
+        },
+      },
+    });
+
+    const customerRole = await Role.create({
+      role_name: "Customer",
+      role_created_by: 1,
+    });
+
+    for (const permission of CustomerpermissionsLists) {
+      await RoleHasPermission.create({
+        rhp_role_id: customerRole.role_id,
+        rhp_permission_id: permission.permission_id,
+      });
+    }
+
 
     try {
       const colorOptions = [
