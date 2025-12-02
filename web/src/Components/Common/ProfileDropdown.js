@@ -67,17 +67,17 @@ const ProfileDropdown = () => {
               {singleUser?.user_name || "N/A"}
             </span>
             <span className="d-none d-xl-block ms-1 fs-12 text-muted user-name-sub-text">
-              {user?.user_type ==  1
+              {user?.user_type ===  1
                 ? "Super Admin"
-                : user?.user_type ==   2
+                : user?.user_type ===   2
                 ? "Admin"
-                : user?.user_type ==   3
+                : user?.user_type ===   3
                 ? "User"
-                : user?.user_type ==   4
+                : user?.user_type ===   4
                 ? "Technician"
-                : user?.user_type ==   5
+                : user?.user_type ===   5
                 ? "Delivery Boy"
-                : user?.user_type ==   6
+                : user?.user_type ===   6
                 ? "Customer"
                 : ""}
             </span>
