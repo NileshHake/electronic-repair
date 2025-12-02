@@ -22,14 +22,15 @@ import {
   resetUpdateCustomerResponse,
 } from "../../store/Customer";
 import AuthUser from "../../helpers/AuthType/AuthUser";
+import { api } from "../../config";
 
 const CustomerList = () => {
-  document.title = "Customer List";
+  document.title = "User List";
   const { permissions } = AuthUser();
   const dispatch = useDispatch();
 
   const {
-    customerList = [],
+    customerList = [], // 👉 isko ab user list maan rahe hain
     loading = false,
     addCustomerResponse = false,
     updateCustomerResponse = false,
@@ -60,14 +61,18 @@ const CustomerList = () => {
   }, [addCustomerResponse, updateCustomerResponse, dispatch]);
 
   // ✅ Delete
-  const onClickDelete = (customer) => {
-    setSelectedCustomer(customer);
+  const onClickDelete = (user) => {
+    setSelectedCustomer(user);
     setDeleteModal(true);
   };
 
   const handleDeleteCustomer = () => {
     if (selectedCustomer) {
-      dispatch(deleteCustomer(selectedCustomer.customer_id));
+      // ⚠️ yaha tumhare backend ke hisab se id ka naam check karna:
+      // agar user_id hai:
+      dispatch(deleteCustomer(selectedCustomer.user_id));
+      // agar abhi bhi customer_id hai to upar wala line:
+      // dispatch(deleteCustomer(selectedCustomer.customer_id));
     }
     setDeleteModal(false);
   };
@@ -88,6 +93,25 @@ const CustomerList = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // ✅ Helper: address string banana
+  const getAddressText = (user) => {
+    const parts = [
+      user.user_address_city,
+      user.user_address_block,
+      user.user_address_district,
+      user.user_address_state,
+      user.user_address_pincode,
+    ].filter(Boolean);
+    return parts.join(", ");
+  };
+
+  // ✅ Helper: profile image path
+  const getProfileImage = (user) => {
+    if (!user.user_profile) return null;
+    if (user.user_profile.startsWith("http")) return user.user_profile;
+    return `${api.IMG_URL}user_profile/${user.user_profile}`;
+  };
+
   return (
     <div className="page-content">
       <Container fluid>
@@ -101,11 +125,11 @@ const CustomerList = () => {
                     <h5 className="mb-0 fw-bold">Customer List</h5>
                   </div>
                   <div className="col-sm-auto">
-                      {permissions.find(
-                        (permission) =>
-                          permission.permission_category == "CUSTOMER" &&
-                          permission.permission_path == "2"
-                      ) && (
+                    {permissions.find(
+                      (permission) =>
+                        permission.permission_category == "CUSTOMER" &&
+                        permission.permission_path == "2"
+                    ) && (
                       <Button
                         color="success"
                         onClick={() => setIsAddOpen(true)}
@@ -123,9 +147,11 @@ const CustomerList = () => {
                     <thead className="table-light text-uppercase text-muted">
                       <tr>
                         <th>#</th>
+                        <th>Profile</th>
                         <th>Name</th>
                         <th>Phone Number</th>
                         <th>Email</th>
+                       
                         <th>Address</th>
                         <th>Actions</th>
                       </tr>
@@ -138,7 +164,7 @@ const CustomerList = () => {
                       ) &&
                       customerList &&
                       customerList.length > 0 ? (
-                        customerList.map((customer, index) => {
+                        customerList.map((user, index) => {
                           // Check permissions for update and delete
                           const canUpdate = permissions.some(
                             (p) =>
@@ -151,13 +177,62 @@ const CustomerList = () => {
                               p.permission_path === "4"
                           );
 
+                          const profileImg = getProfileImage(user);
+
                           return (
-                            <tr key={customer.customer_id || index}>
+                            <tr key={user.user_id || index}>
                               <td>{index + 1}</td>
-                              <td>{customer.customer_name}</td>
-                              <td>{customer.customer_phone_number}</td>
-                              <td>{customer.customer_email}</td>
-                              <td>{customer.customer_address}</td>
+
+                              {/* Profile */}
+                              <td>
+                                {profileImg ? (
+                                  <img
+                                    src={profileImg}
+                                    alt={user.user_name}
+                                    style={{
+                                      width: 40,
+                                      height: 40,
+                                      borderRadius: "50%",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                ) : (
+                                  <div
+                                    style={{
+                                      width: 40,
+                                      height: 40,
+                                      borderRadius: "50%",
+                                      backgroundColor: "#e9ecef",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      fontSize: 14,
+                                      fontWeight: 600,
+                                      textTransform: "uppercase",
+                                    }}
+                                  >
+                                    {user.user_name
+                                      ? user.user_name.charAt(0)
+                                      : "U"}
+                                  </div>
+                                )}
+                              </td>
+
+                              {/* Name */}
+                              <td>{user.user_name}</td>
+
+                              {/* Phone */}
+                              <td>{user.user_phone_number}</td>
+
+                              {/* Email */}
+                              <td>{user.user_email}</td>
+
+                              
+
+                              {/* Address */}
+                              <td>{getAddressText(user)}</td>
+
+                              {/* Actions */}
                               <td>
                                 <ul className="list-inline hstack gap-2 mb-0">
                                   {canUpdate && (
@@ -165,7 +240,7 @@ const CustomerList = () => {
                                       <button
                                         className="text-primary border-0 bg-transparent"
                                         onClick={() => {
-                                          setSelectedCustomer(customer);
+                                          setSelectedCustomer(user);
                                           setIsUpdateOpen(true);
                                         }}
                                       >
@@ -177,7 +252,7 @@ const CustomerList = () => {
                                     <li className="list-inline-item">
                                       <button
                                         className="text-danger border-0 bg-transparent"
-                                        onClick={() => onClickDelete(customer)}
+                                        onClick={() => onClickDelete(user)}
                                       >
                                         <i className="ri-delete-bin-5-fill fs-16"></i>
                                       </button>

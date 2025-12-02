@@ -23,6 +23,11 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.TEXT("long"),
     allowNull: true,
   },
+  product_usage_type: {
+    type: DataTypes.ENUM("sale", "repair", "both"),
+    allowNull: false,
+  }
+  ,
   product_brand: {
     type: DataTypes.INTEGER,
     allowNull: true,

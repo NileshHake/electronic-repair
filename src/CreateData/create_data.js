@@ -41,12 +41,27 @@ const createSuperAdmin = async () => {
         permission_name: "Dashboard",
         permission_path: 1,
         permission_category: "DASHBOARDCUSTOMER",
-      },
-      { 
-        permission_name: "Repair",
+      }, {
+        permission_name: "List",
         permission_path: 1,
         permission_category: "REPAIRINGCUSTOMER",
       },
+      {
+        permission_name: "Create",
+        permission_path: 2,
+        permission_category: "REPAIRINGCUSTOMER",
+      },
+      {
+        permission_name: "Update",
+        permission_path: 3,
+        permission_category: "REPAIRINGCUSTOMER",
+      },
+      {
+        permission_name: "Delete",
+        permission_path: 4,
+        permission_category: "REPAIRINGCUSTOMER",
+      },
+
       {
         permission_name: "Sale",
         permission_path: 1,
@@ -112,6 +127,26 @@ const createSuperAdmin = async () => {
         permission_name: "Delete",
         permission_path: 4,
         permission_category: "REPAIRING",
+      },
+       {
+        permission_name: "List",
+        permission_path: 1,
+        permission_category: "QUOTATION_BILLING",
+      },
+      {
+        permission_name: "Create",
+        permission_path: 2,
+        permission_category: "QUOTATION_BILLING",
+      },
+      {
+        permission_name: "Update",
+        permission_path: 3,
+        permission_category: "QUOTATION_BILLING",
+      },
+      {
+        permission_name: "Delete",
+        permission_path: 4,
+        permission_category: "QUOTATION_BILLING",
       },
       {
         permission_name: "List",

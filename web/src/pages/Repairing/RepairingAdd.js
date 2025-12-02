@@ -65,10 +65,11 @@ import RepairTabDeviceInfo from "./Tabs/RepairTabDeviceInfo";
 import RepairTabServiceInfo from "./Tabs/RepairTabServiceInfo";
 import RepairTabAdditionalInfo from "./Tabs/RepairTabAdditionalInfo";
 import RepairTabGallery from "./Tabs/RepairTabGallery";
+import AuthUser from "../../helpers/AuthType/AuthUser";
 
 const RepairingAdd = ({ isOpen, toggle }) => {
   const dispatch = useDispatch();
-
+  const { user } = AuthUser()
   // ================== STATES ==================
   const [activeTab, setActiveTab] = useState("1");
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -80,14 +81,14 @@ const RepairingAdd = ({ isOpen, toggle }) => {
     repair_problem_description: "",
     repair_estimated_cost: "",
     repair_received_date: new Date(),
-    repair_expected_delivery_date:  null,
+    repair_expected_delivery_date: null,
     repair_assigned_technician_to: "",
     repair_delivery_and_pickup_to: "",
     repair_device_serial_number: "",
     repair_device_accessories_id: "",
     repair_device_services_id: [
-  { service: "", cost: "" },  
-],
+      { service: "", cost: "" },
+    ],
     repair_device_priority: "",
     repair_device_password: "",
     repair_workflow_id: 0,
@@ -105,7 +106,7 @@ const RepairingAdd = ({ isOpen, toggle }) => {
   });
 
   // ================== REDUX SELECTORS ==================
-   const customerList = useSelector(
+  const customerList = useSelector(
     (state) => state.CustomerReducer?.customerList?.data || state.CustomerReducer?.customerList || []
   );
 
@@ -214,8 +215,8 @@ const RepairingAdd = ({ isOpen, toggle }) => {
 
   const customerOptions = mapOptions(
     customerList,
-    "customer_id",
-    "customer_name"
+    "user_id",
+    "user_name"
   );
   const technicianOptions = mapOptions(technicianList, "user_id", "user_name");
   const deliveryOptions = mapOptions(deliveryBoyList, "user_id", "user_name");
@@ -342,7 +343,7 @@ const RepairingAdd = ({ isOpen, toggle }) => {
     const errors = {};
     const f = formData;
 
-    if (!f.repair_customer_id)
+    if (user.user_type != 6 && !f.repair_customer_id)
       errors.repair_customer_id = "Please select a customer.";
     else if (!f.repair_service_type_id)
       errors.repair_service_type_id = "Please select a service type.";
@@ -366,11 +367,11 @@ const RepairingAdd = ({ isOpen, toggle }) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const finalData={
+    const finalData = {
       ...formData,
-      repair_device_services_id:JSON.stringify(formData.repair_device_services_id)
+      repair_device_services_id: JSON.stringify(formData.repair_device_services_id)
     };
-    
+
     dispatch(addRepair(finalData));
   };
 

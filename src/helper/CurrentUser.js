@@ -8,8 +8,9 @@ export function getCreatedBy(user) {
     return user.user_id;
   } else if (
       user.user_type == 3 ||
-      user.user_type == 4
+      user.user_type == 4||
+      user.user_type == 6
     ) {
       return user.user_created_by;
     }
-}
+}   

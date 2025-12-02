@@ -23,10 +23,15 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import Dropzone from "react-dropzone";
 import { useDispatch, useSelector } from "react-redux";
- 
+
 import { toast } from "react-toastify";
-import { api } from "../../config"; 
+import { api } from "../../config";
 import { resetAddProductResponse, resetUpdateProductResponse, updateProduct } from "../../store/product";
+import { resetAddCategoryResponse } from "../../store/category";
+import { resetAddTaxResponse } from "../../store/Tax";
+import CategoryAdd from "../category/CategoryAdd";
+import TaxAdd from "../Tax/TaxAdd";
+import BrandAdd from "../Brand/BrandAdd";
 
 const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
   const [activeTab, setActiveTab] = useState("1");
@@ -34,9 +39,14 @@ const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
   const { brands } = useSelector((state) => state.BrandReducer);
   const { taxes } = useSelector((state) => state.TaxReducer);
   const { categories } = useSelector((state) => state.CategoryReducer);
-
+  const { addCategoryResponse } = useSelector(
+    (state) => state.CategoryReducer
+  );
+  const { addTaxResponse } = useSelector((state) => state.TaxReducer);
   const [productData, setProductData] = useState(isProductData);
-
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isBrandOpen, setIsBrandOpen] = useState(false);
+  const [isTaxOpen, setIsTaxOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState({});
 
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -71,47 +81,47 @@ const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
     if (activeTab !== tab) setActiveTab(tab);
   };
 
-const AddHandler = async (e) => {
-  e.preventDefault();
+  const AddHandler = async (e) => {
+    e.preventDefault();
 
-  const errors = {};
-  if (!productData.product_name.trim()) { 
-    errors.product_name = "Product Name is required";
-  }
-
-  if (Object.keys(errors).length > 0) {
-    setErrorMessage(errors);
-    return;
-  }
-
-  setErrorMessage({});
-
-  const formData = new FormData();
-
-  // Append normal fields (excluding images)
-  Object.entries(productData).forEach(([key, value]) => {
-    if (key !== "product_image") {
-      formData.append(key, value);
+    const errors = {};
+    if (!productData.product_name.trim()) {
+      errors.product_name = "Product Name is required";
     }
-  });
 
-  // Handle both existing + new images
-  for (const file of selectedFiles) {
-    if (file.isExisting) {
-      // Convert URL to actual File object
-      const response = await fetch(file.preview);
-      const blob = await response.blob();
-      const existingFile = new File([blob], file.name, { type: blob.type });
-      formData.append("product_image[]", existingFile);
-    } else {
-      // Directly append new File object
-      formData.append("product_image[]", file);
+    if (Object.keys(errors).length > 0) {
+      setErrorMessage(errors);
+      return;
     }
-  }
 
-  // ✅ Now dispatch with FormData
-  dispatch(updateProduct(formData));
-};
+    setErrorMessage({});
+
+    const formData = new FormData();
+
+    // Append normal fields (excluding images)
+    Object.entries(productData).forEach(([key, value]) => {
+      if (key !== "product_image") {
+        formData.append(key, value);
+      }
+    });
+
+    // Handle both existing + new images
+    for (const file of selectedFiles) {
+      if (file.isExisting) {
+        // Convert URL to actual File object
+        const response = await fetch(file.preview);
+        const blob = await response.blob();
+        const existingFile = new File([blob], file.name, { type: blob.type });
+        formData.append("product_image[]", existingFile);
+      } else {
+        // Directly append new File object
+        formData.append("product_image[]", file);
+      }
+    }
+
+    // ✅ Now dispatch with FormData
+    dispatch(updateProduct(formData));
+  };
 
   const updateProductResponse = useSelector(
     (state) => state.ProductReducer.updateProductResponse
@@ -148,18 +158,29 @@ const AddHandler = async (e) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   };
 
-const removeFile = (index) => {
-  const updatedFiles = selectedFiles.filter((_, i) => i !== index);
+  const removeFile = (index) => {
+    const updatedFiles = selectedFiles.filter((_, i) => i !== index);
 
-  // Update both states in sync
-  setSelectedFiles(updatedFiles);
-  setProductData((prev) => ({
-    ...prev,
-    product_image: updatedFiles, // maintain same structure
-  }));
-};
+    // Update both states in sync
+    setSelectedFiles(updatedFiles);
+    setProductData((prev) => ({
+      ...prev,
+      product_image: updatedFiles, // maintain same structure
+    }));
+  };
 
+  useEffect(() => {
+    if (addCategoryResponse) {
+      setIsCategoryModalOpen(false)
 
+      dispatch(resetAddCategoryResponse());
+    }
+    if (addTaxResponse) {
+      setIsTaxOpen(false)
+
+      dispatch(resetAddTaxResponse());
+    }
+  }, [addCategoryResponse, addTaxResponse, dispatch, toggle]);
   return (
     <Modal size="xl" isOpen={isOpen} centered toggle={() => toggle()}>
       <ModalHeader toggle={() => toggle()} className="modal-title ms-2">
@@ -195,7 +216,7 @@ const removeFile = (index) => {
                 {/* TAB 1 */}
                 <TabPane tabId="1">
                   <Row>
-                    <Col lg={4}>
+                    <Col lg={4} className="mt-2">
                       <Label className="form-label fw-bold">
                         Product Name<span className="text-danger"> *</span>
                       </Label>
@@ -216,81 +237,131 @@ const removeFile = (index) => {
 
                     {/* Category */}
                     <Col lg={4}>
-                      <Label className="form-label fw-bold">Category</Label>
+
+                      <div className="d-flex justify-content-between align-items-center">
+                        <Label className=" fw-bold mb-0">
+                          Select Category
+                        </Label>
+                        <span
+                          role="button"
+                          onClick={() => setIsCategoryModalOpen(true)}
+                          className="text-success fw-bold me-2"
+                          style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
+                        >
+                          +
+                        </span>
+                      </div>
                       <Select
                         placeholder="Select Category"
-                        value={
-                          categories
-                            .filter(
-                              (c) =>
-                                c.category_id === isProductData.product_category
-                            )
-                            .map((c) => ({
-                              value: c.category_id,
-                              label: c.category_name,
-                            }))[0] || null
-                        }
                         options={categories.map((c) => ({
                           value: c.category_id,
                           label: c.category_name,
                         }))}
+                        value={
+                          categories
+                            .map((c) => ({ value: c.category_id, label: c.category_name }))
+                            .find((opt) => opt.value == productData.product_category) || null
+                        }
                         onChange={(selected) =>
                           handleInputChange("product_category", selected.value)
                         }
                       />
+
                     </Col>
 
-                    {/* Tax */}
-                    {/* ✅ Tax % */}
-                    <Col lg={4}>
-                      <Label className="form-label fw-bold">Tax %</Label>
-                      <Select
-                        placeholder="Select Tax %"
-                        value={
-                          taxes
-                            .filter(
-                              (t) => t.tax_id === isProductData.product_tax
-                            )
-                            .map((t) => ({
-                              value: t.tax_id,
-                              label: t.tax_name, // or `${t.tax_percentage}%` if you prefer showing percentage
-                            }))[0] || null
-                        }
-                        options={taxes.map((t) => ({
-                          value: t.tax_id,
-                          label: t.tax_name, // ✅ or use `${t.tax_percentage}%`
-                        }))}
-                        onChange={(selected) =>
-                          handleInputChange("product_tax", selected.value)
-                        }
-                      />
-                    </Col>
 
-                    {/* ✅ Brand */}
-                    <Col lg={4}>
-                      <Label className="form-label fw-bold">Brand</Label>
+
+                    {/* Brand */}
+                    <Col lg={4} >
+                      <div className="d-flex justify-content-between align-items-center">
+                        <Label className=" fw-bold mb-0">
+                          Select  Brand
+                        </Label>
+                        <span
+                          role="button"
+                          onClick={() => setIsBrandOpen(true)}
+                          className="text-success fw-bold me-2"
+                          style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
+                        >
+                          +
+                        </span>
+                      </div>
                       <Select
                         placeholder="Select Brand"
-                        value={
-                          brands
-                            .filter(
-                              (b) => b.brand_id === isProductData.product_brand
-                            )
-                            .map((b) => ({
-                              value: b.brand_id,
-                              label: b.brand_name,
-                            }))[0] || null
-                        }
                         options={brands.map((b) => ({
                           value: b.brand_id,
                           label: b.brand_name,
                         }))}
+                        value={
+                          brands
+                            .map((b) => ({ value: b.brand_id, label: b.brand_name }))
+                            .find((opt) => opt.value == productData.product_brand) || null
+                        }
                         onChange={(selected) =>
                           handleInputChange("product_brand", selected.value)
                         }
                       />
-                    </Col>
 
+                    </Col>
+                    <Col lg={4} className="mt-2 ">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <Label className=" fw-bold mb-0">
+                          Select Tax %
+                        </Label>
+                        <span
+                          role="button"
+                          onClick={() => setIsTaxOpen(true)}
+                          className="text-success fw-bold me-2"
+                          style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
+                        >
+                          +
+                        </span>
+                      </div>
+                      <Select
+                        placeholder="Select Tax %"
+                        options={taxes.map((t) => ({
+                          value: t.tax_id,
+                          label: t.tax_name,
+                        }))}
+                        value={
+                          taxes
+                            .map((t) => ({ value: t.tax_id, label: t.tax_name }))
+                            .find((opt) => opt.value == productData.product_tax) || null
+                        }
+                        onChange={(selected) =>
+                          handleInputChange("product_tax", selected.value)
+                        }
+                      />
+
+                    </Col>
+                    <Col lg={4} className="mt-3 ">
+                      <Label className="form-label fw-bold">
+                        Product Usage
+                      </Label>
+
+                      <Select
+                        value={[
+                          { value: "sale", label: "Only Sale" },
+                          { value: "repair", label: "Only Repair" },
+                          { value: "both", label: "Sale & Repair Both" }
+                        ].find((type) => type.value == productData.product_usage_type)}
+                        placeholder="Select Usage"
+                        options={[
+                          { value: "sale", label: "Only Sale" },
+                          { value: "repair", label: "Only Repair" },
+                          { value: "both", label: "Sale & Repair Both" }
+                        ]}
+                        onChange={(selected) =>
+                          handleInputChange("product_usage_type", selected.value)
+                        }
+                      />
+
+                      {errorMessage.product_usage_type && (
+                        <div className="text-danger small">
+                          {errorMessage.product_usage_type}
+                        </div>
+                      )}
+                    </Col>
                     <Col lg={12}>
                       <div className="table-responsive table-card mt-4 p-3">
                         <table className="table text-center align-middle">
@@ -445,6 +516,25 @@ const removeFile = (index) => {
           </Card>
         </div>
       </form>
+
+      {isCategoryModalOpen && (
+        <CategoryAdd
+          isOpen={isCategoryModalOpen}
+          toggle={() => setIsCategoryModalOpen(false)}
+        />
+      )}
+      {isBrandOpen && (
+        <BrandAdd
+          isOpen={isBrandOpen}
+          toggle={() => setIsBrandOpen(false)}
+        />
+      )}
+      {isTaxOpen && (
+        <TaxAdd
+          isOpen={isTaxOpen}
+          toggle={() => setIsTaxOpen(false)}
+        />
+      )}
     </Modal>
   );
 };

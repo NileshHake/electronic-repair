@@ -28,12 +28,20 @@ import {
   resetAddProductResponse,
 } from "../../store/product/index";
 import { toast } from "react-toastify";
+import ServiceAdd from "../Services/ServiceAdd";
+import CategoryAdd from "../category/CategoryAdd";
+import { resetAddCategoryResponse } from "../../store/category";
+import TaxAdd from "../Tax/TaxAdd";
+import { resetAddTaxResponse } from "../../store/Tax";
+import BrandAdd from "../Brand/BrandAdd";
 
 const ProductAdd = ({ isOpen, toggle }) => {
   const { brands } = useSelector((state) => state.BrandReducer);
- const { taxes } = useSelector((state) => state.TaxReducer);
+  const { taxes } = useSelector((state) => state.TaxReducer);
   const { categories } = useSelector((state) => state.CategoryReducer);
- 
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isTaxOpen, setIsTaxOpen] = useState(false);
+  const [isBrandOpen, setIsBrandOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState("1");
   const dispatch = useDispatch();
@@ -41,6 +49,7 @@ const ProductAdd = ({ isOpen, toggle }) => {
   const [productData, setProductData] = useState({
     product_name: "",
     product_category: "",
+    product_usage_type: "sale",
     product_tax: "",
     product_brand: "",
     product_mrp: "",
@@ -49,7 +58,10 @@ const ProductAdd = ({ isOpen, toggle }) => {
     product_description: "",
     product_image: [],
   });
-
+  const { addCategoryResponse } = useSelector(
+    (state) => state.CategoryReducer
+  );
+  const { addTaxResponse } = useSelector((state) => state.TaxReducer);
   const [errorMessage, setErrorMessage] = useState({});
 
   const handleInputChange = (key, value) => {
@@ -133,7 +145,18 @@ const ProductAdd = ({ isOpen, toggle }) => {
     setSelectedFiles(updatedFiles);
     setProductData((prev) => ({ ...prev, product_image: updatedProductImgs }));
   };
+  useEffect(() => {
+    if (addCategoryResponse) {
+      setIsCategoryModalOpen(false)
 
+      dispatch(resetAddCategoryResponse());
+    }
+    if (addTaxResponse) {
+      setIsTaxOpen(false)
+
+      dispatch(resetAddTaxResponse());
+    }
+  }, [addCategoryResponse, addTaxResponse, dispatch, toggle]);
   return (
     <Modal size="xl" isOpen={isOpen} centered toggle={() => toggle()}>
       <ModalHeader toggle={() => toggle()} className="modal-title ms-2">
@@ -169,7 +192,7 @@ const ProductAdd = ({ isOpen, toggle }) => {
                 {/* TAB 1 */}
                 <TabPane tabId="1">
                   <Row>
-                    <Col lg={4}>
+                    <Col lg={4} className="mt-2">
                       <Label className="form-label fw-bold">
                         Product Name<span className="text-danger"> *</span>
                       </Label>
@@ -190,7 +213,20 @@ const ProductAdd = ({ isOpen, toggle }) => {
 
                     {/* Category */}
                     <Col lg={4}>
-                      <Label className="form-label fw-bold">Category</Label>
+
+                      <div className="d-flex justify-content-between align-items-center">
+                        <Label className=" fw-bold mb-0">
+                          Select Category
+                        </Label>
+                        <span
+                          role="button"
+                          onClick={() => setIsCategoryModalOpen(true)}
+                          className="text-success fw-bold me-2"
+                          style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
+                        >
+                          +
+                        </span>
+                      </div>
                       <Select
                         placeholder="Select Category"
                         options={categories.map((c) => ({
@@ -203,9 +239,48 @@ const ProductAdd = ({ isOpen, toggle }) => {
                       />
                     </Col>
 
-                    {/* Tax */}
-                    <Col lg={4}>
-                      <Label className="form-label fw-bold">Tax %</Label>
+                   
+
+                    {/* Brand */}
+                    <Col lg={4} >
+                       <div className="d-flex justify-content-between align-items-center">
+                        <Label className=" fw-bold mb-0">
+                          Select  Brand
+                        </Label>
+                        <span
+                          role="button"
+                          onClick={() => setIsBrandOpen(true)}
+                          className="text-success fw-bold me-2"
+                          style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
+                        >
+                          +
+                        </span>
+                      </div>
+                      <Select
+                        placeholder="Select Brand"
+                        options={brands.map((b) => ({
+                          value: b.brand_id,
+                          label: b.brand_name,
+                        }))}
+                        onChange={(selected) =>
+                          handleInputChange("product_brand", selected.value)
+                        }
+                      />
+                    </Col>
+                      <Col lg={4} className="mt-2 ">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <Label className=" fw-bold mb-0">
+                          Select Tax %
+                        </Label>
+                        <span
+                          role="button"
+                          onClick={() => setIsTaxOpen(true)}
+                          className="text-success fw-bold me-2"
+                          style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
+                        >
+                          +
+                        </span>
+                      </div>
                       <Select
                         placeholder="Select Tax %"
                         options={taxes.map((t) => ({
@@ -217,20 +292,33 @@ const ProductAdd = ({ isOpen, toggle }) => {
                         }
                       />
                     </Col>
+                    <Col lg={4} className="mt-3 ">
+                      <Label className="form-label fw-bold">
+                        Product Usage
+                      </Label>
 
-                    {/* Brand */}
-                    <Col lg={4}>
-                      <Label className="form-label fw-bold">Brand</Label>
                       <Select
-                        placeholder="Select Brand"
-                        options={brands.map((b) => ({
-                          value: b.brand_id,
-                          label: b.brand_name,
-                        }))}
+                        value={[
+                          { value: "sale", label: "Only Sale" },
+                          { value: "repair", label: "Only Repair" },
+                          { value: "both", label: "Sale & Repair Both" }
+                        ].find((type) => type.value == productData.product_usage_type)}
+                        placeholder="Select Usage"
+                        options={[
+                          { value: "sale", label: "Only Sale" },
+                          { value: "repair", label: "Only Repair" },
+                          { value: "both", label: "Sale & Repair Both" }
+                        ]}
                         onChange={(selected) =>
-                          handleInputChange("product_brand", selected.value)
+                          handleInputChange("product_usage_type", selected.value)
                         }
                       />
+
+                      {errorMessage.product_usage_type && (
+                        <div className="text-danger small">
+                          {errorMessage.product_usage_type}
+                        </div>
+                      )}
                     </Col>
 
                     <Col lg={12}>
@@ -385,6 +473,25 @@ const ProductAdd = ({ isOpen, toggle }) => {
           </Card>
         </div>
       </form>
+
+      {isCategoryModalOpen && (
+        <CategoryAdd
+          isOpen={isCategoryModalOpen}
+          toggle={() => setIsCategoryModalOpen(false)}
+        />
+      )}
+      {isTaxOpen && (
+        <TaxAdd
+          isOpen={isTaxOpen}
+          toggle={() => setIsTaxOpen(false)}
+        />
+      )}
+      {isBrandOpen && (
+        <BrandAdd
+          isOpen={isBrandOpen}
+          toggle={() => setIsBrandOpen(false)}
+        />
+      )}
     </Modal>
   );
 };

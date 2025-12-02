@@ -11,183 +11,80 @@ import {
   Col,
   Input,
 } from "reactstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
-import Select from "react-select";
-import { addCustomer } from "../../store/Customer";
-import { getCustomerAddressList } from "../../store/CustomerAddress";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+
+// 🔁 Yaha apna correct action import karo (customer nahi, user wala hoga to uska)
+import { addCustomer } from "../../store/Customer";
 
 const CustomerAdd = ({ isOpen, toggle }) => {
   const dispatch = useDispatch();
   const submitButtonRef = useRef();
 
-  // ✅ State for customer data
-  const [customerData, setCustomerData] = useState({
-    customer_name: "",
-    customer_phone_number: "",
-    customer_email: "",
-    customer_address_pincode: "",
-    customer_address_city: "",
-    customer_address_block: "",
-    customer_address_district: "",
-    customer_address_state: "",
-    customer_address_description: "",
+  // ✅ State for user data
+  const [userData, setUserData] = useState({
+    user_name: "",
+    user_email: "",
+    user_password: "",
+    user_type: 6,
+    user_phone_number: "",
+    user_role_id: 3, // static 3
+    user_address_pincode: "",
+    user_address_state: "",
+    user_address_district: "",
+    user_address_block: "",
+    user_address_city: "",
+    user_address_description: "",
+    user_profile: null, // file
   });
 
   const [errors, setErrors] = useState({});
-  const [villageOptions, setVillageOptions] = useState([]);
-  const [selectedVillage, setSelectedVillage] = useState(null);
 
-  // ✅ Fetch address list when modal opens (for dropdown if needed)
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(getCustomerAddressList());
-    }
-  }, [dispatch, isOpen]);
-
-  // ✅ Fetch address data by PINCODE
-  useEffect(() => {
-    const fetchAddressByPincode = async () => {
-      const pin = customerData.customer_address_pincode.trim();
-
-      if (pin.length === 6) {
-        try {
-          const res = await fetch(
-            `https://api.postalpincode.in/pincode/${pin}`
-          );
-          const data = await res.json();
-
-          if (data[0].Status === "Success") {
-            const postOffices = data[0].PostOffice;
-            const options = postOffices.map((p) => ({
-              label: p.Name,
-              value: p.Name,
-              data: p,
-            }));
-            setVillageOptions(options);
-            setSelectedVillage(null);
-
-            // Reset address fields when pincode changes
-            setCustomerData((prev) => ({
-              ...prev,
-              customer_address_city: "",
-              customer_address_district: "",
-              customer_address_state: "",
-              customer_address_block: "",
-              customer_address_description: "",
-            }));
-          } else {
-            toast.error("Invalid Pincode!");
-            setVillageOptions([]);
-          }
-        } catch (error) {
-          toast.error("Failed to fetch address data!");
-        }
-      } else {
-        setVillageOptions([]);
-      }
-    };
-
-    fetchAddressByPincode();
-  }, [customerData.customer_address_pincode]);
-
-  // ✅ Handle village select
-  // ✅ Update description automatically when state/district/block changes
-  useEffect(() => {
-    if (
-      customerData.customer_address_city ||
-      customerData.customer_address_block ||
-      customerData.customer_address_district ||
-      customerData.customer_address_state ||
-      customerData.customer_address_pincode
-    ) {
-      const formattedDescription = `
-      <p><strong>Village:</strong> ${
-        customerData.customer_address_city || ""
-      }</p>
-      <p><strong>Block:</strong> ${
-        customerData.customer_address_block || ""
-      }</p>
-      <p><strong>District:</strong> ${
-        customerData.customer_address_district || ""
-      }</p>
-      <p><strong>State:</strong> ${
-        customerData.customer_address_state || ""
-      }</p>
-      <p><strong>Pincode:</strong> ${
-        customerData.customer_address_pincode || ""
-      }</p>
-    `;
-
-      setCustomerData((prev) => ({
-        ...prev,
-        customer_address_description: formattedDescription,
-      }));
-    }
-  }, [
-    customerData.customer_address_city,
-    customerData.customer_address_block,
-    customerData.customer_address_district,
-    customerData.customer_address_state,
-    customerData.customer_address_pincode,
-  ]);
-
-  const handleVillageSelect = (option) => {
-    if (!option) {
-      setSelectedVillage(null);
-      setCustomerData((prev) => ({
-        ...prev,
-        customer_address_city: "",
-        customer_address_block: "",
-        customer_address_district: "",
-        customer_address_state: "",
-        customer_address_description: "",
-      }));
-      return;
-    }
-
-    const office = option.data;
-    const blockValue =
-      office.Block && office.Block.trim() !== "" ? office.Block : "N/A";
-
-    const formattedDescription = `
-      <p><strong>Village:</strong> ${office.Name}</p>
-      <p><strong>Block:</strong> ${blockValue}</p>
-      <p><strong>District:</strong> ${office.District}</p>
-      <p><strong>State:</strong> ${office.State}</p>
-      <p><strong>Pincode:</strong> ${office.Pincode}</p>
-    `;
-
-    setSelectedVillage(option);
-    setCustomerData((prev) => ({
-      ...prev,
-      customer_address_city: office.Name,
-      customer_address_block: blockValue,
-      customer_address_district: office.District,
-      customer_address_state: office.State,
-      customer_address_pincode: office.Pincode,
-      customer_address_description: formattedDescription,
-    }));
-  };
+  // ✅ Profile image state
+  const [previewProfile, setPreviewProfile] = useState(null);
 
   // ✅ Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCustomerData((prev) => ({ ...prev, [name]: value }));
+    setUserData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  // ✅ Handle profile change
+  const handleProfileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // optional: file type / size validation
+    if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
+      toast.error("Only PNG, JPG, JPEG allowed");
+      return;
+    }
+
+    setUserData((prev) => ({
+      ...prev,
+      user_profile: file,
+    }));
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewProfile(reader.result);
+    };
+    reader.readAsDataURL(file);
   };
 
   // ✅ Validation
   const validateForm = () => {
     const newErrors = {};
-    if (!customerData.customer_name)
-      newErrors.customer_name = "Name is required";
-    else if (!customerData.customer_phone_number)
-      newErrors.customer_phone_number = "Phone Number is required";
-    else if (!customerData.customer_email)
-      newErrors.customer_email = "Email is required";
+
+    if (!userData.user_name) newErrors.user_name = "Name is required";
+    if (!userData.user_email) newErrors.user_email = "Email is required";
+    if (!userData.user_password) newErrors.user_password = "Password is required";
+    if (!userData.user_phone_number)
+      newErrors.user_phone_number = "Phone Number is required";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -197,24 +94,49 @@ const CustomerAdd = ({ isOpen, toggle }) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    dispatch(addCustomer(customerData));
-    toast.success("Customer added successfully!");
+    // 👉 Agar backend ko multipart chahiye to FormData use karo
+    const formData = new FormData();
+    formData.append("user_name", userData.user_name);
+    formData.append("user_type", userData.user_type);
+    formData.append("user_email", userData.user_email);
+    formData.append("user_password", userData.user_password);
+    formData.append("user_phone_number", userData.user_phone_number);
+    formData.append("user_role_id", userData.user_role_id);
+    formData.append("user_address_pincode", userData.user_address_pincode || "");
+    formData.append("user_address_state", userData.user_address_state || "");
+    formData.append("user_address_district", userData.user_address_district || "");
+    formData.append("user_address_block", userData.user_address_block || "");
+    formData.append("user_address_city", userData.user_address_city || "");
+    formData.append(
+      "user_address_description",
+      userData.user_address_description || ""
+    );
+    if (userData.user_profile) {
+      formData.append("user_profile", userData.user_profile);
+    }
+
+    // 🔁 Yaha action ko update karo: addCustomer ki jagah addUser ho sakta hai
+    dispatch(addCustomer(formData));
+    
     toggle();
 
     // Reset form
-    setCustomerData({
-      customer_name: "",
-      customer_phone_number: "",
-      customer_email: "",
-      customer_address_pincode: "",
-      customer_address_city: "",
-      customer_address_block: "",
-      customer_address_district: "",
-      customer_address_state: "",
-      customer_address_description: "",
+    setUserData({
+      user_name: "",
+      user_email: "",
+      user_type: 6,
+      user_password: "",
+      user_phone_number: "",
+      user_role_id: 3,
+      user_address_pincode: "",
+      user_address_state: "",
+      user_address_district: "",
+      user_address_block: "",
+      user_address_city: "",
+      user_address_description: "",
+      user_profile: null,
     });
-    setSelectedVillage(null);
-    setVillageOptions([]);
+    setPreviewProfile(null);
   };
 
   // ✅ Keyboard shortcuts (Alt+S = Save, Alt+Esc = Close)
@@ -259,14 +181,14 @@ const CustomerAdd = ({ isOpen, toggle }) => {
                     </span>
                   </Label>
                   <Input
-                    name="customer_name"
+                    name="user_name"
                     type="text"
-                    placeholder="Enter Customer Name"
-                    value={customerData.customer_name}
+                    placeholder="Enter Name"
+                    value={userData.user_name}
                     onChange={handleInputChange}
                   />
                   <span className="text-danger text-sm">
-                    {errors.customer_name}
+                    {errors.user_name}
                   </span>
                 </Col>
 
@@ -276,32 +198,49 @@ const CustomerAdd = ({ isOpen, toggle }) => {
                     Phone Number <span className="text-danger">*</span>
                   </Label>
                   <Input
-                    name="customer_phone_number"
+                    name="user_phone_number"
                     type="text"
                     placeholder="Enter Phone Number"
-                    value={customerData.customer_phone_number}
+                    value={userData.user_phone_number}
                     maxLength={10}
                     onChange={handleInputChange}
                   />
                   <span className="text-danger text-sm">
-                    {errors.customer_phone_number}
+                    {errors.user_phone_number}
                   </span>
                 </Col>
 
                 {/* Email */}
                 <Col lg={4}>
                   <Label className="form-label fw-bold">
-                    Email <span className="text-danger">*</span>{" "}
+                    Email <span className="text-danger">*</span>
                   </Label>
                   <Input
-                    name="customer_email"
+                    name="user_email"
                     type="email"
                     placeholder="Enter Email Address"
-                    value={customerData.customer_email}
+                    value={userData.user_email}
                     onChange={handleInputChange}
                   />
                   <span className="text-danger text-sm">
-                    {errors.customer_email}
+                    {errors.user_email}
+                  </span>
+                </Col>
+
+                {/* Password */}
+                <Col lg={4}>
+                  <Label className="form-label fw-bold">
+                    Password <span className="text-danger">*</span>
+                  </Label>
+                  <Input
+                    name="user_password"
+                    type="password"
+                    placeholder="Enter Password"
+                    value={userData.user_password}
+                    onChange={handleInputChange}
+                  />
+                  <span className="text-danger text-sm">
+                    {errors.user_password}
                   </span>
                 </Col>
 
@@ -311,26 +250,24 @@ const CustomerAdd = ({ isOpen, toggle }) => {
                     <span>Pincode</span>
                   </Label>
                   <Input
-                    name="customer_address_pincode"
+                    name="user_address_pincode"
                     type="text"
                     placeholder="Enter Pincode"
-                    value={customerData.customer_address_pincode}
+                    value={userData.user_address_pincode}
                     onChange={handleInputChange}
                     maxLength={6}
                   />
                 </Col>
 
-                {/* Village / City */}
-                <Col lg={8}>
-                  <Label className="form-label fw-bold d-flex justify-content-between">
-                    <span>Village / City</span>
-                  </Label>
-                  <Select
-                    options={villageOptions}
-                    value={selectedVillage}
-                    onChange={handleVillageSelect}
-                    placeholder="Select Village / City"
-                    isClearable
+                {/* City */}
+                <Col lg={4}>
+                  <Label className="form-label fw-bold">City</Label>
+                  <Input
+                    name="user_address_city"
+                    type="text"
+                    placeholder="Enter City"
+                    value={userData.user_address_city}
+                    onChange={handleInputChange}
                   />
                 </Col>
 
@@ -338,19 +275,22 @@ const CustomerAdd = ({ isOpen, toggle }) => {
                 <Col lg={4}>
                   <Label className="form-label fw-bold">State</Label>
                   <Input
-                    name="customer_address_state"
+                    name="user_address_state"
                     type="text"
-                    value={customerData.customer_address_state}
+                    placeholder="Enter State"
+                    value={userData.user_address_state}
                     onChange={handleInputChange}
                   />
                 </Col>
+
                 {/* District */}
                 <Col lg={4}>
                   <Label className="form-label fw-bold">District</Label>
                   <Input
-                    name="customer_address_district"
+                    name="user_address_district"
                     type="text"
-                    value={customerData.customer_address_district}
+                    placeholder="Enter District"
+                    value={userData.user_address_district}
                     onChange={handleInputChange}
                   />
                 </Col>
@@ -359,27 +299,78 @@ const CustomerAdd = ({ isOpen, toggle }) => {
                 <Col lg={4}>
                   <Label className="form-label fw-bold">Block</Label>
                   <Input
-                    name="customer_address_block"
+                    name="user_address_block"
                     type="text"
-                    value={customerData.customer_address_block}
+                    placeholder="Enter Block"
+                    value={userData.user_address_block}
                     onChange={handleInputChange}
                   />
                 </Col>
 
+                {/* Profile Photo */}
+                <Col lg={6} className="mt-3">
+                  <h5 className="fs-15 mb-1">Profile Photo</h5>
+                  <div className="text-center">
+                    <div className="position-relative d-inline-block">
+                      <div className="position-absolute top-100 start-100 translate-middle">
+                        <label
+                          htmlFor="technicianProfile"
+                          className="mb-0"
+                          title="Select Image"
+                        >
+                          <div className="avatar-xs">
+                            <div className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
+                              <i
+                                className="ri-image-fill"
+                                style={{
+                                  color: "#009CA4",
+                                  fontSize: "20px",
+                                }}
+                              ></i>
+                            </div>
+                          </div>
+                        </label>
+                        <input
+                          className="form-control d-none"
+                          id="technicianProfile"
+                          type="file"
+                          accept="image/png, image/jpeg, image/jpg"
+                          onChange={handleProfileChange}
+                        />
+                      </div>
+                      <div className="avatar-lg">
+                        <div className="avatar-title bg-light rounded">
+                          {previewProfile ? (
+                            <img
+                              src={previewProfile}
+                              alt="Profile Preview"
+                              height={"100px"}
+                              width={"100px"}
+                              className="rounded"
+                            />
+                          ) : (
+                            ""
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Col>
+
                 {/* Description */}
-                <Col lg={12}>
+                <Col lg={12} className="mt-3">
                   <Label className="form-label fw-bold">
                     Address Description
                   </Label>
                   <div className="border rounded-3 p-2">
                     <CKEditor
                       editor={ClassicEditor}
-                      data={customerData.customer_address_description}
+                      data={userData.user_address_description}
                       onChange={(event, editor) => {
                         const data = editor.getData();
-                        setCustomerData((prev) => ({
+                        setUserData((prev) => ({
                           ...prev,
-                          customer_address_description: data,
+                          user_address_description: data,
                         }));
                       }}
                     />

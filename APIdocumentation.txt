@@ -5,3 +5,4 @@
 | 👷‍♂️ **User**        |               `3` | Regular employee — limited access to assigned modules or tasks.           |
 | 🧠 **Tech**           |               `4` | Technical team member — handles support, maintenance, or repairs.         |
 | 🚚 **Delivery Boy**   |               `5` | Responsible for pickup and delivery tasks.                                |
+| 🚚 ** Customer **   |               `6` | Customer.                                |

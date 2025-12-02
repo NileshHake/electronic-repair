@@ -313,7 +313,7 @@ const authProtectedRoutes = [
   { path: "/service-type-list", component: <ServiceTypeList /> },
   { path: "/storage-location-list", component: <StorageLocationList /> },
   { path: "/device-color-list", component: <DeviceColorList /> },
-  { path: "/repair/overview/:repair_id", component: <OverView /> },
+  { path: "/repair/overview/:repair_id", component: <OverView /> }, 
   {
     path: "/hardware-configuration-list",
     component: <HardwareConfigurationList />,

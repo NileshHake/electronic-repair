@@ -29,6 +29,7 @@ const Navdata = () => {
   const [isDashboardCustomer, setIsDashboardCustomer] = useState(false);
   const [isRepairingCustomer, setIsRepairingCustomer] = useState(false);
   const [isCustomerSales, setIsCustomerSales] = useState(false);
+  const [isQuotationBilling, setIsQuotationBilling] = useState(false);
 
   const [isLanding, setIsLanding] = useState(false);
 
@@ -66,6 +67,9 @@ const Navdata = () => {
 
     if (iscurrentState !== "CustomerSales") {
       setIsCustomerSales(false);
+    }
+    if (iscurrentState !== "QuotationBilling") {
+      setIsQuotationBilling(false);
     }
     if (iscurrentState !== "Products") {
       setIsProducts(false);
@@ -183,7 +187,7 @@ const Navdata = () => {
       id: "REPAIRINGCUSTOMER",
       label: "Repairing  ",
       icon: "mdi mdi-tools",        // change icon if you want
-      link: "/#",
+      link: "/repairing-list",
       stateVariables: isRepairingCustomer,
       click: function (e) {
         e.preventDefault();
@@ -234,6 +238,21 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
+
+    {
+      id: "QUOTATION_BILLING",
+      label: "Quotation & Billing",
+      icon: "mdi mdi-file-document-edit",
+      link: "/quotation-billing",
+      stateVariables: isQuotationBilling,
+      click: function (e) {
+        e.preventDefault();
+        setIsQuotationBilling(!isQuotationBilling);
+        setIscurrentState("QuotationBilling");
+        updateIconSidebar(e);
+      },
+    },
+
     {
       id: "PRODUCT",
       label: "Products",

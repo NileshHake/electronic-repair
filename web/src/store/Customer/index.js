@@ -124,10 +124,10 @@ export default CustomerReducer;
 const api = new APIClient();
 
 const getCustomerApi = () => api.get("/customer/list");
-const getSingleCustomerApi = (id) => api.get(`/customer/single/${id}`);
-const addCustomerApi = (formData) => api.create(`/customer/store`, formData);
-const updateCustomerApi = (data) => api.put(`/customer/update`, data);
-const deleteCustomerApi = (id) => api.delete(`/customer/delete/${id}`);
+const getSingleCustomerApi = (id) => api.get(`/user/single/${id}`);
+const addCustomerApi = (formData) => api.create(`/user/store`, formData);
+const updateCustomerApi = (data) => api.put(`/user/update`, data);
+const deleteCustomerApi = (id) => api.delete(`/user/delete/${id}`);
 
 // ================== SAGAS ==================
 function* getCustomerListSaga() {

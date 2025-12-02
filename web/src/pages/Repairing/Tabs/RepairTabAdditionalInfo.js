@@ -2,6 +2,7 @@ import React from "react";
 import { Row, Col, Label, Input } from "reactstrap";
 import Select from "react-select";
 import Flatpickr from "react-flatpickr";
+import AuthUser from "../../../helpers/AuthType/AuthUser";
 
 const RepairTabAdditionalInfo = ({
   formData,
@@ -14,6 +15,7 @@ const RepairTabAdditionalInfo = ({
   deliveryOptions,
   formatDateTime,
 }) => {
+  const { user } = AuthUser()
   return (
     <Row>
       {/* Priority */}
@@ -39,7 +41,7 @@ const RepairTabAdditionalInfo = ({
       </Col>
 
       {/* Technician */}
-      <Col md={4}>
+      {user.user_type != 6 && <Col md={4}>
         <Label>Technician</Label>
         <Select
           value={technicianOptions.find(
@@ -56,20 +58,21 @@ const RepairTabAdditionalInfo = ({
             {errorMessage.repair_assigned_technician_to}
           </span>
         )}
-      </Col>
-      <Col md={4} className=" ">
-        <Label> Estimated Cost</Label>
-        <Input
-          value={formData.repair_estimated_cost}
-          onChange={(e) =>
-            handleInputChange("repair_estimated_cost", e.target.value)
-          }
-          className="form-control"
-          placeholder="Enter Serial / IMEI Number"
-        />
-      </Col>
+      </Col>}
+      {user.user_type != 6 &&
+        <Col md={4} className=" ">
+          <Label> Estimated Cost</Label>
+          <Input
+            value={formData.repair_estimated_cost}
+            onChange={(e) =>
+              handleInputChange("repair_estimated_cost", e.target.value)
+            }
+            className="form-control"
+            placeholder="Enter Serial / IMEI Number"
+          />
+        </Col>}
       {/* Workflow */}
-      <Col md={4}>
+      <Col md={4} className={user?.user_type == 6 ? "" : "mt-3"}>
         <Label>Work Flow</Label>
         <Select
           value={workflowOption.find(
@@ -82,7 +85,7 @@ const RepairTabAdditionalInfo = ({
       </Col>
 
       {/* Work Stage */}
-      <Col md={4} className="mt-3">
+      <Col md={4} className={user?.user_type == 6 ? "" : "mt-3"}>
         <Label>Work Stage</Label>
         <Select
           value={workfloStagewOption.find(
@@ -97,19 +100,20 @@ const RepairTabAdditionalInfo = ({
       </Col>
 
       {/* Delivery / Pickup Boy */}
-      <Col md={4} className="mt-3">
-        <Label>Delivery / PickUp Boy</Label>
-        <Select
-          value={deliveryOptions.find(
-            (opt) => opt.value === formData.repair_delivery_and_pickup_to
-          )}
-          onChange={(opt) =>
-            handleInputChange("repair_delivery_and_pickup_to", opt.value)
-          }
-          options={deliveryOptions}
-          placeholder="Select Delivery/Pickup Boy"
-        />
-      </Col>
+      {user.user_type != 6 &&
+        <Col md={4} className="mt-3">
+          <Label>Delivery / PickUp Boy</Label>
+          <Select
+            value={deliveryOptions.find(
+              (opt) => opt.value === formData.repair_delivery_and_pickup_to
+            )}
+            onChange={(opt) =>
+              handleInputChange("repair_delivery_and_pickup_to", opt.value)
+            }
+            options={deliveryOptions}
+            placeholder="Select Delivery/Pickup Boy"
+          />
+        </Col>}
 
       {/* Expected Delivery Date */}
       <Col md={4} className="mt-3">

@@ -140,6 +140,13 @@ app.use("/api", StageRemark);
 const OPTRoute = require("./src/OTP/otp_route");
 app.use("/api", OPTRoute);
 
+const QuotationAndBilling = require("./src/Repair/QuotationAndBilling/quotation_and_billing_route");
+app.use("/api", QuotationAndBilling);
+
+const inventory = require("./src/inventory/inventory_route");
+app.use("/api", inventory);
+
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

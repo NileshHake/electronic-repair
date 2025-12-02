@@ -11,177 +11,96 @@ import {
   Col,
   Input,
 } from "reactstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
-import Select from "react-select";
-import { updateCustomer } from "../../store/Customer";
-import { getCustomerAddressList } from "../../store/CustomerAddress";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
+import { updateCustomer } from "../../store/Customer";
+import { api } from "../../config";
+
 const CustomerUpdate = ({ isOpen, toggle, customerDataToEdit }) => {
   const dispatch = useDispatch();
-  const submitButtonRef = useRef();
+  const submitButtonRef = useRef(); 
 
-  // ✅ Local state
-  const [customerData, setCustomerData] = useState({
-    customer_name: "",
-    customer_phone_number: "",
-    customer_email: "",
-    customer_address_pincode: "",
-    customer_address_city: "",
-    customer_address_block: "",
-    customer_address_district: "",
-    customer_address_state: "",
-    customer_address_description: "",
+  // ✅ Local state (safe defaults)
+  const [userData, setUserData] = useState({
+    user_name: "",
+    user_email: "",
+    user_password: "",
+    user_phone_number: "",
+    user_role_id: 3,
+    user_address_pincode: "",
+    user_address_city: "",
+    user_address_block: "",
+    user_address_district: "",
+    user_address_state: "",
+    user_address_description: "",
+    user_profile: null,
   });
 
   const [errors, setErrors] = useState({});
-  const [villageOptions, setVillageOptions] = useState([]);
-  const [selectedVillage, setSelectedVillage] = useState(null);
+  const [profilePreview, setProfilePreview] = useState(null);
 
   // ✅ Pre-fill when modal opens
   useEffect(() => {
     if (isOpen && customerDataToEdit) {
-      setCustomerData({
-        customer_name: customerDataToEdit.customer_name || "",
-        customer_phone_number: customerDataToEdit.customer_phone_number || "",
-        customer_email: customerDataToEdit.customer_email || "",
-        customer_address_pincode:
-          customerDataToEdit.customer_address_pincode || "",
-        customer_address_city: customerDataToEdit.customer_address_city || "",
-        customer_address_block: customerDataToEdit.customer_address_block || "",
-        customer_address_district:
-          customerDataToEdit.customer_address_district || "",
-        customer_address_state: customerDataToEdit.customer_address_state || "",
-        customer_address_description:
-          customerDataToEdit.customer_address_description || "",
-      });
-      setSelectedVillage(
-        customerDataToEdit.customer_address_city
-          ? {
-              label: customerDataToEdit.customer_address_city,
-              value: customerDataToEdit.customer_address_city,
-            }
-          : null
-      );
+      setUserData((prev) => ({
+        ...prev,
+        user_name: customerDataToEdit?.user_name || "",
+        user_email: customerDataToEdit?.user_email || "",
+        user_password: customerDataToEdit?.user_password || "", // blank on edit
+        user_phone_number: customerDataToEdit?.user_phone_number || "",
+        user_role_id: customerDataToEdit?.user_role_id || 3,
+        user_address_pincode: customerDataToEdit?.user_address_pincode || "",
+        user_address_city: customerDataToEdit?.user_address_city || "",
+        user_address_block: customerDataToEdit?.user_address_block || "",
+        user_address_district: customerDataToEdit?.user_address_district || "",
+        user_address_state: customerDataToEdit?.user_address_state || "",
+        user_address_description:
+          customerDataToEdit?.user_address_description || "",
+        user_profile: null, // file nahi bhej rahe initial me
+      }));
+
+      // ✅ Existing profile image path set
+      if (customerDataToEdit?.user_profile) {
+        const imageUrl = customerDataToEdit?.user_profile.startsWith("http")
+          ? customerDataToEdit?.user_profile
+          : `${api.IMG_URL}user_profile/${customerDataToEdit?.user_profile}`;
+        setProfilePreview(imageUrl);
+      } else {
+        setProfilePreview(null);
+      }
     }
+
+    // ✅ har baar open pe error reset
+    setErrors({});
   }, [isOpen, customerDataToEdit]);
 
-  // ✅ Fetch address list when modal opens (optional)
-  useEffect(() => {
-    if (isOpen) dispatch(getCustomerAddressList());
-  }, [dispatch, isOpen]);
-
-  // ✅ Fetch address data by PINCODE
-  useEffect(() => {
-    const fetchAddressByPincode = async () => {
-      const pin = customerData.customer_address_pincode || "";
-      if (pin.length === 6) {
-        try {
-          const res = await fetch(
-            `https://api.postalpincode.in/pincode/${pin}`
-          );
-          const data = await res.json();
-          if (data[0].Status === "Success") {
-            const postOffices = data[0].PostOffice;
-            const options = postOffices.map((p) => ({
-              label: p.Name,
-              value: p.Name,
-              data: p,
-            }));
-            setVillageOptions(options);
-          } else {
-            setVillageOptions([]);
-            toast.error("Invalid Pincode!");
-          }
-        } catch (error) {
-          toast.error("Failed to fetch address data!");
-        }
-      } else {
-        setVillageOptions([]);
-      }
-    };
-    fetchAddressByPincode();
-  }, [customerData.customer_address_pincode]);
-
-  // ✅ Handle village select
-  const handleVillageSelect = (option) => {
-    if (!option) {
-      setSelectedVillage(null);
-      setCustomerData((prev) => ({
-        ...prev,
-        customer_address_city: "",
-        customer_address_block: "",
-        customer_address_district: "",
-        customer_address_state: "",
-        customer_address_description: "",
-      }));
-      return;
-    }
-
-    const office = option.data;
-    const blockValue =
-      office.Block && office.Block.trim() !== "" ? office.Block : "N/A";
-    const formattedDescription = `
-      <p><strong>Village:</strong> ${office.Name}</p>
-      <p><strong>Block:</strong> ${blockValue}</p>
-      <p><strong>District:</strong> ${office.District}</p>
-      <p><strong>State:</strong> ${office.State}</p>
-      <p><strong>Pincode:</strong> ${office.Pincode}</p>
-    `;
-
-    setSelectedVillage(option);
-    setCustomerData((prev) => ({
-      ...prev,
-      customer_address_city: office.Name,
-      customer_address_block: blockValue,
-      customer_address_district: office.District,
-      customer_address_state: office.State,
-      customer_address_pincode: office.Pincode,
-      customer_address_description: formattedDescription,
-    }));
-  };
-
-  // ✅ Handle input changes and update description dynamically
+  // ✅ Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCustomerData((prev) => {
-      const updated = { ...prev, [name]: value };
+    setUserData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
 
-      // Only update description dynamically if manual edits occur
-      if (
-        [
-          "customer_address_state",
-          "customer_address_district",
-          "customer_address_block",
-          "customer_address_city",
-          "customer_address_pincode",
-        ].includes(name)
-      ) {
-        updated.customer_address_description = `
-          <p><strong>Village:</strong> ${updated.customer_address_city}</p>
-          <p><strong>Block:</strong> ${updated.customer_address_block}</p>
-          <p><strong>District:</strong> ${updated.customer_address_district}</p>
-          <p><strong>State:</strong> ${updated.customer_address_state}</p>
-          <p><strong>Pincode:</strong> ${updated.customer_address_pincode}</p>
-        `;
-      }
-
-      return updated;
-    });
- 
+  // ✅ Handle profile change
+  const handleProfileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setUserData((prev) => ({ ...prev, user_profile: file }));
+      setProfilePreview(URL.createObjectURL(file));
+    }
   };
 
   // ✅ Validation
   const validateForm = () => {
     const newErrors = {};
-    if (!customerData.customer_name)
-      newErrors.customer_name = "Name is required";
-    else if (!customerData.customer_phone_number)
-      newErrors.customer_phone_number = "Phone Number is required";
-    else if (!customerData.customer_email)
-      newErrors.customer_email = "Email is required";
+    if (!userData.user_name) newErrors.user_name = "Name is required";
+    if (!userData.user_phone_number)
+      newErrors.user_phone_number = "Phone Number is required";
+    if (!userData.user_email) newErrors.user_email = "Email is required";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -190,12 +109,40 @@ const CustomerUpdate = ({ isOpen, toggle, customerDataToEdit }) => {
   const handleSubmit = () => {
     if (!validateForm()) return;
 
-    const finalData = {
-      ...customerData,
-      customer_id: customerDataToEdit.customer_id,
-    };
+    const formData = new FormData();
+    formData.append("user_id", customerDataToEdit.user_id); // important: id bhejna
+    formData.append("user_name", userData.user_name);
+    formData.append("user_email", userData.user_email);
+    formData.append("user_phone_number", userData.user_phone_number);
+    formData.append("user_role_id", userData.user_role_id || 3);
+    formData.append(
+      "user_address_pincode",
+      userData.user_address_pincode || ""
+    );
+    formData.append("user_address_city", userData.user_address_city || "");
+    formData.append("user_address_block", userData.user_address_block || "");
+    formData.append(
+      "user_address_district",
+      userData.user_address_district || ""
+    );
+    formData.append("user_address_state", userData.user_address_state || "");
+    formData.append(
+      "user_address_description",
+      userData.user_address_description || ""
+    );
 
-    dispatch(updateCustomer(finalData));
+    // Password only if user entered something
+    if (userData.user_password && userData.user_password.trim() !== "") {
+      formData.append("user_password", userData.user_password);
+    }
+
+    // New file only if selected
+    if (userData.user_profile) {
+      formData.append("user_profile", userData.user_profile);
+    }
+
+    dispatch(updateCustomer(formData));
+    toast.success("User updated successfully!");
     toggle();
   };
 
@@ -225,6 +172,7 @@ const CustomerUpdate = ({ isOpen, toggle, customerDataToEdit }) => {
         <ModalBody>
           <Card className="border card-border-success p-3 shadow-lg">
             <Row className="gy-3">
+              {/* Name */}
               <Col lg={4}>
                 <Label className="form-label fw-bold d-flex justify-content-between">
                   <span>
@@ -232,109 +180,186 @@ const CustomerUpdate = ({ isOpen, toggle, customerDataToEdit }) => {
                   </span>
                 </Label>
                 <Input
-                  name="customer_name"
+                  name="user_name"
                   type="text"
-                  value={customerData.customer_name}
+                  value={userData.user_name}
                   onChange={handleInputChange}
-                  placeholder="Enter Customer Name"
+                  placeholder="Enter Name"
                 />
-                <span className="text-danger">{errors.customer_name}</span>
+                <span className="text-danger">{errors.user_name}</span>
               </Col>
 
+              {/* Phone */}
               <Col lg={4}>
                 <Label className="form-label fw-bold">
                   Phone Number<span className="text-danger"> *</span>
                 </Label>
                 <Input
-                  name="customer_phone_number"
+                  name="user_phone_number"
                   type="text"
-                  value={customerData.customer_phone_number}
+                  value={userData.user_phone_number}
                   onChange={handleInputChange}
                   maxLength={10}
                   placeholder="Enter Phone Number"
                 />
                 <span className="text-danger">
-                  {errors.customer_phone_number}
+                  {errors.user_phone_number}
                 </span>
               </Col>
 
               {/* Email */}
               <Col lg={4}>
-                <Label className="form-label fw-bold">Email<span className="text-danger"> *</span></Label>
+                <Label className="form-label fw-bold">
+                  Email<span className="text-danger"> *</span>
+                </Label>
                 <Input
-                  name="customer_email"
+                  name="user_email"
                   type="email"
                   placeholder="Enter Email Address"
-                  value={customerData.customer_email}
+                  value={userData.user_email}
                   onChange={handleInputChange}
                 />
-                <span className="text-danger">{errors.customer_email}</span>
+                <span className="text-danger">{errors.user_email}</span>
               </Col>
+
+              {/* Password (optional) */}
+              <Col lg={4}>
+                <Label className="form-label fw-bold">Password</Label>
+                <Input
+                  name="user_password"
+                  type="password"
+                  placeholder="Enter new password (optional)"
+                  value={userData.user_password}
+                  onChange={handleInputChange}
+                />
+                <span className="text-danger">{errors.user_password}</span>
+              </Col>
+
+              {/* Pincode */}
               <Col lg={4}>
                 <Label className="form-label fw-bold">Pincode</Label>
                 <Input
-                  name="customer_address_pincode"
+                  name="user_address_pincode"
                   type="text"
-                  value={customerData.customer_address_pincode}
+                  value={userData.user_address_pincode}
                   onChange={handleInputChange}
                   maxLength={6}
                   placeholder="Enter Pincode"
                 />
               </Col>
-              <Col lg={8}>
-                <Label className="form-label fw-bold">Village / City</Label>
-                <Select
-                  options={villageOptions}
-                  value={selectedVillage}
-                  onChange={handleVillageSelect}
-                  placeholder="Select Village / City"
-                  isClearable
+
+              {/* City */}
+              <Col lg={4}>
+                <Label className="form-label fw-bold">City</Label>
+                <Input
+                  name="user_address_city"
+                  type="text"
+                  value={userData.user_address_city}
+                  onChange={handleInputChange}
+                  placeholder="Enter City"
                 />
               </Col>
 
+              {/* State */}
               <Col lg={4}>
                 <Label className="form-label fw-bold">State</Label>
                 <Input
-                  name="customer_address_state"
+                  name="user_address_state"
                   type="text"
-                  value={customerData.customer_address_state}
+                  value={userData.user_address_state}
                   onChange={handleInputChange}
+                  placeholder="Enter State"
                 />
               </Col>
 
+              {/* District */}
               <Col lg={4}>
                 <Label className="form-label fw-bold">District</Label>
                 <Input
-                  name="customer_address_district"
+                  name="user_address_district"
                   type="text"
-                  value={customerData.customer_address_district}
+                  value={userData.user_address_district}
                   onChange={handleInputChange}
+                  placeholder="Enter District"
                 />
               </Col>
 
+              {/* Block */}
               <Col lg={4}>
                 <Label className="form-label fw-bold">Block</Label>
                 <Input
-                  name="customer_address_block"
+                  name="user_address_block"
                   type="text"
-                  value={customerData.customer_address_block}
+                  value={userData.user_address_block}
                   onChange={handleInputChange}
+                  placeholder="Enter Block"
                 />
               </Col>
 
-              <Col lg={12}>
+              {/* Profile Photo */}
+              <Col lg={6} className="mt-3">
+                <h5 className="fs-15 mb-1">Profile Photo</h5>
+                <div className="text-center">
+                  <div className="position-relative d-inline-block">
+                    <div className="position-absolute top-100 start-100 translate-middle">
+                      <label
+                        htmlFor="userProfile"
+                        className="mb-0"
+                        title="Select Image"
+                      >
+                        <div className="avatar-xs">
+                          <div className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
+                            <i
+                              className="ri-image-fill"
+                              style={{
+                                color: "#009CA4",
+                                fontSize: "20px",
+                              }}
+                            ></i>
+                          </div>
+                        </div>
+                      </label>
+                      <input
+                        className="form-control d-none"
+                        id="userProfile"
+                        type="file"
+                        accept="image/png, image/jpeg, image/jpg"
+                        onChange={handleProfileChange}
+                      />
+                    </div>
+                    <div className="avatar-lg">
+                      <div className="avatar-title bg-light rounded">
+                        {profilePreview ? (
+                          <img
+                            src={profilePreview}
+                            alt="Profile Preview"
+                            height={"100px"}
+                            width={"100px"}
+                            className="rounded"
+                          />
+                        ) : (
+                          ""
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Col>
+
+              {/* Address Description */}
+              <Col lg={12} className="mt-3">
                 <Label className="form-label fw-bold">
                   Address Description
                 </Label>
                 <div className="border rounded-3 p-2">
                   <CKEditor
                     editor={ClassicEditor}
-                    data={customerData.customer_address_description}
+                    data={userData.user_address_description}
                     onChange={(event, editor) => {
                       const data = editor.getData();
-                      setCustomerData((prev) => ({
+                      setUserData((prev) => ({
                         ...prev,
-                        customer_address_description: data,
+                        user_address_description: data,
                       }));
                     }}
                   />

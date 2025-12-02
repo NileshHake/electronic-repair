@@ -221,6 +221,21 @@ const Businessindex = async (req, res) => {
       .json({ message: "Error fetching users", error: error.message });
   }
 };
+const Customerindex = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      where: {
+        user_type: 6,
+        user_created_by: getCreatedBy(req.currentUser),
+      },
+    });
+    res.status(200).json(users);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching users", error: error.message });
+  }
+};
 const Userindex = async (req, res) => {
   try {
     const users = await User.findAll({
@@ -267,30 +282,37 @@ const update = async (req, res) => {
   try {
     const { user_id } = req.body;
 
-
     const user = await User.findByPk(user_id);
     if (!user) {
       return res.status(404).json({ message: "❌ User not found" });
     }
 
+    // ---------- PROFILE IMAGE ----------
     let user_profile = user.user_profile;
 
     const file = req.files?.user_profile;
     if (file) {
+      // Purani image delete karo (agar hai to)
       if (user.user_profile) {
         deleteImage("user_profile", user.user_profile);
       }
 
+      // New image save
       user_profile = await saveImage(file, "user_profile");
     }
 
-    let user_password = user.user_password;
+    // ---------- PASSWORD HANDLE ----------
+    let user_password = user.user_password; // default: old password
 
-    if (req.body.user_password === user.user_password) {
-      user_password = user.user_password;
-    } else {
+    // Agar frontend se user_password aaya hai aur empty nahi hai
+    if (
+      typeof req.body.user_password === "string" &&
+      req.body.user_password.trim() !== ""
+    ) {
       user_password = await bcrypt.hash(req.body.user_password, 10);
     }
+
+    // ---------- UPDATE FIELDS ----------
     await user.update({
       ...req.body,
       user_password,
@@ -298,7 +320,7 @@ const update = async (req, res) => {
     });
 
     return res.status(200).json({
-      message: "User updated successfully",
+      message: "User updated successfully ✅",
       data: user,
     });
   } catch (error) {
@@ -309,6 +331,7 @@ const update = async (req, res) => {
     });
   }
 };
+
 
 const deleted = async (req, res) => {
   try {
@@ -381,6 +404,7 @@ module.exports = {
   googleLoginOrSignup,
   Userindex,
   Deliveryindex,
+  Customerindex,
   Businessindex,
   login,
   Get,

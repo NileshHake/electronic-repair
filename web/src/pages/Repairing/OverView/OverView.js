@@ -104,6 +104,16 @@ const OverView = () => {
       setSelectedFiles(existingPreviews);
     }
   }, [singleRepair]);
+  const getProfileImage = (user) => {
+    if (!user || !user.customer_profile) return null;
+
+    if (user.customer_profile.startsWith("http")) {
+      return user.customer_profile;
+    }
+
+    return `${api.IMG_URL}/user_profile/${user.customer_profile}`;
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -112,16 +122,66 @@ const OverView = () => {
             <div className="profile-wid-bg">
               <img src={profileBg} alt="" className="profile-wid-img" />
             </div>
+
+            <div className="position-absolute top-0 end-0 m-3 d-flex gap-2">
+
+              {/* Quotation Button */}
+              {/* Quotation Button (FULL RED) */}
+              <button
+                className="btn btn-sm text-white fw-bold d-flex align-items-center gap-1"
+                style={{ backgroundColor: "#D92D20" }}  // full rich red
+              >
+                <i className="bi bi-receipt-cutoff"></i>
+                Quotation
+              </button>
+
+              {/* Billing Button (FULL GREEN / SUCCESS) */}
+              <button
+                className="btn btn-sm text-white fw-bold d-flex align-items-center gap-1"
+                style={{ backgroundColor: "#0FA958" }}  // full success green
+              >
+                <i className="bi bi-receipt"></i>
+                Billing
+              </button>
+
+
+            </div>
           </div>
+
           <div className="pt-4 mb-4 mb-lg-3 pb-lg-4 profile-wrapper">
             <Row className="g-4">
               <div className="col-auto">
                 <div className="avatar-lg">
-                  <img
-                    src={avatar1}
-                    alt="user-img"
-                    className="img-thumbnail rounded-circle"
-                  />
+
+                  {getProfileImage(singleRepair) ? (
+                    <img
+                      src={getProfileImage(singleRepair)}
+                      alt="profile"
+                      className="img-thumbnail rounded-circle"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",   // keeps perfect circle crop
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="img-thumbnail rounded-circle bg-primary text-white"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: "600",
+                        fontSize: "38px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {singleRepair?.customer_name?.charAt(0)}
+                    </div>
+                  )}
+
                 </div>
               </div>
 

@@ -193,7 +193,7 @@ function* addProductSaga({ payload }) {
 
     yield put(productApiResponseSuccess(ADD_PRODUCT, response));
     yield call(getProductListSaga);
-    toast.success("✅ Product added successfully!");
+    toast.success("  Product added successfully!");
   } catch (error) {
     console.error("❌ Error in addProductSaga:", error);
     yield put(productApiResponseError(ADD_PRODUCT, error));
@@ -208,7 +208,7 @@ function* updateProductSaga({ payload }) {
 
     yield put(productApiResponseSuccess(UPDATE_PRODUCT, response));
     yield call(getProductListSaga);
-    toast.success("✅ Product updated successfully!");
+    toast.success("  Product updated successfully!");
   } catch (error) {
     console.error("❌ Error in updateProductSaga:", error);
     yield put(productApiResponseError(UPDATE_PRODUCT, error));
@@ -222,7 +222,7 @@ function* deleteProductSaga({ payload }) {
     yield call(deleteProductApi, payload);
     yield put(productApiResponseSuccess(DELETE_PRODUCT, { data: payload }));
     yield call(getProductListSaga);
-    toast.success("🗑️ Product deleted successfully!");
+    toast.success("  Product deleted successfully!");
   } catch (error) {
     yield put(productApiResponseError(DELETE_PRODUCT, error));
     toast.error("Failed to delete product!");

@@ -31,7 +31,7 @@ const RepairCard = ({
                 className="mb-1"
                 style={{ fontSize: "1rem", fontWeight: "500" }}
               >
-                {item.product_name || "Unnamed Product"}
+                {item.device_type_name || "Unnamed Product"}
               </h6>
             </div>
 

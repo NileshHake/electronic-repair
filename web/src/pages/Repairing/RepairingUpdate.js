@@ -175,8 +175,8 @@ const RepairingUpdate = ({ isOpen, toggle, isRepairData }) => {
 
   const customerOptions = mapOptions(
     customerList,
-    "customer_id",
-    "customer_name"
+    "user_id",
+    "user_name"
   );
   const technicianOptions = mapOptions(technicianList, "user_id", "user_name");
   const deliveryOptions = mapOptions(deliveryBoyList, "user_id", "user_name");
@@ -334,13 +334,13 @@ const RepairingUpdate = ({ isOpen, toggle, isRepairData }) => {
     return Object.keys(errors).length === 0;
   };
 
-const UpdateHandler = (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
+  const UpdateHandler = (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  const servicesArray = Array.isArray(formData.repair_device_services_id)
-    ? formData.repair_device_services_id
-    : (() => {
+    const servicesArray = Array.isArray(formData.repair_device_services_id)
+      ? formData.repair_device_services_id
+      : (() => {
         try {
           const parsed = JSON.parse(formData.repair_device_services_id);
           return Array.isArray(parsed) ? parsed : [];
@@ -349,33 +349,33 @@ const UpdateHandler = (e) => {
         }
       })();
 
-  const formDataToSend = new FormData();
+    const formDataToSend = new FormData();
 
-  for (const key in formData) {
-    if (key === "repair_images" && Array.isArray(formData.repair_images)) {
-      formData.repair_images.forEach((img) => {
-        if (img.type === "existing" && img.name) {
-          formDataToSend.append("old_images[]", img.name);
-        } else if (img.type === "new" && img.file instanceof File) {
-          formDataToSend.append("repair_images[]", img.file);
-        }
-      });
-    } else if (key === "repair_device_services_id") {
-      servicesArray.forEach((service) => {
-        // append each service object as JSON string
-        formDataToSend.append(
-          "repair_device_services_id",
-          JSON.stringify(service)
-        );
-      });
-    } else {
-      formDataToSend.append(key, formData[key]);
+    for (const key in formData) {
+      if (key === "repair_images" && Array.isArray(formData.repair_images)) {
+        formData.repair_images.forEach((img) => {
+          if (img.type === "existing" && img.name) {
+            formDataToSend.append("old_images[]", img.name);
+          } else if (img.type === "new" && img.file instanceof File) {
+            formDataToSend.append("repair_images[]", img.file);
+          }
+        });
+      } else if (key === "repair_device_services_id") {
+        servicesArray.forEach((service) => {
+          // append each service object as JSON string
+          formDataToSend.append(
+            "repair_device_services_id",
+            JSON.stringify(service)
+          );
+        });
+      } else {
+        formDataToSend.append(key, formData[key]);
+      }
     }
-  }
 
-  console.log("FormData ready to send:", formDataToSend);
-  dispatch(updateRepair(formDataToSend));
-};
+    console.log("FormData ready to send:", formDataToSend);
+    dispatch(updateRepair(formDataToSend));
+  };
 
   useEffect(() => {
     if (workflows.length > 0 && !formData.repair_workflow_id) {

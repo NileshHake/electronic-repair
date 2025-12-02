@@ -13,7 +13,7 @@ const RepairBoard = ({
   onClickDelete,
 }) => {
   const hasRepairPermission = permissions.some(
-    (p) => p.permission_category === "REPAIRING" && p.permission_path === "1"
+    (p) => p.permission_category === "REPAIRING"|| p.permission_category === "REPAIRINGCUSTOMER" && p.permission_path === "1"
   );
 
   return (

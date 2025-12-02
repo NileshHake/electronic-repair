@@ -82,19 +82,19 @@ const ProductList = () => {
                   <h4 className="mb-0">Product List</h4>
                 </div>
                 <div className="col-sm-auto">
-               
+
                   {permissions.find(
                     (permission) =>
                       permission.permission_category == "PRODUCT" &&
                       permission.permission_path == "2"
                   ) && (
-                    <Button
-                      color="success"
-                      onClick={() => setIsModalOpen(true)}
-                    >
-                      + Add Product
-                    </Button>
-                  )}
+                      <Button
+                        color="success"
+                        onClick={() => setIsModalOpen(true)}
+                      >
+                        + Add Product
+                      </Button>
+                    )}
                 </div>
               </CardHeader>
               <CardBody className="pt-0">
@@ -106,12 +106,13 @@ const ProductList = () => {
                           role="table"
                           className="align-middle table-nowrap table table-hover"
                         >
-                          <thead className="table-light text-muted text-uppercase">
+                          <thead className="table-light text-muted text-uppercase text-center">
                             <tr>
                               <th>Sr No</th>
                               <th>Product Name</th>
                               <th>Category</th>
                               <th>Brand</th>
+                              <th>Tax Name</th>
                               <th>Tax (%)</th>
                               <th>Purchase Price</th>
                               <th>Sale Price</th>
@@ -124,12 +125,12 @@ const ProductList = () => {
                               permission.permission_category === "PRODUCT" &&
                               permission.permission_path === "1"
                           ) &&
-                          products &&
-                          products.length > 0 ? (
+                            products &&
+                            products.length > 0 ? (
                             <tbody>
                               {products.map((item, index) => {
-                         
- 
+
+
                                 const canUpdate = permissions.some(
                                   (p) =>
                                     p.permission_category === "PRODUCT" &&
@@ -142,7 +143,7 @@ const ProductList = () => {
                                 );
 
                                 return (
-                                  <tr key={index}>
+                                  <tr key={index} className="text-center">
                                     <td>{index + 1}</td>
                                     <td>
                                       <div className="d-flex align-items-center">
@@ -153,25 +154,26 @@ const ProductList = () => {
                                         </div>
                                       </div>
                                     </td>
-                                    <td>{item.product_category || "N/A"}</td>
-                                    <td>{item.product_brand || "N/A"}</td>
-                                    <td>{item.product_tax || "0"}%</td>
+                                    <td>{item.category_name || "N/A"}</td>
+                                    <td>{item.brand_name || "N/A"}</td>
+                                    <td>{item.tax_name || ""}</td>
+                                    <td>{item.tax_percentage || "0"}%</td>
                                     <td>₹{item.product_purchase_price}</td>
                                     <td>₹{item.product_sale_price}</td>
                                     <td>₹{item.product_mrp}</td>
-                                    <td>
-                                      <ul className="list-inline hstack gap-2 mb-0">
-                                         <li className="list-inline-item edit">
-                                    <button
-                                      className="text-primary d-inline-block edit-item-btn border-0 bg-transparent"
-                                     onClick={() => {
-                                                setIsProduct(item);
-                                                setIsViewModalOpen(true);
-                                              }}
-                                    >
-                                      <i className="ri-eye-fill fs-16" />
-                                    </button>
-                                  </li>
+                                    <td className="text-center">
+                                      <ul className="list-inline hstack   mb-0">
+                                        <li className="list-inline-item edit">
+                                          <button
+                                            className="text-primary d-inline-block edit-item-btn border-0 bg-transparent"
+                                            onClick={() => {
+                                              setIsProduct(item);
+                                              setIsViewModalOpen(true);
+                                            }}
+                                          >
+                                            <i className="ri-eye-fill fs-16" />
+                                          </button>
+                                        </li>
                                         {canUpdate && (
                                           <li className="list-inline-item">
                                             <button

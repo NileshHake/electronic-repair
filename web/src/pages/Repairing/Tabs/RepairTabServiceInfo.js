@@ -3,6 +3,7 @@ import { Row, Col, Label } from "reactstrap";
 import Select from "react-select";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import AuthUser from "../../../helpers/AuthType/AuthUser";
 
 const RepairTabServiceInfo = ({
   formData,
@@ -14,7 +15,7 @@ const RepairTabServiceInfo = ({
   setIsServicesModalOpen,
   setIsHardwareConfigurationModalOpen,
 }) => {
-
+ const { user } = AuthUser()
     
 // Helper: ensure repair_device_services_id is always an array
 const getServicesArray = (services) => {
@@ -105,14 +106,14 @@ const updateServiceRow = (index, field, value) => {
     />
 
     {/* Cost */}
-    <input
+   {user.user_type != 6 &&  <input
       type="number"
       className="form-control"
       placeholder="Cost"
       value={row.cost || ""}
       onChange={(e) => updateServiceRow(index, "cost", e.target.value)}
     />
-
+   }
     {/* Remove button only */}
     {getServicesArray(formData.repair_device_services_id).length > 1 && (
       <button
