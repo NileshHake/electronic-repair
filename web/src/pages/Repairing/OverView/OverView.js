@@ -56,12 +56,15 @@ import { getServicesList } from "../../../store/Service";
 import RecentStatus from "./RecentStatus";
 import RepairDetailsLayout from "./RepairDetailsLayout";
 import { api } from "../../../config";
+import QuotationAndBillingAdd from "../QuotationAndBilling/QuotationAndBillingAdd";
 
 const OverView = () => {
   SwiperCore.use([Autoplay]);
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("1");
   const [activityTab, setActivityTab] = useState("1");
+  const [isQuotationModaLOpen, setIsQuotationModaLOpen] = useState(false);
+  const [isBillingModaLOpen, setIsBillingModaLOpen] = useState(false);
 
   const toggleTab = (tab) => {
     if (activeTab !== tab) {
@@ -120,33 +123,41 @@ const OverView = () => {
         <Container fluid>
           <div className="profile-foreground position-relative mx-n4 mt-n4">
             <div className="profile-wid-bg">
-              <img src={profileBg} alt="" className="profile-wid-img" />
+              <img
+                src={profileBg}
+                alt=""
+                className="profile-wid-img"
+                style={{ pointerEvents: "none" }}
+              />
             </div>
 
-            <div className="position-absolute top-0 end-0 m-3 d-flex gap-2">
-
-              {/* Quotation Button */}
-              {/* Quotation Button (FULL RED) */}
+            <div
+              className="position-absolute top-0 end-0 m-3 d-flex gap-2"
+              style={{ zIndex: 9999, pointerEvents: "auto" }}
+            >
               <button
                 className="btn btn-sm text-white fw-bold d-flex align-items-center gap-1"
-                style={{ backgroundColor: "#D92D20" }}  // full rich red
+                onClick={() => {
+                  console.log("click");
+                  setIsQuotationModaLOpen(true);
+                }}
+                style={{ backgroundColor: "#D92D20" }}
               >
                 <i className="bi bi-receipt-cutoff"></i>
                 Quotation
               </button>
 
-              {/* Billing Button (FULL GREEN / SUCCESS) */}
               <button
                 className="btn btn-sm text-white fw-bold d-flex align-items-center gap-1"
-                style={{ backgroundColor: "#0FA958" }}  // full success green
+                onClick={() => setIsBillingModaLOpen(true)}
+                style={{ backgroundColor: "#0FA958" }}
               >
                 <i className="bi bi-receipt"></i>
                 Billing
               </button>
-
-
             </div>
           </div>
+
 
           <div className="pt-4 mb-4 mb-lg-3 pb-lg-4 profile-wrapper">
             <Row className="g-4">
@@ -278,6 +289,24 @@ const OverView = () => {
           </Row>
         </Container>
       </div>
+
+      {isQuotationModaLOpen && (
+        <QuotationAndBillingAdd
+          RepairData={singleRepair}
+          isOpen={isQuotationModaLOpen}
+          toggle={() => setIsQuotationModaLOpen(false)}
+        />
+      )}
+
+      {isBillingModaLOpen && (
+        <QuotationAndBillingAdd
+        RepairData={singleRepair}
+          isOpen={isBillingModaLOpen}
+          toggle={() => setIsBillingModaLOpen(false)}
+          type="billing"
+        />
+      )}
+
     </React.Fragment>
   );
 };

@@ -33,8 +33,7 @@ import RepairBoard from "./RepairComponent/RepairBoard";
 
 const RepairList = () => {
   const { permissions } = AuthUser();
-  const dispatch = useDispatch();
-console.log(permissions);
+  const dispatch = useDispatch(); 
 
   const { repairs = [], addRepairResponse, DeleteRepairResponse, updateRepairResponse, loading = false } =
     useSelector((state) => state.RepairReducer) || {};

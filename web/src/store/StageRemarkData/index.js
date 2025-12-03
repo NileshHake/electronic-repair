@@ -192,7 +192,7 @@ function* getStageRemarksSaga() {
     yield put(stageRemarkApiResponseSuccess(GET_STAGE_REMARKS, response));
   } catch (error) {
     yield put(stageRemarkApiResponseError(GET_STAGE_REMARKS, error));
-    toast.error("Failed to fetch stage remarks!");
+  
   }
 }
 
@@ -206,7 +206,7 @@ function* getSingleStageRemarkSaga({ payload }) {
     );
   } catch (error) {
     yield put(stageRemarkApiResponseError(GET_SINGLE_STAGE_REMARK, error));
-    toast.error("Failed to fetch stage remark detail!");
+ 
   }
 }
 

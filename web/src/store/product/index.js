@@ -5,6 +5,7 @@ import { APIClient } from "../../helpers/api_helper";
 // ================== ACTION TYPES ==================
 export const GET_PRODUCT = "GET_PRODUCT";
 export const ADD_PRODUCT = "ADD_PRODUCT";
+export const FILTER_PRODUCT_FOR_REPAIR = "FILTER_PRODUCT_FOR_REPAIR";
 export const UPDATE_PRODUCT = "UPDATE_PRODUCT";
 export const DELETE_PRODUCT = "DELETE_PRODUCT";
 export const GET_SINGLE_PRODUCT = "GET_SINGLE_PRODUCT";
@@ -45,6 +46,10 @@ export const addProduct = (product) => ({
   type: ADD_PRODUCT,
   payload: product,
 });
+export const filterProductforRepair = (filterData) => ({
+  type: FILTER_PRODUCT_FOR_REPAIR,
+  payload: filterData,
+});
 
 export const updateProduct = (product) => ({
   type: UPDATE_PRODUCT,
@@ -59,6 +64,7 @@ export const deleteProduct = (id) => ({
 // ================== REDUCER ==================
 const INIT_STATE = {
   products: [],
+  filterProductsforRepair: [],
   singleProduct: null,
   loading: true,
   error: false,
@@ -81,6 +87,12 @@ export const ProductReducer = (state = INIT_STATE, action) => {
           return {
             ...state,
             singleProduct: action.payload.data,
+            loading: false,
+          };
+        case FILTER_PRODUCT_FOR_REPAIR:
+          return {
+            ...state,
+            filterProductsforRepair: action.payload.data,
             loading: false,
           };
 
@@ -134,6 +146,9 @@ const api = new APIClient();
 const getProductApi = () => api.get("/product/list");
 const getSingleProductApi = (id) => api.get(`/product/single/${id}`);
 const addProductApi = (formData) => api.create(`/product/store`, formData);
+const filterProductForRepairApi = (formData) =>
+  api.create(`/products/repair-sale/list`, formData);
+
 const updateProductApi = (data) => api.put(`/product/update`, data);
 const deleteProductApi = (id) => api.delete(`/product/delete/${id}`);
 
@@ -157,6 +172,22 @@ function* getSingleProductSaga({ payload }) {
     toast.error("Failed to fetch product details!");
   }
 }
+
+
+function* filterProductForRepairSaga({ payload }) {
+  try {
+    const response = yield call(filterProductForRepairApi, payload);
+
+    yield put(
+      productApiResponseSuccess(FILTER_PRODUCT_FOR_REPAIR, response)
+    );
+  } catch (error) {
+    yield put(productApiResponseError(FILTER_PRODUCT_FOR_REPAIR, error));
+    toast.error("Failed to filter products for repair!");
+  }
+}
+
+
 
 function* addProductSaga({ payload }) {
   try {
@@ -184,10 +215,10 @@ function* addProductSaga({ payload }) {
         formData.append("product_img", file);
       });
 
-       
+
       response = yield call(addProductApi, formData);
     } else {
-      
+
       response = yield call(api.create, `/product/store`, payload);
     }
 
@@ -236,6 +267,10 @@ function* watchGetProduct() {
 function* watchGetSingleProduct() {
   yield takeEvery(GET_SINGLE_PRODUCT, getSingleProductSaga);
 }
+function* watchFilterProductForRepair() {
+  yield takeEvery(FILTER_PRODUCT_FOR_REPAIR, filterProductForRepairSaga);
+}
+
 function* watchAddProduct() {
   yield takeEvery(ADD_PRODUCT, addProductSaga);
 }
@@ -251,6 +286,7 @@ export function* productSaga() {
   yield all([
     fork(watchGetProduct),
     fork(watchGetSingleProduct),
+    fork(watchFilterProductForRepair),
     fork(watchAddProduct),
     fork(watchUpdateProduct),
     fork(watchDeleteProduct),

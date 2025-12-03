@@ -93,10 +93,13 @@ const index = async (req, res) => {
   }
 };
 
+
 const RepairandSaleProduct = async (req, res) => {
   try {
-    const products = await sequelize.query(
-      `
+    const { category_id, brand_id, product_name } = req.body;
+
+    // Base query
+    let query = `
       SELECT 
         pro.*,
         tx.tax_name,
@@ -109,13 +112,29 @@ const RepairandSaleProduct = async (req, res) => {
       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
       WHERE pro.product_created_by = :created_by
         AND pro.product_usage_type IN ('repair', 'both')
-      ORDER BY pro.product_id DESC
-      `,
-      {
-        replacements: { created_by: getCreatedBy(req.currentUser) },
-        type: sequelize.QueryTypes.SELECT,
-      }
-    );
+    `;
+
+    // Add optional filters only if provided
+    const replacements = { created_by: getCreatedBy(req.currentUser) };
+    if (category_id) {
+      query += ` AND pro.product_category = :category_id`;
+      replacements.category_id = category_id;
+    }
+    if (brand_id) {
+      query += ` AND pro.product_brand = :brand_id`;
+      replacements.brand_id = brand_id;
+    }
+    if (product_name) {
+      query += ` AND pro.product_name LIKE :product_name`;
+      replacements.product_name = `%${product_name}%`;
+    }
+
+    query += ` ORDER BY pro.product_id DESC`;
+
+    const products = await sequelize.query(query, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT,
+    });
 
     res.status(200).json(products);
   } catch (error) {
@@ -126,7 +145,8 @@ const RepairandSaleProduct = async (req, res) => {
     });
   }
 };
-const  SaleAndBothProduct = async (req, res) => {
+
+const SaleAndBothProduct = async (req, res) => {
   try {
     const products = await sequelize.query(
       `

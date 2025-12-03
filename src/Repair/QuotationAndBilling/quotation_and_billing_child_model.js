@@ -18,8 +18,20 @@ const QuotationAndBillingChild = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+         quotation_and_billing_product_name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
         quotation_and_billing_tax_percentage: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.FLOAT,
+            allowNull: false,
+        },
+        quotation_and_billing_product_mrp: {
+            type: DataTypes.FLOAT,
+            allowNull: false,
+        },
+        quotation_and_billing_product_sale_price: {
+            type: DataTypes.FLOAT,
             allowNull: false,
         },
         quotation_and_billing_tax_value: {

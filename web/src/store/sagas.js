@@ -87,6 +87,7 @@ import { storageLocationSaga } from "./StorageLocation";
 import { deviceColorSaga } from "./DeviceColor";
 import { otpSaga } from "./StageRemark";
 import { stageRemarkSaga } from "./StageRemarkData";
+import { watchQuotationBilling } from "./QuotationAndBilling";
 export default function* rootSaga() {
   yield all([
     //public
@@ -133,6 +134,7 @@ export default function* rootSaga() {
     fork(dashboardEcommerceSaga),
     fork(dashboardCryptoSaga),
     fork(productSaga),
+    fork(watchQuotationBilling),
     fork(otpSaga),
     fork(stageRemarkSaga),
     fork(dashboardProjectSaga),

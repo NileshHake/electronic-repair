@@ -11,40 +11,40 @@ const QuotationAndBillingMaster = sequelize.define(
         },
         quotation_and_billing_master_invoice_number: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         quotation_and_billing_master_date: {
-            type: DataTypes.STRING,
-            allowNull: false,
+            type: DataTypes.DATE,
+            allowNull: true,
         },
         quotation_and_billing_master_customer_id: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         quotation_and_billing_master_repair_id: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         quotation_and_billing_master_total: {
             type: DataTypes.FLOAT,
-            allowNull: false,
+            allowNull: true,
         },
        
         quotation_and_billing_master_gst_amount: {
             type: DataTypes.FLOAT,
-            allowNull: false,
+            allowNull: true,
         },
         quotation_and_billing_master_grand_total: {
             type: DataTypes.FLOAT,
-            allowNull: false,
+            allowNull: true,
         },
         quotation_and_billing_master_created_by: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
         },
         quotation_and_billing_master_status: {
             type: DataTypes.TINYINT,
-            allowNull: false,
+            allowNull: true,
             defaultValue: 1,
         },
     },

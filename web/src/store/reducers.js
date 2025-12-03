@@ -95,6 +95,7 @@ import { StorageLocationReducer } from "./StorageLocation";
 import { DeviceColorReducer } from "./DeviceColor";
 import { OtpReducer } from "./StageRemark";
 import { StageRemarkReducer } from "./StageRemarkData";
+import { QuotationBillingReducer } from "./QuotationAndBilling";
  
 const rootReducer = combineReducers({
   // public
@@ -147,11 +148,12 @@ const rootReducer = combineReducers({
   ProductReducer,
   AccessoriesReducer,
   WorkflowReducer,
-  Team,
-  FileManager,
-  Todos,
-  Jobs,
-  APIKey,
+  QuotationBillingReducer,
+  // Team,
+  // FileManager,
+  // Todos,
+  // Jobs,
+  // APIKey,
 });
 
 export default rootReducer;

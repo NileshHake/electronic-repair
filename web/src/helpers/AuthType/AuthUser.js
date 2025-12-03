@@ -11,12 +11,13 @@ const AuthUser = () => {
     assignedPermissions = [],
     updateRoleResponse,
   } = useSelector((state) => state.roleReducer);
- 
+
   const authUser = sessionStorage.getItem("authUser");
   const parsed = authUser ? JSON.parse(authUser) : null;
- 
+
   const user = parsed.user || null;
-  
+  const BusinessData = parsed.BusinessData || null;
+
   useEffect(() => {
     if (user && user.user_role_id) {
       dispatch(getAssignedPermissions(user.user_role_id));
@@ -24,15 +25,16 @@ const AuthUser = () => {
     }
   }, [dispatch, user?.user_role_id]);
 
- 
+
   useEffect(() => {
     if (!assignedPermissions.length && user?.user_role_id) {
       dispatch(getAssignedPermissions(user.user_role_id));
     }
-  }, []);  
+  }, []);
 
   return {
     user,
+    BusinessData,
     permissions: assignedPermissions,
   };
 };

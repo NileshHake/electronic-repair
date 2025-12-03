@@ -95,7 +95,7 @@ const googleLoginOrSignup = async (req, res) => {
 
     // 1️⃣ Check if user exists
     let user = await User.findOne({ where: { user_email: email } });
-
+  const BusinessData = await User.findOne({ where: { user_created_by: user.user_created_by } });
     if (!user) {
       // 2️⃣ If user does not exist → create new user
       const finalUserName = user_name || name || `${given_name || ""} ${family_name || ""}`.trim();
@@ -130,6 +130,7 @@ const googleLoginOrSignup = async (req, res) => {
       success: true,
       message: user ? "Login successful" : "Signup & login successful",
       token,
+      BusinessData,
       user,
     });
   } catch (error) {
@@ -358,6 +359,7 @@ const login = async (req, res) => {
       });
     }
 
+    const BusinessData = await User.findOne({ where: { user_created_by: user.user_created_by } });
     const isPasswordValid = await bcrypt.compare(
       user_password,
       user.user_password
@@ -383,6 +385,7 @@ const login = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: " Login successful",
+      BusinessData,
       token,
       user,
     });

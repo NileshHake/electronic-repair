@@ -27,6 +27,7 @@ const createSuperAdmin = async () => {
       user_name: "Super Admin",
       user_email: "super@nbh.com",
       user_type: 1,
+      user_created_by: 1,
       user_role_id: 1,
       user_password: hashedPassword,
     });
@@ -128,7 +129,7 @@ const createSuperAdmin = async () => {
         permission_path: 4,
         permission_category: "REPAIRING",
       },
-       {
+      {
         permission_name: "List",
         permission_path: 1,
         permission_category: "QUOTATION_BILLING",
