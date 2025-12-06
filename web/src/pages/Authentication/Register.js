@@ -124,7 +124,7 @@ const Register = () => {
                     }
                 );
 
-                const { email, name } = response.data;
+                const { email, name } = response;
 
                 // Mark as Google login so password is optional
                 setIsGoogleLogin(true);

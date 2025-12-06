@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../../../config/db");
- 
+
 
 const QuotationAndBillingChild = sequelize.define(
     "tbl_quotation_and_billing_child",
@@ -18,7 +18,11 @@ const QuotationAndBillingChild = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-         quotation_and_billing_product_name: {
+        quotation_and_billing_product_name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        quotation_and_billing_service_or_product: {
             type: DataTypes.STRING,
             allowNull: false,
         },
@@ -42,7 +46,11 @@ const QuotationAndBillingChild = sequelize.define(
             type: DataTypes.FLOAT,
             allowNull: false,
         },
-        quotation_and_billing_child_master_id: {
+        quotation_and_billing_child_product_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+          quotation_and_billing_child_master_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },

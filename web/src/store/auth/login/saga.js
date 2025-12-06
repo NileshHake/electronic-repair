@@ -71,7 +71,8 @@ function* socialLogin({ payload }) {
     });
 
     const res = apiResponse; // rename for clarity
-    
+     console.log(res);
+     
     if (res.userNotFound && !res.success) {
       // if backend responds with 404 + body { userNotFound: true, email, name, picture }
       navigate("/register", {

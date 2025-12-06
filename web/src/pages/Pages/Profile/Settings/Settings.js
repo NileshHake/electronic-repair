@@ -63,16 +63,7 @@ const Settings = () => {
 
   useEffect(() => {
     if (singleUser) {
-      setFormData({
-        user_id: singleUser.user_id || "",
-        user_name: singleUser.user_name || "",
-        user_email: singleUser.user_email || "",
-        user_password: singleUser.user_password || "",
-        user_phone_number: singleUser.user_phone_number || "",
-        user_role_id: singleUser.user_role_id || "",
-        user_type: singleUser.user_type || "",
-        user_profile: singleUser.user_profile || "",
-      });
+      setFormData(singleUser);
     }
   }, [singleUser]);
 

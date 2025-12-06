@@ -86,7 +86,18 @@ const setAuthorization = (token) => {
       throw error.response ? error.response.data : error;
     }
   };
- 
+  createFormJSON = async (url, formData) => {
+    try {
+      const response = await this.axiosInstance.post(url, formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
+  };
   put = (url, data) => {
     return axios.put(url, data);
   };

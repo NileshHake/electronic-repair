@@ -98,9 +98,7 @@ const Login = (props) => {
           )
         );
 
-        toast.success(`Welcome ${response.name || "User"}!`, {
-          position: "top-right",
-        });
+        
       } catch (err) {
         console.error("Error in Google social login:", err);
         toast.error("Failed to login with Google.");

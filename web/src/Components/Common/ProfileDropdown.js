@@ -12,6 +12,7 @@ import { logoutUser } from "../../store/actions";
 import { getSingleUser, resetUpdateUserResponse } from "../../store/User";
 import AuthUser from "../../helpers/AuthType/AuthUser";
 import { api } from "../../config";
+import { toast, ToastContainer } from "react-toastify";
 
 const ProfileDropdown = () => {
   const [isProfileDropdown, setIsProfileDropdown] = useState(false);
@@ -36,6 +37,8 @@ const ProfileDropdown = () => {
   useEffect(() => {
     if (updateUserResponse) {
       dispatch(getSingleUser(user.user_id));
+      toast.success("Profile updated successfully");
+
       dispatch(resetUpdateUserResponse());
     }
   }, [updateUserResponse, user?.user_id, dispatch]);
@@ -51,6 +54,7 @@ const ProfileDropdown = () => {
       toggle={toggleProfileDropdown}
       className="ms-sm-3 header-item topbar-user"
     >
+      <ToastContainer limit={1} autoClose={800} />
       <DropdownToggle tag="button" type="button" className="btn shadow-none">
         <span className="d-flex align-items-center">
           <img
@@ -67,21 +71,21 @@ const ProfileDropdown = () => {
               {singleUser?.user_name || "N/A"}
             </span>
             <span className="d-none d-xl-block ms-1 fs-12 text-muted user-name-sub-text">
-              {user?.user_type ===  1
+              {user?.user_type == 1
                 ? "Super Admin"
-                : user?.user_type ===   2
-                ? "Admin"
-                : user?.user_type ===   3
-                ? "User"
-                : user?.user_type ===   4
-                ? "Technician"
-                : user?.user_type ===   5
-                ? "Delivery Boy"
-                : user?.user_type ===   6
-                ? "Customer"
-                : ""}
+                : user?.user_type == 2
+                  ? "Admin"
+                  : user?.user_type == 3
+                    ? "User"
+                    : user?.user_type == 4
+                      ? "Technician"
+                      : user?.user_type == 5
+                        ? "Delivery Boy"
+                        : user?.user_type == 6
+                          ? "Customer"
+                          : ""}
             </span>
-          </span> 
+          </span>
         </span>
       </DropdownToggle>
 

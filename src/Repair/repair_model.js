@@ -117,7 +117,14 @@ const Repair = sequelize.define("tbl_repair", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-
+  repair_quotation_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  repair_bill_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   repair_status: {
     type: DataTypes.INTEGER,
     defaultValue: 1,

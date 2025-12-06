@@ -42,6 +42,12 @@ const googleCustomerLogin = async (req, res) => {
         picture,
       });
     }
+    const BusinessData = await (
+      [2, 3].includes(user.user_type)
+        ? User.findByPk(user.user_id)
+        : User.findOne({ where: { user_id: user.user_created_by } })
+    );
+
 
     // 3️⃣ If user exists → create JWT token and login
     const token = jwt.sign(
@@ -58,6 +64,7 @@ const googleCustomerLogin = async (req, res) => {
       success: true,
       message: "Login successful (Google)",
       token,
+      BusinessData,
       user,
     });
   } catch (error) {
@@ -95,7 +102,7 @@ const googleLoginOrSignup = async (req, res) => {
 
     // 1️⃣ Check if user exists
     let user = await User.findOne({ where: { user_email: email } });
-  const BusinessData = await User.findOne({ where: { user_created_by: user.user_created_by } });
+
     if (!user) {
       // 2️⃣ If user does not exist → create new user
       const finalUserName = user_name || name || `${given_name || ""} ${family_name || ""}`.trim();
@@ -130,7 +137,7 @@ const googleLoginOrSignup = async (req, res) => {
       success: true,
       message: user ? "Login successful" : "Signup & login successful",
       token,
-      BusinessData,
+
       user,
     });
   } catch (error) {

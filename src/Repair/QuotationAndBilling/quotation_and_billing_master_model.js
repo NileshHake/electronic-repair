@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize"); 
+const { DataTypes } = require("sequelize");
 const sequelize = require("../../../config/db");
 
 const QuotationAndBillingMaster = sequelize.define(
@@ -25,11 +25,16 @@ const QuotationAndBillingMaster = sequelize.define(
             type: DataTypes.STRING,
             allowNull: true,
         },
+        quotation_and_billing_master_payment_status: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue:"Pendding"
+        },
         quotation_and_billing_master_total: {
             type: DataTypes.FLOAT,
             allowNull: true,
         },
-       
+
         quotation_and_billing_master_gst_amount: {
             type: DataTypes.FLOAT,
             allowNull: true,
@@ -40,6 +45,10 @@ const QuotationAndBillingMaster = sequelize.define(
         },
         quotation_and_billing_master_created_by: {
             type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        quotation_or_billing: {
+            type: DataTypes.STRING,
             allowNull: true,
         },
         quotation_and_billing_master_status: {

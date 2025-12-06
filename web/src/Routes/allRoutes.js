@@ -263,6 +263,7 @@ import HardwareConfigurationList from "../pages/HardwareConfiguration/HardwareCo
 import StorageLocationList from "../pages/StorageLocation/StorageLocationList";
 import DeviceColorList from "../pages/DeviceColor/DeviceColorList";
 import OverView from "../pages/Repairing/OverView/OverView";
+import QuotationAndBillingList from "../pages/Repairing/QuotationAndBilling/QuotationAndBillinglist";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -314,6 +315,7 @@ const authProtectedRoutes = [
   { path: "/storage-location-list", component: <StorageLocationList /> },
   { path: "/device-color-list", component: <DeviceColorList /> },
   { path: "/repair/overview/:repair_id", component: <OverView /> }, 
+  { path: "/quotation-billing", component: <QuotationAndBillingList /> }, 
   {
     path: "/hardware-configuration-list",
     component: <HardwareConfigurationList />,

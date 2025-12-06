@@ -57,6 +57,9 @@ import RecentStatus from "./RecentStatus";
 import RepairDetailsLayout from "./RepairDetailsLayout";
 import { api } from "../../../config";
 import QuotationAndBillingAdd from "../QuotationAndBilling/QuotationAndBillingAdd";
+import { toast, ToastContainer } from "react-toastify";
+import { resetAddQuotationBillingResponse } from "../../../store/QuotationAndBilling";
+import QuotationAndBillingPerviwe from "../QuotationAndBilling/QuotationAndBillingPerviwe";
 
 const OverView = () => {
   SwiperCore.use([Autoplay]);
@@ -64,7 +67,21 @@ const OverView = () => {
   const [activeTab, setActiveTab] = useState("1");
   const [activityTab, setActivityTab] = useState("1");
   const [isQuotationModaLOpen, setIsQuotationModaLOpen] = useState(false);
+  const [isQuotationPreviewModalOpen, setIsQuotationPreviewModalOpen] = useState(false);
+  const [isBillingPreviewModalOpen, setIsBillingPreviewModalOpen] = useState(false);
   const [isBillingModaLOpen, setIsBillingModaLOpen] = useState(false);
+  const addResponse = useSelector((state) => state.QuotationBillingReducer.addResponse);
+
+  // Show toast on successful add
+  useEffect(() => {
+    if (addResponse) {
+
+      toast.success("Quotation & Billing added successfully!");
+      dispatch(resetAddQuotationBillingResponse());
+      setIsQuotationModaLOpen(false);
+      setIsBillingModaLOpen(false)
+    }
+  }, [addResponse, dispatch]);
 
   const toggleTab = (tab) => {
     if (activeTab !== tab) {
@@ -83,7 +100,7 @@ const OverView = () => {
       dispatch(getSingleRepair(repair_id));
       dispatch(getServicesList());
     }
-  }, [dispatch, repair_id]);
+  }, [dispatch, repair_id, addResponse]);
   document.title = "Repairing | Over View";
   const { services } = useSelector((state) => state.ServiceReducer);
   const { singleRepair } = useSelector((state) => state.RepairReducer) || {};
@@ -135,7 +152,17 @@ const OverView = () => {
               className="position-absolute top-0 end-0 m-3 d-flex gap-2"
               style={{ zIndex: 9999, pointerEvents: "auto" }}
             >
-              <button
+              {singleRepair?.repair_quotation_id !== null ? <button
+                className="btn btn-sm text-white fw-bold d-flex align-items-center gap-1"
+                onClick={() => {
+                  console.log("click");
+                  setIsQuotationPreviewModalOpen(true);
+                }}
+                style={{ backgroundColor: "#D92D20" }}
+              >
+                <i className="bi bi-receipt-cutoff"></i>
+                View Quotation
+              </button> : (<button
                 className="btn btn-sm text-white fw-bold d-flex align-items-center gap-1"
                 onClick={() => {
                   console.log("click");
@@ -145,16 +172,25 @@ const OverView = () => {
               >
                 <i className="bi bi-receipt-cutoff"></i>
                 Quotation
-              </button>
-
-              <button
+              </button>)
+              }
+              {singleRepair?.repair_bill_id !== null ? <button
                 className="btn btn-sm text-white fw-bold d-flex align-items-center gap-1"
-                onClick={() => setIsBillingModaLOpen(true)}
+                onClick={() => setIsBillingPreviewModalOpen(true)}
+
                 style={{ backgroundColor: "#0FA958" }}
               >
                 <i className="bi bi-receipt"></i>
-                Billing
-              </button>
+                View  Billing
+              </button> :
+                <button
+                  className="btn btn-sm text-white fw-bold d-flex align-items-center gap-1"
+                  onClick={() => setIsBillingModaLOpen(true)}
+                  style={{ backgroundColor: "#0FA958" }}
+                >
+                  <i className="bi bi-receipt"></i>
+                  Billing
+                </button>}
             </div>
           </div>
 
@@ -289,21 +325,37 @@ const OverView = () => {
           </Row>
         </Container>
       </div>
-
+      <ToastContainer limit={1} autoClose={800} />
       {isQuotationModaLOpen && (
         <QuotationAndBillingAdd
           RepairData={singleRepair}
           isOpen={isQuotationModaLOpen}
           toggle={() => setIsQuotationModaLOpen(false)}
+          type="Quotation"
         />
       )}
-
+      {isQuotationPreviewModalOpen && (
+        <QuotationAndBillingPerviwe
+          RepairData={singleRepair}
+          isOpen={isQuotationPreviewModalOpen}
+          toggle={() => setIsQuotationPreviewModalOpen(false)}
+          type="Quotation"
+        />
+      )}
+      {isBillingPreviewModalOpen && (
+        <QuotationAndBillingPerviwe
+          RepairData={singleRepair}
+          isOpen={isBillingPreviewModalOpen}
+          toggle={() => setIsBillingPreviewModalOpen(false)}
+          type="Billing"
+        />
+      )}
       {isBillingModaLOpen && (
         <QuotationAndBillingAdd
-        RepairData={singleRepair}
+          RepairData={singleRepair}
           isOpen={isBillingModaLOpen}
           toggle={() => setIsBillingModaLOpen(false)}
-          type="billing"
+          type="Billing"
         />
       )}
 

@@ -13,7 +13,7 @@ router.post("/quotationAndBill/list", verifyToken, quotationAndBillController.ge
 router.get("/quotationAndBill/single/:id", verifyToken, quotationAndBillController.getQuotationAndBill);
 
 // Update QuotationAndBill
-router.put("/quotationAndBill/update/:id", verifyToken, quotationAndBillController.updateQuotationAndBill);
+router.put("/quotationAndBill/updated", verifyToken, quotationAndBillController.updateQuotationAndBill);
 
 // Delete QuotationAndBill
 router.delete("/quotationAndBill/delete/:id", verifyToken, quotationAndBillController.deleteQuotationAndBill);
