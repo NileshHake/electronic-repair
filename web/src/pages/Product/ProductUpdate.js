@@ -361,6 +361,64 @@ const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
                           {errorMessage.product_usage_type}
                         </div>
                       )}
+                    </Col>{/* 1. Product Color Field */}
+                    <Col lg={4} className="mt-2">
+                      <Label className="form-label fw-bold">
+                        Product Color
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="Enter Color (e.g., Red, Blue)"
+                        value={productData.product_color}
+                        onChange={(e) =>
+                          handleInputChange("product_color", e.target.value)
+                        }
+                      />
+                      {errorMessage.product_color && (
+                        <div className="text-danger small">
+                          {errorMessage.product_color}
+                        </div>
+                      )}
+                    </Col>
+
+                    {/* 2. Product Material Field */}
+                    <Col lg={4} className="mt-2">
+                      <Label className="form-label fw-bold">
+                        Product Material
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="Enter Material (e.g., Cotton, Steel)"
+                        value={productData.product_material}
+                        onChange={(e) =>
+                          handleInputChange("product_material", e.target.value)
+                        }
+                      />
+                      {errorMessage.product_material && (
+                        <div className="text-danger small">
+                          {errorMessage.product_material}
+                        </div>
+                      )}
+                    </Col>
+
+                    {/* 3. Product Weight Field */}
+                    <Col lg={4} className="mt-2">
+                      <Label className="form-label fw-bold">
+                        Product Weight
+                      </Label>
+                      <Input
+                        type="text" // Use "text" for weight with units, or "number" if only raw numbers are expected
+                        placeholder="Enter Weight (e.g., 500g, 2kg)"
+                        value={productData.product_weight}
+                        onChange={(e) =>
+                          handleInputChange("product_weight", e.target.value)
+                        }
+                      />
+                      {errorMessage.product_weight && (
+                        <div className="text-danger small">
+                          {errorMessage.product_weight}
+                        </div>
+                      )}
                     </Col>
                     <Col lg={12}>
                       <div className="table-responsive table-card mt-4 p-3">

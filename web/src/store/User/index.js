@@ -6,12 +6,17 @@ import { APIClient } from "../../helpers/api_helper";
 export const GET_USERS = "GET_USERS";
 export const ADD_USER = "ADD_USER";
 export const UPDATE_USER = "UPDATE_USER";
+export const UPDATE_USER_PASS_WORD = "UPDATE_USER_PASS_WORD";
 export const DELETE_USER = "DELETE_USER";
 export const GET_SINGLE_USER = "GET_SINGLE_USER";
 export const RESET_ADD_USER_RESPONSE = "RESET_ADD_USER_RESPONSE";
 export const RESET_UPDATE_USER_RESPONSE = "RESET_UPDATE_USER_RESPONSE";
 export const API_RESPONSE_SUCCESS = "API_RESPONSE_SUCCESS";
 export const API_RESPONSE_ERROR = "API_RESPONSE_ERROR";
+// ================== ACTION TYPES ==================
+export const UPDATE_USER_PASSWORD = "UPDATE_USER_PASSWORD";
+export const UPDATE_USER_PASSWORD_SUCCESS = "UPDATE_USER_PASSWORD_SUCCESS";
+export const UPDATE_USER_PASSWORD_FAIL = "UPDATE_USER_PASSWORD_FAIL";
 
 // ================== ACTIONS ==================
 export const userApiResponseSuccess = (actionType, data) => ({
@@ -52,6 +57,12 @@ export const updateUser = (user) => ({
   type: UPDATE_USER,
   payload: user,
 });
+// ================== ACTION ==================
+export const updatePassword = (payload) => ({
+  type: UPDATE_USER_PASSWORD,
+  payload,
+});
+
 
 export const deleteUser = (id) => ({
   type: DELETE_USER,
@@ -125,6 +136,9 @@ const getSingleUserApi = (id) => api.get(`/user/single/${id}`);
 const addUserApi = (formData) => {
   return api.create(`/user/store`, formData);
 };
+const ChangePassword = (formData) => {
+  return api.create(`/change-password`, formData);
+};
 
 const updateUserApi = (id, data) => api.put(`/user/update`, data);
 const deleteUserApi = (id) => api.delete(`/user/delete/${id}`);
@@ -197,6 +211,26 @@ function* updateUserSaga({ payload }) {
     toast.error("❌ Failed to update user!");
   }
 }
+function* updateUserPasswordSaga({ payload }) {
+  try {
+    const response = yield call(ChangePassword, payload);
+
+    yield put({
+      type: UPDATE_USER_PASSWORD_SUCCESS,
+      payload: response.data,
+    });
+
+    toast.success(response.data?.message || "Password updated!");
+
+  } catch (error) {
+    toast.error(error?.response?.data?.message || "Failed to update password");
+
+    yield put({
+      type: UPDATE_USER_PASSWORD_FAIL,
+      payload: error,
+    });
+  }
+}
 
 function* deleteUserSaga({ payload }) {
   try {
@@ -226,6 +260,9 @@ function* watchUpdateUser() {
 function* watchDeleteUser() {
   yield takeEvery(DELETE_USER, deleteUserSaga);
 }
+function* watchUpdateUserPassword() {
+  yield takeEvery(UPDATE_USER_PASSWORD, updateUserPasswordSaga);
+}
 
 export function* userSaga() {
   yield all([
@@ -234,5 +271,6 @@ export function* userSaga() {
     fork(watchAddUser),
     fork(watchUpdateUser),
     fork(watchDeleteUser),
+    fork(watchUpdateUserPassword),
   ]);
 }

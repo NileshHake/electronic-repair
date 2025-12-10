@@ -264,6 +264,7 @@ import StorageLocationList from "../pages/StorageLocation/StorageLocationList";
 import DeviceColorList from "../pages/DeviceColor/DeviceColorList";
 import OverView from "../pages/Repairing/OverView/OverView";
 import QuotationAndBillingList from "../pages/Repairing/QuotationAndBilling/QuotationAndBillinglist";
+import EcommerceListProduct from "../pages/Ecommerce/EcommerceProducts/EcommerceListProduct";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -274,7 +275,7 @@ const authProtectedRoutes = [
   { path: "/dashboard-projects", component: <DashboardProject /> },
   { path: "/dashboard-nft", component: <DashboardNFT /> },
   { path: "/apps-calendar", component: <Calendar /> },
-  { path: "/apps-ecommerce-products", component: <EcommerceProducts /> },
+  { path: "/apps-ecommerce-products", component: <EcommerceListProduct /> },
   { path: "/dashboard-job", component: <DashboardJobs /> },
 
   {

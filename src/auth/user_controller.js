@@ -314,9 +314,8 @@ const update = async (req, res) => {
 
     // Agar frontend se user_password aaya hai aur empty nahi hai
     if (
-      typeof req.body.user_password === "string" &&
-      req.body.user_password.trim() !== ""
-    ) {
+      req.body.user_password === user.user_password
+    ) { user_password = user.user_password; } else {
       user_password = await bcrypt.hash(req.body.user_password, 10);
     }
 
@@ -337,6 +336,41 @@ const update = async (req, res) => {
       message: "Error updating user ❌",
       error: error.message,
     });
+  }
+};
+
+
+const changePassword = async (req, res) => {
+  try {
+    const { user_id, old_password, new_password } = req.body;
+
+    if (!user_id || !old_password || !new_password) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
+
+    const user = await User.findByPk(user_id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    const isMatch = await bcrypt.compare(old_password, user.user_password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Old password is wrong!" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(new_password, 10);
+
+    await User.update(
+      { user_password: hashedNewPassword },
+      { where: { user_id } }
+    );
+
+    return res.status(200).json({ message: "Password updated successfully!" });
+  } catch (error) {
+    console.log("Password update error", error);
+    return res.status(500).json({ message: "Server Error", error });
   }
 };
 
@@ -418,6 +452,7 @@ module.exports = {
   Businessindex,
   login,
   Get,
+  changePassword,
   update,
   deleted,
 };

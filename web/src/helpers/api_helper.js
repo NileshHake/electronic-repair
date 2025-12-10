@@ -1,23 +1,23 @@
 import axios from "axios";
 import { api } from "../config";
 
- 
+
 axios.defaults.baseURL = api.API_URL;
 
- 
+
 axios.defaults.headers.post["Content-Type"] = "multipart/form-data";
 axios.defaults.headers.put["Content-Type"] = "multipart/form-data";
 
- 
+
 const tokenData = sessionStorage.getItem("authUser");
 const token = tokenData ? JSON.parse(tokenData).token : null;
 
- 
+
 if (token) {
   axios.defaults.headers.common["Authorization"] = "Bearer " + token;
 }
 
- 
+
 axios.interceptors.response.use(
   function (response) {
     return response.data ? response.data : response;
@@ -41,13 +41,13 @@ axios.interceptors.response.use(
   }
 );
 
- 
+
 const setAuthorization = (token) => {
   axios.defaults.headers.common["Authorization"] = "Bearer " + token;
 };
 
- class APIClient {
- 
+class APIClient {
+
   get = (url, params) => {
     let response;
     let paramKeys = [];
@@ -68,12 +68,19 @@ const setAuthorization = (token) => {
     return response;
   };
 
- 
+
   create = (url, data) => {
     return axios.post(url, data);
   };
+  createApplicationData = (url, data) => {
+    return axios.post(url, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  };
 
- 
+
   createFormData = async (url, formData) => {
     try {
       const response = await this.axiosInstance.post(url, formData, {
@@ -98,28 +105,28 @@ const setAuthorization = (token) => {
       throw error.response ? error.response.data : error;
     }
   };
-  put = (url, data) => {
+      put = (url, data) => {
     return axios.put(url, data);
   };
- 
+
   putFormData = (url, formData) => {
     return axios.put(url, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   };
 
- 
+
   update = (url, data) => {
     return axios.patch(url, data);
   };
 
- 
+
   delete = (url, config) => {
     return axios.delete(url, { ...config });
   };
 }
 
- 
+
 const getLoggedinUser = () => {
   const user = sessionStorage.getItem("authUser");
   if (!user) {

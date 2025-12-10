@@ -17,51 +17,10 @@ yarn.lock
 # Explicitly ignore client & server node_modules (optional but clearer)
 electronic-repair/node_modules/
 electronic-repair/web/node_modules/
-electronic-repair/public/
+/public/
 
-# =========================
-# Environment variables
-# =========================
-.env
-.env.local
-.env.*.local
-.env.development.local
-.env.test.local
-.env.production.local
 
-# If client/server have their own env files
-RepairCRM-Client/.env
-RepairCRM-Client/.env.local
-RepairCRM-Client/.env.*.local
-
-RepairCRM-Server/.env
-RepairCRM-Server/.env.local
-RepairCRM-Server/.env.*.local
-
-# =========================
-# Logs
-# =========================
-logs
-*.log
-logs/*.log
-
-# =========================
-# Build / Coverage
-# =========================
-dist/
-build/
-coverage/
-.cache/
-.next/
-
-# Client builds
-RepairCRM-Client/build/
-RepairCRM-Client/coverage/
-
-# Server builds (if using TypeScript or build step)
-RepairCRM-Server/dist/
-RepairCRM-Server/build/
-RepairCRM-Server/coverage/
+ 
 
 # =========================
 # Editors / IDEs

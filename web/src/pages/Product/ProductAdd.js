@@ -30,10 +30,11 @@ import {
 import { toast } from "react-toastify";
 import ServiceAdd from "../Services/ServiceAdd";
 import CategoryAdd from "../category/CategoryAdd";
-import { resetAddCategoryResponse } from "../../store/category";
+import { getCategoriesList, resetAddCategoryResponse } from "../../store/category";
 import TaxAdd from "../Tax/TaxAdd";
 import { resetAddTaxResponse } from "../../store/Tax";
 import BrandAdd from "../Brand/BrandAdd";
+import { getBrandsList } from "../../store/Brand";
 
 const ProductAdd = ({ isOpen, toggle }) => {
   const { brands } = useSelector((state) => state.BrandReducer);
@@ -42,9 +43,12 @@ const ProductAdd = ({ isOpen, toggle }) => {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isTaxOpen, setIsTaxOpen] = useState(false);
   const [isBrandOpen, setIsBrandOpen] = useState(false);
-
-  const [activeTab, setActiveTab] = useState("1");
   const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getCategoriesList());
+    dispatch(getBrandsList());
+  }, [dispatch])
+  const [activeTab, setActiveTab] = useState("1");
   // ✅ Product state
   const [productData, setProductData] = useState({
     product_name: "",
@@ -55,6 +59,9 @@ const ProductAdd = ({ isOpen, toggle }) => {
     product_mrp: "",
     product_sale_price: "",
     product_purchase_price: "",
+    product_color: "",
+    product_material: "",
+    product_weight: "",
     product_description: "",
     product_image: [],
   });
@@ -239,11 +246,11 @@ const ProductAdd = ({ isOpen, toggle }) => {
                       />
                     </Col>
 
-                   
+
 
                     {/* Brand */}
                     <Col lg={4} >
-                       <div className="d-flex justify-content-between align-items-center">
+                      <div className="d-flex justify-content-between align-items-center">
                         <Label className=" fw-bold mb-0">
                           Select  Brand
                         </Label>
@@ -267,7 +274,7 @@ const ProductAdd = ({ isOpen, toggle }) => {
                         }
                       />
                     </Col>
-                      <Col lg={4} className="mt-2 ">
+                    <Col lg={4} className="mt-2 ">
                       <div className="d-flex justify-content-between align-items-center">
                         <Label className=" fw-bold mb-0">
                           Select Tax %
@@ -320,7 +327,53 @@ const ProductAdd = ({ isOpen, toggle }) => {
                         </div>
                       )}
                     </Col>
+                    {/* 1. Product Color Field */}
+                    <Col lg={4} className="mt-2">
+                      <Label className="form-label fw-bold">
+                        Product Color
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="Enter Color (e.g., Red, Blue)"
+                        value={productData.product_color}
+                        onChange={(e) =>
+                          handleInputChange("product_color", e.target.value)
+                        }
+                      />
 
+                    </Col>
+
+                    {/* 2. Product Material Field */}
+                    <Col lg={4} className="mt-2">
+                      <Label className="form-label fw-bold">
+                        Product Material
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="Enter Material (e.g., Cotton, Steel)"
+                        value={productData.product_material}
+                        onChange={(e) =>
+                          handleInputChange("product_material", e.target.value)
+                        }
+                      />
+
+                    </Col>
+
+                    {/* 3. Product Weight Field */}
+                    <Col lg={4} className="mt-2">
+                      <Label className="form-label fw-bold">
+                        Product Weight
+                      </Label>
+                      <Input
+                        type="text" // Use "text" for weight with units, or "number" if only raw numbers are expected
+                        placeholder="Enter Weight (e.g., 500g, 2kg)"
+                        value={productData.product_weight}
+                        onChange={(e) =>
+                          handleInputChange("product_weight", e.target.value)
+                        }
+                      />
+
+                    </Col>
                     <Col lg={12}>
                       <div className="table-responsive table-card mt-4 p-3">
                         <table className="table text-center align-middle">

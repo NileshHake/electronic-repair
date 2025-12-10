@@ -202,7 +202,7 @@ const Navdata = () => {
       id: "CUSTOMERSALES",
       label: "  Sales",
       icon: "mdi mdi-cash-multiple", // change icon if you want
-      link: "/#",
+      link: "/apps-ecommerce-productsz",
       stateVariables: isCustomerSales,
       click: function (e) {
         e.preventDefault();

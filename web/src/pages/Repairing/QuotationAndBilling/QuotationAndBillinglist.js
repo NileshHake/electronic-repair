@@ -27,8 +27,8 @@ const QuotationAndBillingList = () => {
     const { quotationBillingList, updateResponse } = useSelector(
         (state) => state.QuotationBillingReducer
     );
- 
-    
+
+
     const { permissions } = AuthUser();
 
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -42,10 +42,8 @@ const QuotationAndBillingList = () => {
     }, [dispatch]);
     useEffect(() => {
         if (updateResponse) {
-            // Close the update modal
             setIsUpdateOpen(false);
 
-            // Reset the update response in Redux
             dispatch(resetUpdateQuotationBillingResponse());
 
             // Optionally, refresh the list

@@ -40,6 +40,18 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  product_weight: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  product_material: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  product_color: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   product_purchase_price: {
     type: DataTypes.FLOAT,
     allowNull: true,

@@ -16,6 +16,7 @@ const store = async (req, res) => {
       product_purchase_price,
       product_sale_price,
       product_mrp,
+      product_color, product_material, product_weight,
       product_status,
     } = req.body;
 
@@ -38,8 +39,9 @@ const store = async (req, res) => {
       product_brand,
       product_created_by,
       product_description,
-      product_usage_type,
+      product_usage_type: product_usage_type || "sale",
       product_category,
+      product_color, product_material, product_weight,
       product_image: JSON.stringify(product_images),
       product_purchase_price,
       product_sale_price,
@@ -148,37 +150,102 @@ const RepairandSaleProduct = async (req, res) => {
 
 const SaleAndBothProduct = async (req, res) => {
   try {
-    const products = await sequelize.query(
-      `
-      SELECT 
-        pro.*,
-        tx.tax_name,
-        tx.tax_percentage,
-        cat.category_name,
-        br.brand_name
-      FROM tbl_products AS pro
-      LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
-      LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
-      LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
-      WHERE pro.product_created_by = :created_by
-        AND pro.product_usage_type IN ('sale', 'both')
-      ORDER BY pro.product_id DESC
-      `,
-      {
-        replacements: { created_by: getCreatedBy(req.currentUser) },
-        type: sequelize.QueryTypes.SELECT,
-      }
+    const {
+      categoryId = 0,
+      brandIds = [],
+      product_search = "",
+      minPrice,
+      maxPrice
+    } = req.body;
+
+    const createdBy = getCreatedBy(req.currentUser);
+
+    // ----- Base WHERE condition -----
+    let baseWhere = `WHERE pro.product_created_by = :created_by
+      AND pro.product_usage_type IN ('sale','both')`;
+
+    if (categoryId && categoryId !== 0) baseWhere += ` AND pro.product_category = :categoryId`;
+    if (brandIds.length > 0) baseWhere += ` AND pro.product_brand IN (:brandIds)`;
+    if (product_search.trim() !== "") baseWhere += ` AND pro.product_name LIKE :product_search`;
+
+    const replacementsBase = {
+      created_by: createdBy,
+      categoryId: categoryId || null,
+      brandIds: brandIds || [],
+      product_search: `%${product_search}%`,
+    };
+
+    // ----- 1) Get min & max price without price filter -----
+    const priceRange = await sequelize.query(
+      `SELECT MIN(product_sale_price) AS minPrice, MAX(product_sale_price) AS maxPrice
+       FROM tbl_products AS pro
+       ${baseWhere}`,
+      { replacements: replacementsBase, type: sequelize.QueryTypes.SELECT }
     );
 
-    res.status(200).json(products);
-  } catch (error) {
-    console.error("❌ Error fetching products:", error);
-    res.status(500).json({
-      message: "Error fetching products",
-      error: error.message,
+    const { minPrice: dbMinPrice, maxPrice: dbMaxPrice } = priceRange[0];
+
+    // ----- 2) Apply price filter for product listing -----
+    const safeMinPrice = minPrice ?? dbMinPrice ?? 0;
+    const safeMaxPrice = maxPrice ?? dbMaxPrice ?? 9999999;
+
+    const whereWithPrice = `${baseWhere} AND pro.product_sale_price BETWEEN :minPrice AND :maxPrice`;
+
+    const replacementsFiltered = { ...replacementsBase, minPrice: safeMinPrice, maxPrice: safeMaxPrice };
+
+    // Cheapest product
+    const minProduct = await sequelize.query(
+      `SELECT pro.*, tx.tax_name, tx.tax_percentage, cat.category_name, br.brand_name
+       FROM tbl_products AS pro
+       LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
+       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
+       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
+       ${whereWithPrice} AND pro.product_sale_price = :minPrice
+       LIMIT 1`,
+      { replacements: replacementsFiltered, type: sequelize.QueryTypes.SELECT }
+    );
+
+    // Most expensive product
+    const maxProduct = await sequelize.query(
+      `SELECT pro.*, tx.tax_name, tx.tax_percentage, cat.category_name, br.brand_name
+       FROM tbl_products AS pro
+       LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
+       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
+       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
+       ${whereWithPrice} AND pro.product_sale_price = :maxPrice
+       LIMIT 1`,
+      { replacements: replacementsFiltered, type: sequelize.QueryTypes.SELECT }
+    );
+
+    // All filtered products
+    const allProducts = await sequelize.query(
+      `SELECT pro.*, tx.tax_name, tx.tax_percentage, cat.category_name, br.brand_name
+       FROM tbl_products AS pro
+       LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
+       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
+       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
+       ${whereWithPrice}
+       ORDER BY pro.product_id DESC`,
+      { replacements: replacementsFiltered, type: sequelize.QueryTypes.SELECT }
+    );
+
+    return res.status(200).json({
+      min_price: dbMinPrice ?? 0, // updated based on category/brand/search
+      max_price: dbMaxPrice ?? 9999999,
+      cheapest: minProduct[0] || null,
+      expensive: maxProduct[0] || null,
+      products: allProducts,
     });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
   }
 };
+
+
+
+
 const Get = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);

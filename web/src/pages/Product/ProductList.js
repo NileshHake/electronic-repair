@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import DeleteModal from "../../Components/Common/DeleteModal";
 import ProductAdd from "./ProductAdd";
-import ProductUpdate from "./ProductUpdate";
+import ProductUpdate from "./ProductUpdate"; 
 import {
   deleteProduct,
   getProductList,
@@ -246,13 +246,13 @@ const ProductList = () => {
           isProductData={isProduct}
         />
       )}
-      {isViewModalOpen && (
-        <ProductView
-          isOpen={isViewModalOpen}
-          toggle={() => setIsViewModalOpen(false)}
-          isProductData={isProduct}
-        />
-      )}
+        {isViewModalOpen && (
+          <ProductView
+            isOpen={isViewModalOpen}
+            toggle={() => setIsViewModalOpen(false)}
+            isProductData={isProduct}
+          />
+        )}
     </div>
   );
 };

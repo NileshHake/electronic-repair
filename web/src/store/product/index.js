@@ -6,6 +6,7 @@ import { APIClient } from "../../helpers/api_helper";
 export const GET_PRODUCT = "GET_PRODUCT";
 export const ADD_PRODUCT = "ADD_PRODUCT";
 export const FILTER_PRODUCT_FOR_REPAIR = "FILTER_PRODUCT_FOR_REPAIR";
+export const FILTER_PRODUCT_FOR_SALE = "FILTER_PRODUCT_FOR_SALE";
 export const UPDATE_PRODUCT = "UPDATE_PRODUCT";
 export const DELETE_PRODUCT = "DELETE_PRODUCT";
 export const GET_SINGLE_PRODUCT = "GET_SINGLE_PRODUCT";
@@ -50,6 +51,10 @@ export const filterProductforRepair = (filterData) => ({
   type: FILTER_PRODUCT_FOR_REPAIR,
   payload: filterData,
 });
+export const filterProductForSale = (filterData) => ({
+  type: FILTER_PRODUCT_FOR_SALE,
+  payload: filterData,
+});
 
 export const updateProduct = (product) => ({
   type: UPDATE_PRODUCT,
@@ -65,7 +70,10 @@ export const deleteProduct = (id) => ({
 const INIT_STATE = {
   products: [],
   filterProductsforRepair: [],
+  filterProductsforSale: [],
   singleProduct: null,
+  max_price: 9999999,
+  min_price: 0,
   loading: true,
   error: false,
   addProductResponse: false,
@@ -95,7 +103,14 @@ export const ProductReducer = (state = INIT_STATE, action) => {
             filterProductsforRepair: action.payload.data,
             loading: false,
           };
-
+        case FILTER_PRODUCT_FOR_SALE:
+          return {
+            ...state,
+            filterProductsforSale: action.payload.data.products,
+            max_price: action.payload.data.max_price,
+            min_price: action.payload.data.min_price,
+            loading: false,
+          };
         case ADD_PRODUCT:
           return {
             ...state,
@@ -147,7 +162,9 @@ const getProductApi = () => api.get("/product/list");
 const getSingleProductApi = (id) => api.get(`/product/single/${id}`);
 const addProductApi = (formData) => api.create(`/product/store`, formData);
 const filterProductForRepairApi = (formData) =>
-  api.create(`/products/repair-sale/list`, formData);
+  api.create(`/products/repair-list`, formData);
+const filterProductForSaleApi = (formData) =>
+  api.createApplicationData(`/products/sale-list`, formData);
 
 const updateProductApi = (data) => api.put(`/product/update`, data);
 const deleteProductApi = (id) => api.delete(`/product/delete/${id}`);
@@ -183,11 +200,24 @@ function* filterProductForRepairSaga({ payload }) {
     );
   } catch (error) {
     yield put(productApiResponseError(FILTER_PRODUCT_FOR_REPAIR, error));
-    toast.error("Failed to filter products for repair!");
+    toast.error("Failed to filter products for Repair!");
   }
 }
 
+function* filterProductForSaleSaga({ payload }) {
+  try {
 
+
+    const response = yield call(filterProductForSaleApi, payload);
+
+    yield put(
+      productApiResponseSuccess(FILTER_PRODUCT_FOR_SALE, response)
+    );
+  } catch (error) {
+    yield put(productApiResponseError(FILTER_PRODUCT_FOR_SALE, error));
+    toast.error("Failed to filter products for Sale!");
+  }
+}
 
 function* addProductSaga({ payload }) {
   try {
@@ -270,6 +300,9 @@ function* watchGetSingleProduct() {
 function* watchFilterProductForRepair() {
   yield takeEvery(FILTER_PRODUCT_FOR_REPAIR, filterProductForRepairSaga);
 }
+function* watchFilterProductForSale() {
+  yield takeEvery(FILTER_PRODUCT_FOR_SALE, filterProductForSaleSaga);
+}
 
 function* watchAddProduct() {
   yield takeEvery(ADD_PRODUCT, addProductSaga);
@@ -287,6 +320,7 @@ export function* productSaga() {
     fork(watchGetProduct),
     fork(watchGetSingleProduct),
     fork(watchFilterProductForRepair),
+    fork(watchFilterProductForSale),
     fork(watchAddProduct),
     fork(watchUpdateProduct),
     fork(watchDeleteProduct),
