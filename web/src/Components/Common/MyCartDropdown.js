@@ -84,7 +84,7 @@ const MyCartDropdown = () => {
                                 <Link to="/apps-ecommerce-products" className="btn btn-success w-md mb-3">Shop Now</Link>
                             </div>
 
-                            {cart.map((item, key) => (<div className="d-block dropdown-item text-wrap dropdown-item-cart px-3 py-2" key={key}>
+                            {cartData.map((item, key) => (<div className="d-block dropdown-item text-wrap dropdown-item-cart px-3 py-2" key={key}>
                                 <div className="d-flex align-items-center">
                                     <img src={item.img}
                                         className="me-3 rounded-circle avatar-sm p-2 bg-light" alt="user-pic" />
