@@ -181,8 +181,7 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
-
-    // 2️⃣ Repairing - Customer
+ 
     {
       id: "REPAIRINGCUSTOMER",
       label: "Repairing  ",
@@ -196,13 +195,12 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
-
-    // 3️⃣ Customer Sales
+ 
     {
       id: "CUSTOMERSALES",
       label: "  Sales",
-      icon: "mdi mdi-cash-multiple", // change icon if you want
-      link: "/apps-ecommerce-productsz",
+      icon: "mdi mdi-cash-multiple", 
+      link: "/apps-ecommerce-products",
       stateVariables: isCustomerSales,
       click: function (e) {
         e.preventDefault();

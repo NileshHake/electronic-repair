@@ -162,7 +162,7 @@ const getProductApi = () => api.get("/product/list");
 const getSingleProductApi = (id) => api.get(`/product/single/${id}`);
 const addProductApi = (formData) => api.create(`/product/store`, formData);
 const filterProductForRepairApi = (formData) =>
-  api.create(`/products/repair-list`, formData);
+  api.create(`/products/repair-sale/list`, formData);
 const filterProductForSaleApi = (formData) =>
   api.createApplicationData(`/products/sale-list`, formData);
 

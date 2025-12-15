@@ -108,16 +108,20 @@ exports.getQuotationAndBills = async (req, res) => {
         // Step 1: Fetch all masters with customer info
         const masters = await sequelize.query(
             `
-      SELECT 
-        m.*,
-        u.user_name AS customer_name,
-        u.user_email AS customer_email
-      FROM tbl_quotation_and_billing_masters AS m
-      LEFT JOIN tbl_users AS u 
+    SELECT 
+      m.*,
+      u.user_name AS customer_name,
+      u.user_email AS customer_email
+    FROM tbl_quotation_and_billing_masters AS m
+    LEFT JOIN tbl_users AS u 
         ON m.quotation_and_billing_master_customer_id = u.user_id
-      ORDER BY m.quotation_and_billing_master_id DESC
-      `,
-            { type: sequelize.QueryTypes.SELECT }
+    WHERE m.quotation_and_billing_master_created_by = :createdBy
+    ORDER BY m.quotation_and_billing_master_id DESC
+  `,
+            {
+                type: sequelize.QueryTypes.SELECT,
+                replacements: { createdBy: getCreatedBy(req.currentUser) },
+            }
         );
 
         // Step 2: If no masters, return empty array
@@ -238,7 +242,7 @@ exports.updateQuotationAndBill = async (req, res) => {
 
     const t = await sequelize.transaction();
     try {
-        
+
         const master = await QuotationAndBillingMaster.findByPk(req.body.quotation_and_billing_master_id);
         if (!master) return res.status(404).json({ error: "QuotationAndBill not found" });
 

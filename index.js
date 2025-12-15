@@ -50,7 +50,7 @@ sequelize
     console.log("✅ Database connected successfully");
 
     return sequelize.sync({
-      alter: false
+      alter:false
 
     });
   })
@@ -148,6 +148,8 @@ app.use("/api", QuotationAndBilling);
 
 const inventory = require("./src/inventory/inventory_route");
 app.use("/api", inventory);
+const add_to_card = require("./src/add_to_card/add_to_card_route");
+app.use("/api", add_to_card);
 
 
 const PORT = process.env.PORT || 5000;

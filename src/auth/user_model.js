@@ -52,7 +52,7 @@ const User = sequelize.define("tbl_user", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  user_branch_nmae: {
+  user_branch_name: {
     type: DataTypes.STRING,
     allowNull: true,
   },

@@ -53,7 +53,7 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
     user_upi_id: "",
     user_bank_name: "",
     user_ifsc_code: "",
-    user_branch_nmae: "",
+    user_branch_name: "",
     user_bank_account_number: "",
     user_profile: null,
     user_address_pincode: "",
@@ -82,7 +82,7 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
         user_upi_id: businessDataToEdit.user_upi_id || "",
         user_bank_name: businessDataToEdit.user_bank_name || "",
         user_ifsc_code: businessDataToEdit.user_ifsc_code || "",
-        user_branch_nmae: businessDataToEdit.user_branch_nmae || "",
+        user_branch_name: businessDataToEdit.user_branch_name || "",
         user_bank_account_number:
           businessDataToEdit.user_bank_account_number || "",
         user_profile: null,
@@ -197,7 +197,7 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
         setBusinessData((prev) => ({
           ...prev,
           user_bank_name: data.BANK || "",
-          user_branch_nmae: data.BRANCH || "",
+          user_branch_name: data.BRANCH || "",
         }));
       }
     } catch (error) {

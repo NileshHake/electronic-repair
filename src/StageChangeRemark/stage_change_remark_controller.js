@@ -136,9 +136,8 @@ const Get = async (req, res) => {
       }
     );
 
-    if (!stageRemarks || stageRemarks.length === 0) {
-      return res.status(404).json({ message: "Stage remark not found" });
-    }
+     
+    
 
     res.status(200).json(stageRemarks);
   } catch (error) {

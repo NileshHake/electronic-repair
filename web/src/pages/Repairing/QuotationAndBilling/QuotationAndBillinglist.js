@@ -119,6 +119,7 @@ const QuotationAndBillingList = () => {
                                                 <th>Invoice Number</th>
                                                 <th>Date</th>
                                                 <th>Customer</th>
+                                                <th>Type</th>
                                                 <th>Total</th>
                                                 <th>GST Amount</th>
                                                 <th>Grand Total</th>
@@ -137,6 +138,7 @@ const QuotationAndBillingList = () => {
                                                             ).toLocaleDateString()}
                                                         </td>
                                                         <td>{q.customer_name}</td>
+                                                        <td>{q.quotation_or_billing}</td>
                                                         <td>₹{q.quotation_and_billing_master_total?.toFixed(2)}</td>
                                                         <td>
                                                             ₹{q.quotation_and_billing_master_gst_amount?.toFixed(2)}

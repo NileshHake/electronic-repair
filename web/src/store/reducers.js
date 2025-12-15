@@ -96,6 +96,7 @@ import { DeviceColorReducer } from "./DeviceColor";
 import { OtpReducer } from "./StageRemark";
 import { StageRemarkReducer } from "./StageRemarkData";
 import { QuotationBillingReducer } from "./QuotationAndBilling";
+import { CartReducer } from "./AddToCart";
  
 const rootReducer = combineReducers({
   // public
@@ -148,6 +149,7 @@ const rootReducer = combineReducers({
   ProductReducer,
   AccessoriesReducer,
   WorkflowReducer,
+  CartReducer,
   QuotationBillingReducer,
   // Team,
   // FileManager,

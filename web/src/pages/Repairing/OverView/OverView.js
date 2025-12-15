@@ -75,12 +75,22 @@ const OverView = () => {
   // Show toast on successful add
   useEffect(() => {
     if (addResponse) {
+      if (isQuotationModaLOpen && isBillingModaLOpen) {
+        toast.success("Quotation & Billing added successfully!");
+      } else if (isQuotationModaLOpen) {
+        toast.success("Quotation added successfully!");
+      } else if (isBillingModaLOpen) {
+        toast.success("Billing added successfully!");
+      }
 
-      toast.success("Quotation & Billing added successfully!");
       dispatch(resetAddQuotationBillingResponse());
+
       setIsQuotationModaLOpen(false);
-      setIsBillingModaLOpen(false)
+      setIsBillingModaLOpen(false);
+
+    
     }
+
   }, [addResponse, dispatch]);
 
   const toggleTab = (tab) => {

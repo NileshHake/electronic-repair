@@ -15,6 +15,8 @@ import defaultImage from "../../../../assets/images/productdefaultimg/istockphot
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Navigation, Autoplay } from 'swiper'; // Import modules from 'swiper' 
 import { api } from '../../../../config';
+import { addToCart } from '../../../../store/AddToCart';
+import { useDispatch } from 'react-redux';
 
 
 /**
@@ -24,21 +26,26 @@ import { api } from '../../../../config';
  * @param {function} props.onViewDetails - Handler function for view details action.
  * @param {function} props.onAddToCart - Handler function for add to cart action.
  */
-const ProductSaleCard = ({ product, onViewDetails, onAddToCart }) => {
-    // Safely parse the product images string to an array
+const ProductSaleCard = ({ product, onViewDetails }) => {
+    const dispatch = useDispatch()
     const imageArray = JSON.parse(product.product_image || "[]");
 
-    // Default image source if no images are available
-    
-
-    // Determine the main image for the carousel or single display
     const imagesToDisplay = imageArray.length > 0
         ? imageArray.map(imgName => api.IMG_URL + "product_images/" + imgName)
         : [defaultImage];
 
-    // Placeholder for rating logic - adjust as needed
-    const rating = product.average_rating || 4.5;
-    const isNew = product.is_new || false;
+
+    const onAddToCart = (product) => {
+        const addtocarddata = {
+            add_to_card_product_id: product.product_id,
+            add_to_card_product_qty: 1,
+            add_to_card_product_sale_price: product.product_sale_price,
+            add_to_card_product_mrp: product.product_mrp,
+            add_to_card_product_name: product.product_name,
+            add_to_card_product_discount: product.product_dis
+        }
+        dispatch(addToCart(addtocarddata));
+    }
 
     return (
         <Card className="product-sale-card h-100 shadow-sm border-0">
@@ -67,11 +74,11 @@ const ProductSaleCard = ({ product, onViewDetails, onAddToCart }) => {
                 </Swiper>
 
                 {/* Sale Badge */}
-                {isNew && (
+                {/* {isNew && (
                     <Badge color="danger" className="position-absolute top-0 start-0 m-2">
                         New
                     </Badge>
-                )}
+                )} */}
             </div>
 
             {/* Product Details Section */}
@@ -130,8 +137,8 @@ const ProductSaleCard = ({ product, onViewDetails, onAddToCart }) => {
             </CardBody>
         </Card>
     );
-};
 
+}
 export default ProductSaleCard;
 
 //

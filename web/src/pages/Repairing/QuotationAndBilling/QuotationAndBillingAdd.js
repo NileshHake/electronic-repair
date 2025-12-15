@@ -37,7 +37,7 @@ const QuotationAndBillingAdd = ({ isOpen, toggle, RepairData, type }) => {
     useEffect(() => {
         dispatch(getCategoriesList());
         dispatch(getBrandsList());
-
+       
         if (RepairData && type === "Quotation"  ) {
             try {
                 const servicesArray = JSON.parse(RepairData.repair_device_services_id || "[]");
@@ -127,7 +127,7 @@ const QuotationAndBillingAdd = ({ isOpen, toggle, RepairData, type }) => {
 
             const base = qty * price;
             const gstValue = (base * gst) / 100;
-
+ 
             total += base;
             gstAmount += gstValue;
         });
@@ -170,9 +170,7 @@ const handleProductAdd = (product) => {
             return updated;
         }
 
-        // Generate unique child product ID (for invoice row)
-        const childId = `child_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-
+     
         const qty = 1;
         const base = qty * salePrice;
         const taxValue = (base * taxPercent) / 100;

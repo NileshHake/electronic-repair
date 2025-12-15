@@ -30,6 +30,7 @@ import { api } from "../../../../config";
 import { toast } from "react-toastify";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("1");
@@ -69,14 +70,19 @@ const Settings = () => {
     user_bank_code: "",
     user_bank_contact: "",
     user_bank_account_number: "",
+    user_branch_name: "",
     user_upi_id: "",
     user_bank_address: "",
     user_terms_and_conditions: "",
   });
+    const navigate = useNavigate  ();
   useEffect(() => {
     if (updateUserResponse) {
       dispatch(getSingleUser(user.user_id));
+
       dispatch(resetUpdateUserResponse());
+      navigate("/dashboard")
+      window.location.reload();
     }
   }, [updateUserResponse]);
   useEffect(() => {

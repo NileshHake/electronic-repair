@@ -121,7 +121,7 @@ const EcommerceProducts = (props) => {
     return (
         <div className="page-content">
 
-            <ToastContainer closeButton={false} limit={1} />
+            <ToastContainer closeButton={false} limit={1}  autoClose={800}/>
 
             <Container fluid>
                 <BreadCrumb title="Products" pageTitle="Ecommerce" />
@@ -287,7 +287,7 @@ const EcommerceProducts = (props) => {
                                                     setIsProduct(product);
                                                     setIsViewModalOpen(true);
                                                 }}
-                                                onAddToCart={(prod) => console.log('Added to cart:', prod)}
+                                               
                                             />
                                         </Col>
                                     ))

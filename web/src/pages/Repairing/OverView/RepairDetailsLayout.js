@@ -320,9 +320,9 @@ const RepairDetailsLayout = ({
                 <hr className="my-3" />
 
                 {/* Hardware & Storage */}
-                <h6 className="text-muted mb-2">Hardware & Configuration</h6>
+                <h6 className="text-muted mb-2">Cost & Location</h6>
                 <Row className="g-2 small">
-                  <Col sm={6}>
+                  {/* <Col sm={6}>
                     <small className="text-muted d-block">Processor</small>
                     <span className="fw-semibold d-block">
                       {singleRepair?.hardware_configuration_processor || "-"}
@@ -352,7 +352,7 @@ const RepairDetailsLayout = ({
                       {singleRepair?.hardware_configuration_graphics_card ||
                         "-"}
                     </span>
-                  </Col>
+                  </Col> */}
                   <Col sm={6}>
                     <small className="text-muted d-block">
                       Storage Location
@@ -361,13 +361,12 @@ const RepairDetailsLayout = ({
                       {singleRepair?.storage_location_name || "N/A"}
                     </span>
                   </Col>
-
-                  {/* Repair Estimated Cost */}
+ 
                   <Col sm={6}>
                     <small className="text-muted d-block">Estimated Cost</small>
                     <span className="fw-semibold d-block">
                       {singleRepair?.repair_estimated_cost
-                        ? `₹${singleRepair.repair_estimated_cost}`
+                        ? `₹${singleRepair.repair_estimated_cost}` 
                         : "-"}
                     </span>
                   </Col>
@@ -447,7 +446,7 @@ const RepairDetailsLayout = ({
           className="px-3 py-2 bg-primary-subtle text-primary rounded fw-semibold"
           style={{ fontSize: "15px" }} // make it bigger
         >
-          {index + 1}. Service: {service.service}, Cost: {service.cost}
+          {index + 1}. Service: {service.service} 
         </div>
       ));
     })()

@@ -46,7 +46,7 @@ const BusinessAdd = ({ isOpen, toggle }) => {
     user_upi_id: "",
     user_bank_name: "",
     user_ifsc_code: "",
-    user_branch_nmae: "",
+    user_branch_name: "",
     user_bank_account_number: "",
     user_bank_address: "",
     user_bank_code: "",
