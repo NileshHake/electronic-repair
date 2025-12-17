@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    container_name: repair_backend
+    ports:
+      - "5001:5000"
+    env_file:
+      - .env.docker
+    depends_on:
+      - mysql
+    restart: always
+
+  frontend:
+    build:
+      context: ./web
+    container_name: repair_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: repair_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: repaircrm_db
+      MYSQL_USER: repair_user
+      MYSQL_PASSWORD: repair_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+
+volumes:
+  mysql_data:

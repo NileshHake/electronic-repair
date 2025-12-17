@@ -102,14 +102,15 @@
     "yup": "^1.2.0"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "node --max_old_space_size=8000 ./node_modules/.bin/craco build",
-    "test": "craco test",
-    "eject": "react-scripts eject",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
-    "format": "prettier --write \"**/*.{js,jsx,json,md,html,css,less,scss}\""
-  },
+  "start": "craco start",
+  "build": "craco build",
+  "test": "craco test",
+  "eject": "react-scripts eject",
+  "lint": "eslint .",
+  "lint:fix": "eslint --fix .",
+  "format": "prettier --write \"**/*.{js,jsx,json,md,html,css,less,scss}\""
+}
+,
   "babelOptions": {
     "presets": [
       "@babel/preset-react"

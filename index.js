@@ -53,7 +53,7 @@ sequelize
       alter:false
 
     });
-  })
+  })  
   .then(() => {
     console.log("🔁 Models synchronized with database (force: true)");
 
