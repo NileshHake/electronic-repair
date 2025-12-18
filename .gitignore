@@ -17,6 +17,7 @@ yarn.lock
 # Explicitly ignore client & server node_modules (optional but clearer)
 electronic-repair/node_modules/
 electronic-repair/web/node_modules/
+electronic-repair/frontend/node_modules/
 /public/
 
 
