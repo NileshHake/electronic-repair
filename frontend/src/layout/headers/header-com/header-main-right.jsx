@@ -12,6 +12,8 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
   const { wishlist } = useSelector((state) => state.wishlist);
   const { quantity } = useCartInfo();
   const dispatch = useDispatch()
+ 
+  
   return (
     <div className="tp-header-main-right d-flex align-items-center justify-content-end">
       <div className="tp-header-login d-none d-lg-block">
@@ -27,10 +29,10 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
                     height={35}
                   />
                 </Link>
-              ) : userInfo?.name ? (
+              ) : userInfo?.user_name ? (
                 <Link href="/profile">
                   <h2 className="text-uppercase login_text">
-                    {userInfo?.name[0]}
+                    {userInfo?.user_name[0]}
                   </h2>
                 </Link>
               ) : (
@@ -39,15 +41,15 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
             </span>
           </div>
           <div className="tp-header-login-content d-none d-xl-block">
-            {!userInfo?.name && (
+            {!userInfo?.user_name && (
               <Link href="/login">
                 <span>Hello,</span>
               </Link>
             )}
-            {userInfo?.name && <span>Hello, {userInfo?.name}</span>}
+            {userInfo?.user_name && <span>Hello, {userInfo?.user_name}</span>}
             <div className="tp-header-login-title">
-              {!userInfo?.name && <Link href="/login">Sign In</Link>}
-              {userInfo?.name && <Link href="/profile">Your Account</Link>}
+              {!userInfo?.user_name && <Link href="/login">Sign In</Link>}
+              {userInfo?.user_name && <Link href="/profile">Your Account</Link>}
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@ function Language({active,handleActive}) {
         onClick={() => handleActive('lang')}
         className="tp-header-lang-toggle"
         id="tp-header-lang-toggle"
-      >
+      > 
         English
       </span>
       <ul className={active === 'lang' ? "tp-lang-list-open" : ""}>

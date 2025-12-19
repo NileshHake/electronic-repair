@@ -18,6 +18,11 @@ const io = new Server(server, {
 });
 
 app.use(cors());
+app.use(cors({
+  origin: "*", // allow all origins
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 

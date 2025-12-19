@@ -46,7 +46,7 @@ export const authApi = apiSlice.injectEndpoints({
     // login
     loginUser: builder.mutation({
       query: (data) => ({
-        url: "https://shofy-backend-dlt.vercel.app/api/user/login",
+        url:  "/user/login",
         method: "POST",
         body: data,
       }),
@@ -58,16 +58,16 @@ export const authApi = apiSlice.injectEndpoints({
           Cookies.set(
             "userInfo",
             JSON.stringify({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
+              accessToken: result.data.token,
+              user: result.data.user,
             }),
             { expires: 0.5 }
           );
 
           dispatch(
             userLoggedIn({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
+              accessToken: result.data.token,
+              user: result.data.user,
             })
           );
         } catch (err) {

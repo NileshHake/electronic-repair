@@ -9,6 +9,7 @@ import { CloseEye, OpenEye } from '@/svg';
 import ErrorMsg from '../common/error-msg';
 import { useLoginUserMutation } from '@/redux/features/auth/authApi';
 import { notifyError, notifySuccess } from '@/utils/toast';
+import { toast } from 'react-toastify';
 
 
 // schema
@@ -31,22 +32,29 @@ const LoginForm = () => {
     resolver: yupResolver(schema),
   });
   // onSubmit
-  const onSubmit = (data) => {
-    loginUser({
-      email: data.email,
-      password: data.password,
-    })
-      .then((data) => {
-        if (data?.data) {
-          notifySuccess("Login successfully");
-          router.push(redirect || "/");
-        }
-        else {
-          notifyError(data?.error?.data?.error)
-        }
-      })
-    reset();
+  const onSubmit = async (data) => {
+    try {
+      // Call the RTK Query mutation
+      const response = await loginUser({
+        user_email: data.email,
+        user_password: data.password,
+      }).unwrap(); // unwrap to get the actual response or throw error
+
+      if (response && response.success) {
+        // Store user in session
+       
+        router.push("/");
+      } else {
+        toast.error(response?.message || "Invalid email or password ❌");
+        dispatch(apiError(response?.message || "Invalid login response"));
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast.error(error?.data?.message || "Login failed ❌");
+    }
   };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="tp-login-input-wrapper">
@@ -78,7 +86,7 @@ const LoginForm = () => {
               <label htmlFor="password">Password</label>
             </div>
           </div>
-          <ErrorMsg msg={errors.password?.message}/>
+          <ErrorMsg msg={errors.password?.message} />
         </div>
       </div>
       <div className="tp-login-suggetions d-sm-flex align-items-center justify-content-between mb-20">
