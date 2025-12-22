@@ -65,6 +65,47 @@ const getSubCategories = async (req, res) => {
       .json({ message: "Error fetching subcategories", error: error.message });
   }
 };
+const getCategoriesWithSub = async (req, res) => {
+  try {
+    console.log("tcvxcvcxvrue");
+
+    // 1️⃣ Fetch all main categories (category_main_id = 0 or null)
+    const mainCategories = await Category.findAll({
+      where: {
+        category_main_id: null,
+      },
+      raw: true,
+    });
+
+
+    // 2️⃣ For each main category, fetch its subcategories
+    const categoriesWithChildren = await Promise.all(
+      mainCategories.map(async (mainCat) => {
+        const subCategories = await Category.findAll({
+          where: {
+            category_main_id: mainCat.category_id,
+          },
+          raw: true,
+        });
+
+        return {
+          ...mainCat,
+          children: subCategories, // attach subcategories as children
+        };
+      })
+    );
+    console.log(categoriesWithChildren);
+
+    res.status(200).json(categoriesWithChildren);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error fetching categories with subcategories",
+      error: error.message,
+    });
+  }
+};
+
 // 🔵 READ SINGLE
 const Get = async (req, res) => {
   try {
@@ -142,6 +183,7 @@ module.exports = {
   store,
   index,
   getSubCategories,
+  getCategoriesWithSub,
   Get,
   update,
   deleted,

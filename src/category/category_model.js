@@ -18,7 +18,7 @@ const Category = sequelize.define("tbl_category", {
   category_main_id: {
     type: DataTypes.STRING,
     allowNull: true,
-    defaultValue: "0",
+    defaultValue:  null,
   },
   category_created_by: {
     type: DataTypes.INTEGER,

@@ -1,79 +1,74 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-// internal
-import { useGetProductTypeCategoryQuery } from "@/redux/features/categoryApi";
+import { useGetCategoriesWithSubQuery } from "@/redux/features/categoryApi";
 import ErrorMsg from "@/components/common/error-msg";
 import Loader from "@/components/loader/loader";
+import { api } from "../../../../config";
+import D_img from "@/components/Default/D_img";
 
-const HeaderCategory = ({ isCategoryActive, categoryType = "electronics" }) => {
-  const {
-    data: categories,
-    isError,
-    isLoading,
-  } = useGetProductTypeCategoryQuery(categoryType);
+const HeaderCategory = ({ isCategoryActive }) => {
+  const { data: categories, isLoading, isError } =
+    useGetCategoriesWithSubQuery();
   const router = useRouter();
 
-  // handle category route
-  const handleCategoryRoute = (title, route) => {
-    if (route === "parent") {
-      router.push(
-        `/shop?category=${title
-          .toLowerCase()
-          .replace("&", "")
-          .split(" ")
-          .join("-")}`
-      );
-    } else {
-      router.push(
-        `/shop?subCategory=${title
-          .toLowerCase()
-          .replace("&", "")
-          .split(" ")
-          .join("-")}`
-      );
-    }
+  const handleCategoryRoute = (name, type) => {
+    const param = type === "parent" ? "category" : "subCategory";
+    router.push(
+      `/shop?${param}=${name
+        .toLowerCase()
+        .replace("&", "")
+        .split(" ")
+        .join("-")}`
+    );
   };
-  // decide what to render
+
   let content = null;
 
-  if (isLoading) {
-    content = (
-      <div className="py-5">
-        <Loader loading={isLoading} />
-      </div>
-    );
-  }
-  if (!isLoading && isError) {
-    content = <ErrorMsg msg="There was an error" />;
-  }
-  if (!isLoading && !isError && categories?.result?.length === 0) {
+  if (isLoading) content = <Loader loading />;
+  if (!isLoading && isError) content = <ErrorMsg msg="There was an error" />;
+  if (!isLoading && !isError && categories?.length === 0)
     content = <ErrorMsg msg="No Category found!" />;
-  }
-  if (!isLoading && !isError && categories?.result?.length > 0) {
-    const category_items = categories.result;
-    content = category_items.map((item) => (
-      <li className="has-dropdown" key={item._id}>
+
+  if (!isLoading && !isError && categories?.length > 0) {
+    content = categories.map((item) => (
+      <li className="has-dropdown" key={item.category_id}>
+        {/* Parent Category */}
         <a
           className="cursor-pointer"
-          onClick={() => handleCategoryRoute(item.parent, "parent")}
+          onClick={() =>
+            handleCategoryRoute(item.category_name, "parent")
+          }
         >
-          {item.img && (
-            <span>
-              <Image src={item.img} alt="cate img" width={50} height={50} />
-            </span>
-          )}
-          {item.parent}
+        {item.category_img ? (
+  <span>
+    <Image
+      src={`${api.IMG_URL}category_img/${item.category_img}`}
+      alt={item.category_name}
+      width={50}
+      height={50}
+    />
+  </span>
+) : (
+  <D_img />
+)}
+{item.category_name}
+
         </a>
 
-        {item.children && (
+        {/* Sub Categories */}
+        {item.children?.length > 0 && (
           <ul className="tp-submenu">
-            {item.children.map((child, i) => (
+            {item.children.map((child) => (
               <li
-                key={i}
-                onClick={() => handleCategoryRoute(child, "children")}
+                key={child.category_id}
+                onClick={() =>
+                  handleCategoryRoute(child.category_name, "children")
+                }
               >
-                <a className="cursor-pointer">{child}</a>
+                <a className="cursor-pointer">
+                  {child.category_name}
+                </a>
               </li>
             ))}
           </ul>
@@ -81,6 +76,7 @@ const HeaderCategory = ({ isCategoryActive, categoryType = "electronics" }) => {
       </li>
     ));
   }
+
   return <ul className={isCategoryActive ? "active" : ""}>{content}</ul>;
 };
 

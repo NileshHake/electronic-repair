@@ -1,16 +1,31 @@
 import { useState } from "react";
-// internal
 import { Search } from "@/svg";
 import NiceSelect from "@/ui/nice-select";
 import useSearchFormSubmit from "@/hooks/use-search-form-submit";
+import { useGetCategoriesWithSubQuery } from "@/redux/features/categoryApi";
 
 const HeaderSearchForm = () => {
-  const { setSearchText, setCategory, handleSubmit, searchText } = useSearchFormSubmit();
+  const { setSearchText, setCategory, handleSubmit, searchText } =
+    useSearchFormSubmit();
 
-  // selectHandle
+  const {
+    data: categories = [], // ✅ default empty array
+    isLoading,
+    isError,
+  } = useGetCategoriesWithSubQuery();
+
+  console.log("categories", categories);
+
   const selectCategoryHandle = (e) => {
     setCategory(e.value);
   };
+  const options = [
+    { value: "", label: "Select Category" },
+    ...(categories || []).map((cat) => ({
+      value: (cat.category_id),
+      label: cat.category_name,
+    })),
+  ];
 
   return (
     <form onSubmit={handleSubmit}>
@@ -23,20 +38,13 @@ const HeaderSearchForm = () => {
             placeholder="Search for Products..."
           />
         </div>
-        <div className="tp-header-search-category">
-          <NiceSelect
-            options={[
-              { value: "Select Category", text: "Select Category" },
-              { value: "electronics", text: "electronics" },
-              { value: "fashion", text: "fashion" },
-              { value: "beauty", text: "beauty" },
-              { value: "jewelry", text: "jewelry" },
-            ]}
-            defaultCurrent={0}
-            onChange={selectCategoryHandle}
-            name="Select Category"
-          />
+
+        <div  >
+     
+
+
         </div>
+
         <div className="tp-header-search-btn">
           <button type="submit">
             <Search />
