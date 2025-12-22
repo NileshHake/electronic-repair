@@ -25,19 +25,51 @@ const CategoryAdd = ({ isOpen, toggle }) => {
     (state) => state.CategoryReducer
   );
 
-  const [categoryDetails, setCategoryDetails] = useState({
-    category_name: "",
-  });
-
-  const [nameError, setNameError] = useState("");
   const submitButtonRef = useRef();
 
+  const [categoryDetails, setCategoryDetails] = useState({
+    category_name: "",
+    category_img: null,
+  });
+
+  const [previewCategoryImg, setPreviewCategoryImg] = useState(null);
+  const [nameError, setNameError] = useState("");
+  const [imageError, setImageError] = useState("");
+
+  // -----------------------------
+  // Input change
+  // -----------------------------
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCategoryDetails((prev) => ({ ...prev, [name]: value }));
     if (name === "category_name") setNameError("");
   };
 
+  // -----------------------------
+  // Category Image handler
+  // -----------------------------
+  const handleCategoryImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
+      setImageError("Only PNG, JPG, JPEG allowed");
+      return;
+    }
+
+    setImageError("");
+
+    setCategoryDetails((prev) => ({
+      ...prev,
+      category_img: file,
+    }));
+
+    setPreviewCategoryImg(URL.createObjectURL(file));
+  };
+
+  // -----------------------------
+  // Submit
+  // -----------------------------
   const handleAddCategory = (e) => {
     e.preventDefault();
 
@@ -46,20 +78,36 @@ const CategoryAdd = ({ isOpen, toggle }) => {
       return;
     }
 
-    dispatch(addCategory(categoryDetails));
+    const formData = new FormData();
+    formData.append("category_name", categoryDetails.category_name);
+
+    if (categoryDetails.category_img) {
+      formData.append("category_img", categoryDetails.category_img);
+    }
+
+    dispatch(addCategory(formData));
   };
 
-  // Auto-close and reset on success
+  // -----------------------------
+  // Auto-close on success
+  // -----------------------------
   useEffect(() => {
     if (addCategoryResponse) {
       toggle();
-      setCategoryDetails({ category_name: "" });
+      setCategoryDetails({
+        category_name: "",
+        category_img: null,
+      });
+      setPreviewCategoryImg(null);
       setNameError("");
+      setImageError("");
       dispatch(resetAddCategoryResponse());
     }
   }, [addCategoryResponse, dispatch, toggle]);
 
-  // Shortcuts: Alt+S save, Alt+Esc close
+  // -----------------------------
+  // Keyboard shortcuts
+  // -----------------------------
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.altKey && event.key.toLowerCase() === "s") {
@@ -86,6 +134,7 @@ const CategoryAdd = ({ isOpen, toggle }) => {
           <ModalBody>
             <Card className="border card-border-success p-3 shadow-lg">
               <Row>
+                {/* Category Name */}
                 <Col lg={12}>
                   <Label className="form-label fw-bold d-flex justify-content-between">
                     <div>
@@ -102,6 +151,57 @@ const CategoryAdd = ({ isOpen, toggle }) => {
                     autoFocus
                   />
                 </Col>
+
+                {/* Category Image */}
+                <Col lg={6} className="mt-3">
+                  <h5 className="fs-15 mb-1">Category Image</h5>
+
+                  <div className="text-center">
+                    <div className="position-relative d-inline-block">
+                      <div className="position-absolute top-100 start-100 translate-middle">
+                        <label htmlFor="categoryImg" className="mb-0">
+                          <div className="avatar-xs">
+                            <div className="avatar-title bg-light border rounded-circle cursor-pointer">
+                              <i
+                                className="ri-image-fill"
+                                style={{
+                                  color: "#009CA4",
+                                  fontSize: "20px",
+                                }}
+                              ></i>
+                            </div>
+                          </div>
+                        </label>
+
+                        <input
+                          id="categoryImg"
+                          type="file"
+                          className="d-none"
+                          accept="image/png, image/jpeg, image/jpg"
+                          onChange={handleCategoryImageChange}
+                        />
+                      </div>
+
+                      <div className="avatar-lg">
+                        <div className="avatar-title bg-light rounded">
+                          {previewCategoryImg && (
+                            <img
+                              src={previewCategoryImg}
+                              alt="Category"
+                              height="100"
+                              width="100"
+                              className="rounded"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {imageError && (
+                      <div className="text-danger mt-1">{imageError}</div>
+                    )}
+                  </div>
+                </Col>
               </Row>
             </Card>
           </ModalBody>
@@ -116,6 +216,7 @@ const CategoryAdd = ({ isOpen, toggle }) => {
           </ModalFooter>
         </Form>
       </Modal>
+
       <ToastContainer />
     </>
   );

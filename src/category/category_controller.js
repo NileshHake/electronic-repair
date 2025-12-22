@@ -1,11 +1,20 @@
+const { Op } = require("sequelize");
 const { getCreatedBy } = require("../helper/CurrentUser");
+const { saveImage, deleteImage } = require("../helper/fileUpload");
 const Category = require("./category_model");
 
 // 🟢 CREATE
 const store = async (req, res) => {
   try {
+    const file = req.files?.category_img;
+    let savedPath = null;
+
+    if (file) {
+      savedPath = await saveImage(file, "category_img");
+    }
     const category = await Category.create({
       ...req.body,
+      category_img: savedPath,
       category_created_by: getCreatedBy(req.currentUser),
     });
     res
@@ -26,6 +35,9 @@ const index = async (req, res) => {
     const categories = await Category.findAll({
       where: {
         category_created_by: getCreatedBy(req.currentUser),
+        category_main_id: {
+          [Op.or]: [0, null],
+        },
       },
     });
     res.status(200).json(categories);
@@ -35,7 +47,24 @@ const index = async (req, res) => {
       .json({ message: "Error fetching categories", error: error.message });
   }
 };
+const getSubCategories = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const subCategories = await Category.findAll({
+      where: {
+        category_main_id: id, // only subcategories of this main category
+      },
+    });
+
+    res.status(200).json(subCategories);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Error fetching subcategories", error: error.message });
+  }
+};
 // 🔵 READ SINGLE
 const Get = async (req, res) => {
   try {
@@ -53,23 +82,45 @@ const Get = async (req, res) => {
 // 🟠 UPDATE
 const update = async (req, res) => {
   try {
+    const file = req.files?.category_img;
+
     const category = await Category.findByPk(req.body.category_id);
-
-    if (!category)
+    if (!category) {
       return res.status(404).json({ message: "Category not found" });
+    }
 
-    await category.update(req.body);
-    res
-      .status(200)
-      .json({ message: "Category updated successfully", data: category });
+    let category_img = category.category_img; // default old image
+
+    // 🔥 If new image uploaded
+    if (file) {
+      // Delete old image if exists
+      if (category.category_img) {
+        deleteImage("category_img", category.category_img);
+      }
+
+      // Save new image
+      category_img = await saveImage(file, "category_img");
+    }
+
+    // Update category
+    await category.update({
+      ...req.body,
+      category_img, // updated OR old
+    });
+
+    res.status(200).json({
+      message: "Category updated successfully",
+      data: category,
+    });
   } catch (error) {
     console.log(error);
-
-    res
-      .status(500)
-      .json({ message: "Error updating category", error: error.message });
+    res.status(500).json({
+      message: "Error updating category",
+      error: error.message,
+    });
   }
 };
+
 
 // 🔴 DELETE
 const deleted = async (req, res) => {
@@ -90,6 +141,7 @@ const deleted = async (req, res) => {
 module.exports = {
   store,
   index,
+  getSubCategories,
   Get,
   update,
   deleted,

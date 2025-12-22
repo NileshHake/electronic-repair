@@ -1,13 +1,13 @@
 import { call, put, takeEvery, all, fork } from "redux-saga/effects";
 import { toast } from "react-toastify";
 import { APIClient } from "../../helpers/api_helper";
-import { categories } from "../../common/data/jobLanding";
 
 // ================== ACTION TYPES ==================
 export const GET_CATEGORIES = "GET_CATEGORIES";
 export const ADD_CATEGORY = "ADD_CATEGORY";
 export const UPDATE_CATEGORY = "UPDATE_CATEGORY";
 export const DELETE_CATEGORY = "DELETE_CATEGORY";
+export const GET_SUB_CATEGORY = "GET_SUB_CATEGORY";
 export const RESET_ADD_CATEGORY_RESPONSE = "RESET_ADD_CATEGORY_RESPONSE";
 export const RESET_UPDATE_CATEGORY_RESPONSE = "RESET_UPDATE_CATEGORY_RESPONSE";
 export const API_RESPONSE_SUCCESS = "API_RESPONSE_SUCCESS";
@@ -32,28 +32,16 @@ export const resetUpdateCategoryResponse = () => ({
   type: RESET_UPDATE_CATEGORY_RESPONSE,
 });
 
-export const getCategoriesList = () => ({
-  type: GET_CATEGORIES,
-});
-
-export const addCategory = (category) => ({
-  type: ADD_CATEGORY,
-  payload: { category },
-});
-
-export const updateCategory = (category) => ({
-  type: UPDATE_CATEGORY,
-  payload: { category },
-});
-
-export const deleteCategory = (id) => ({
-  type: DELETE_CATEGORY,
-  payload: id,
-});
+export const getCategoriesList = () => ({ type: GET_CATEGORIES });
+export const addCategory = (category) => ({ type: ADD_CATEGORY, payload: { category } });
+export const updateCategory = (category) => ({ type: UPDATE_CATEGORY, payload: { category } });
+export const deleteCategory = (id) => ({ type: DELETE_CATEGORY, payload: id });
+export const getSubCategoriesList = (id) => ({ type: GET_SUB_CATEGORY, payload: id });
 
 // ================== REDUCER ==================
 const INIT_STATE = {
   categories: [],
+  subCategories: [],
   loading: true,
   error: false,
   addCategoryResponse: false,
@@ -63,17 +51,16 @@ const INIT_STATE = {
 export const CategoryReducer = (state = INIT_STATE, action) => {
   switch (action.type) {
     case GET_CATEGORIES:
+    case GET_SUB_CATEGORY:
       return { ...state, loading: true };
 
     case API_RESPONSE_SUCCESS:
       switch (action.payload.actionType) {
         case GET_CATEGORIES:
-          return {
-            ...state,
-            categories: action.payload.data,
-            loading: false,
-            error: false,
-          };
+          return { ...state, categories: action.payload.data, loading: false, error: false };
+
+        case GET_SUB_CATEGORY:
+          return { ...state, subCategories: action.payload.data, loading: false, error: false };
 
         case ADD_CATEGORY:
           return {
@@ -89,57 +76,57 @@ export const CategoryReducer = (state = INIT_STATE, action) => {
             ...state,
             updateCategoryResponse: true,
             categories: state.categories.map((c) =>
-              c.category_id === action.payload.data.category_id
-                ? action.payload.data
-                : c
+              c.category_id === action.payload.data.category_id ? action.payload.data : c
+            ),
+            subCategories: state.subCategories.map((c) =>
+              c.category_id === action.payload.data.category_id ? action.payload.data : c
             ),
             loading: false,
             error: false,
           };
 
-       case DELETE_CATEGORY: {
-  const categoryId = action.payload;
-  return categories.filter(
-    (category) => category.category_id !== categoryId
-  );
-}
-
+        case DELETE_CATEGORY:
+          return {
+            ...state,
+            categories: state.categories.filter(
+              (category) => category.category_id !== action.payload.data
+            ),
+            subCategories: state.subCategories.filter(
+              (category) => category.category_id !== action.payload.data
+            ),
+            loading: false,
+            error: false,
+          };
 
         default:
           return state;
       }
 
     case API_RESPONSE_ERROR:
-      return {
-        ...state,
-        addCategoryResponse: null,
-        error: true,
-      };
+      return { ...state, error: true, loading: false };
 
     case RESET_ADD_CATEGORY_RESPONSE:
-      return {
-        ...state,
-        addCategoryResponse: false,
-      };
+      return { ...state, addCategoryResponse: false };
 
     case RESET_UPDATE_CATEGORY_RESPONSE:
-      return {
-        ...state,
-        updateCategoryResponse: false,
-      };
+      return { ...state, updateCategoryResponse: false };
 
     default:
       return state;
   }
 };
 
-// ================== API CALLS ==================
+// ================== API ==================
 const api = new APIClient();
 
+// Main category APIs
 const getCategoriesApi = () => api.get("/category/list");
 const addCategoryApi = (data) => api.create("/category/store", data);
 const updateCategoryApi = (data) => api.put("/category/update", data);
 const deleteCategoryApi = (id) => api.delete(`/category/delete/${id}`);
+
+// Subcategory API
+const getSubCategoryApi = (id) => api.get(`/category/sub/${id}`);
 
 // ================== SAGAS ==================
 
@@ -150,7 +137,18 @@ function* getCategoriesListSaga() {
     yield put(categoryApiResponseSuccess(GET_CATEGORIES, response));
   } catch (error) {
     yield put(categoryApiResponseError(GET_CATEGORIES, error));
-    toast.error("Failed to fetch category list!");
+    toast.error("Failed to fetch categories!");
+  }
+}
+
+// Get Subcategories
+function* getSubCategoriesListSaga({ payload }) {
+  try {
+    const response = yield call(getSubCategoryApi, payload);
+    yield put(categoryApiResponseSuccess(GET_SUB_CATEGORY, response));
+  } catch (error) {
+    yield put(categoryApiResponseError(GET_SUB_CATEGORY, error));
+    toast.error("Failed to fetch subcategories!");
   }
 }
 
@@ -158,7 +156,7 @@ function* getCategoriesListSaga() {
 function* addCategorySaga({ payload }) {
   try {
     const { category } = payload;
-    const response = yield call(addCategoryApi, category);   
+    const response = yield call(addCategoryApi, category);
     yield put(categoryApiResponseSuccess(ADD_CATEGORY, response));
     yield call(getCategoriesListSaga);
     toast.success("Category added successfully!");
@@ -186,7 +184,6 @@ function* updateCategorySaga({ payload }) {
 function* deleteCategorySaga({ payload }) {
   try {
     yield call(deleteCategoryApi, payload);
-    // put success with deleted id so reducer can remove it quickly
     yield put(categoryApiResponseSuccess(DELETE_CATEGORY, { data: payload }));
     yield call(getCategoriesListSaga);
     toast.success("Category deleted successfully!");
@@ -199,6 +196,10 @@ function* deleteCategorySaga({ payload }) {
 // ================== WATCHERS ==================
 function* watchGetCategories() {
   yield takeEvery(GET_CATEGORIES, getCategoriesListSaga);
+}
+
+function* watchGetSubCategories() {
+  yield takeEvery(GET_SUB_CATEGORY, getSubCategoriesListSaga);
 }
 
 function* watchAddCategory() {
@@ -217,6 +218,7 @@ function* watchDeleteCategory() {
 export function* categorySaga() {
   yield all([
     fork(watchGetCategories),
+    fork(watchGetSubCategories),
     fork(watchAddCategory),
     fork(watchUpdateCategory),
     fork(watchDeleteCategory),

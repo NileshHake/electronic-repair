@@ -17,37 +17,74 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   updateCategory,
   resetUpdateCategoryResponse,
-} from "../../store/category/index";
-
+} from "../../store/category/index"; 
+import { api } from "../../config";
 const CategoryUpdate = ({ isOpen, toggle, categoryData }) => {
   const dispatch = useDispatch();
   const { updateCategoryResponse } = useSelector(
     (state) => state.CategoryReducer
   );
 
-  const [categoryDetails, setCategoryDetails] = useState({
-    category_name: "",
-  });
-
-  const [nameError, setNameError] = useState("");
   const submitButtonRef = useRef();
 
-  // ✅ Prefill data when modal opens
+  const [categoryDetails, setCategoryDetails] = useState({
+    category_name: "",
+    category_img: null, // IMPORTANT
+  });
+
+  const [previewImg, setPreviewImg] = useState(null);
+  const [nameError, setNameError] = useState("");
+
+  // ----------------------------------
+  // Prefill category data
+  // ----------------------------------
   useEffect(() => {
     if (categoryData) {
       setCategoryDetails({
         category_name: categoryData.category_name || "",
+        category_img: null, // keep null unless user changes image
       });
+
+      // existing image preview
+      if (categoryData.category_img) {
+        const imageUrl = categoryData.category_img.startsWith("http")
+          ? categoryData.category_img
+          : `${api.IMG_URL}category_img/${categoryData.category_img}`;
+
+        setPreviewImg(imageUrl);
+      }
+
       setNameError("");
     }
   }, [categoryData]);
 
+  // ----------------------------------
+  // Input change
+  // ----------------------------------
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCategoryDetails((prev) => ({ ...prev, [name]: value }));
     if (name === "category_name") setNameError("");
   };
 
+  // ----------------------------------
+  // Image change (ONLY when user selects)
+  // ----------------------------------
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setCategoryDetails((prev) => ({
+      ...prev,
+      category_img: file,
+    }));
+
+    setPreviewImg(URL.createObjectURL(file));
+  };
+
+  // ----------------------------------
+  // Submit update
+  // ----------------------------------
   const handleUpdateCategory = (e) => {
     e.preventDefault();
 
@@ -56,24 +93,32 @@ const CategoryUpdate = ({ isOpen, toggle, categoryData }) => {
       return;
     }
 
-    const payload = {
-      category_id: categoryData.category_id,
-      ...categoryDetails,
-    };
+    const formData = new FormData();
+    formData.append("category_id", categoryData.category_id);
+    formData.append("category_name", categoryDetails.category_name);
 
-    dispatch(updateCategory(payload));
+    // 🔥 KEY LOGIC
+    // append image ONLY if user selected new image
+    if (categoryDetails.category_img instanceof File) {
+      formData.append("category_img", categoryDetails.category_img);
+    }
+
+    dispatch(updateCategory(formData));
   };
 
-  // ✅ Close modal on successful update
+  // ----------------------------------
+  // Close modal on success
+  // ----------------------------------
   useEffect(() => {
     if (updateCategoryResponse) {
       toggle();
-      setNameError("");
       dispatch(resetUpdateCategoryResponse());
     }
   }, [updateCategoryResponse, dispatch, toggle]);
 
-  // ✅ Keyboard Shortcuts (Alt+S for Save, Alt+Esc for Close)
+  // ----------------------------------
+  // Keyboard shortcuts
+  // ----------------------------------
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.altKey && event.key.toLowerCase() === "s") {
@@ -100,8 +145,9 @@ const CategoryUpdate = ({ isOpen, toggle, categoryData }) => {
           <ModalBody>
             <Card className="border card-border-success p-3 shadow-lg">
               <Row>
+                {/* Category Name */}
                 <Col lg={12}>
-                  <Label className="form-label fw-bold d-flex justify-content-between mt-3">
+                  <Label className="form-label fw-bold d-flex justify-content-between">
                     <div>
                       Category Name <span className="text-danger">*</span>
                     </div>
@@ -115,6 +161,50 @@ const CategoryUpdate = ({ isOpen, toggle, categoryData }) => {
                     onChange={handleInputChange}
                     autoFocus
                   />
+                </Col>
+
+                {/* Category Image */}
+                <Col lg={6} className="mt-3">
+                  <h5 className="fs-15 mb-1">Category Image</h5>
+
+                  <div className="text-center">
+                    <div className="position-relative d-inline-block">
+                      <div className="position-absolute top-100 start-100 translate-middle">
+                        <label htmlFor="categoryImg" className="mb-0">
+                          <div className="avatar-xs">
+                            <div className="avatar-title bg-light border rounded-circle cursor-pointer">
+                              <i
+                                className="ri-image-fill"
+                                style={{ color: "#009CA4", fontSize: "20px" }}
+                              ></i>
+                            </div>
+                          </div>
+                        </label>
+
+                        <input
+                          id="categoryImg"
+                          type="file"
+                          className="d-none"
+                          accept="image/png, image/jpeg, image/jpg"
+                          onChange={handleImageChange}
+                        />
+                      </div>
+
+                      <div className="avatar-lg">
+                        <div className="avatar-title bg-light rounded">
+                          {previewImg && (
+                            <img
+                              src={previewImg}
+                              alt="Category"
+                              height="100"
+                              width="100"
+                              className="rounded"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </Col>
               </Row>
             </Card>
@@ -130,6 +220,7 @@ const CategoryUpdate = ({ isOpen, toggle, categoryData }) => {
           </ModalFooter>
         </Form>
       </Modal>
+
       <ToastContainer />
     </>
   );

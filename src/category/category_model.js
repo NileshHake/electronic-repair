@@ -11,6 +11,15 @@ const Category = sequelize.define("tbl_category", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  category_img: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  category_main_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: "0",
+  },
   category_created_by: {
     type: DataTypes.INTEGER,
     allowNull: false,

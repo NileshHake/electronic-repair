@@ -265,6 +265,7 @@ import DeviceColorList from "../pages/DeviceColor/DeviceColorList";
 import OverView from "../pages/Repairing/OverView/OverView";
 import QuotationAndBillingList from "../pages/Repairing/QuotationAndBilling/QuotationAndBillinglist";
 import EcommerceListProduct from "../pages/Ecommerce/EcommerceProducts/EcommerceListProduct";
+import SubCategoryList from "../pages/category/SubCategory/SubCategoryList";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -315,8 +316,9 @@ const authProtectedRoutes = [
   { path: "/service-type-list", component: <ServiceTypeList /> },
   { path: "/storage-location-list", component: <StorageLocationList /> },
   { path: "/device-color-list", component: <DeviceColorList /> },
-  { path: "/repair/overview/:repair_id", component: <OverView /> }, 
-  { path: "/quotation-billing", component: <QuotationAndBillingList /> }, 
+  { path: "/sub-category-list/:category_id", component: <SubCategoryList /> },
+  { path: "/repair/overview/:repair_id", component: <OverView /> },
+  { path: "/quotation-billing", component: <QuotationAndBillingList /> },
   {
     path: "/hardware-configuration-list",
     component: <HardwareConfigurationList />,
