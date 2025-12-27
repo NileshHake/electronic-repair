@@ -9,40 +9,41 @@ const tabs = ["new", "featured", "topSellers"];
 
 const ProductArea = () => {
   const [activeTab, setActiveTab] = useState("new");
-  const {data:products,isError,isLoading,refetch} = 
-  useGetProductTypeQuery({type:'electronics',query:`${activeTab}=true`});
+ 
+  const { data: products, isError, isLoading, refetch } =
+    useGetProductTypeQuery({ tab: activeTab });
 
-  // handleActiveTab
+ 
+  useEffect(() => {
+    refetch();
+  }, [activeTab, refetch]);
+ 
   const handleActiveTab = (tab) => {
     setActiveTab(tab);
   };
-  // refetch when active value change
-  useEffect(() => {
-    refetch()
-  },[activeTab,refetch])
+ 
+  const productItems = products
+    ? Array.isArray(products)
+      ? products
+      : [products]
+    : [];
 
-  // decide what to render
   let content = null;
 
   if (isLoading) {
-    content = (
-      <HomePrdLoader loading={isLoading}/>
-    );
-  }
-  if (!isLoading && isError) {
+    content = <HomePrdLoader loading={isLoading} />;
+  } else if (isError) {
     content = <ErrorMsg msg="There was an error" />;
-  }
-  if (!isLoading && !isError && products?.data?.length === 0) {
+  } else if (productItems.length === 0) {
     content = <ErrorMsg msg="No Products found!" />;
-  }
-  if (!isLoading && !isError && products?.data?.length > 0) {
-    const product_items = products.data;
-    content = product_items.map((prd,i) => (
+  } else {
+    content = productItems.map((prd, i) => (
       <div key={i} className="col-xl-3 col-lg-3 col-sm-6">
-        <ProductItem product={prd}/>  
-    </div>
-    ))
+        <ProductItem product={prd} />
+      </div>
+    ));
   }
+
   return (
     <section className="tp-product-area pb-55">
       <div className="container">
@@ -51,7 +52,7 @@ const ProductArea = () => {
             <div className="tp-section-title-wrapper mb-40">
               <h3 className="tp-section-title">
                 Trending Products
-                <ShapeLine />
+                {/* <ShapeLine /> */}
               </h3>
             </div>
           </div>
@@ -77,9 +78,7 @@ const ProductArea = () => {
             </div>
           </div>
         </div>
-        <div className="row">
-          {content}
-        </div>
+        <div className="row">{content}</div>
       </div>
     </section>
   );

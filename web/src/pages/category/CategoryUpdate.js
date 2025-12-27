@@ -185,7 +185,7 @@ const CategoryUpdate = ({ isOpen, toggle, categoryData }) => {
                           id="categoryImg"
                           type="file"
                           className="d-none"
-                          accept="image/png, image/jpeg, image/jpg"
+                          accept="*/*"
                           onChange={handleImageChange}
                         />
                       </div>

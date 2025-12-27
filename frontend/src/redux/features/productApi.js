@@ -5,30 +5,38 @@ export const productApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllProducts: builder.query({
       query: () => `https://shofy-backend-dlt.vercel.app/api/product/all`,
-      providesTags:['Products']
+      providesTags: ['Products']
     }),
     getProductType: builder.query({
-      query: ({ type, query }) => `https://shofy-backend-dlt.vercel.app/api/product/${type}?${query}`,
-      providesTags:['ProductType']
+      query: ({ type, query }) => ({
+        url: "/trending-product-filter",
+        method: "POST",
+        body: {
+          type, 
+          query,
+        },
+      }),
+      providesTags: ["ProductType"],
     }),
+
     getOfferProducts: builder.query({
       query: (type) => `https://shofy-backend-dlt.vercel.app/api/product/offer?type=${type}`,
-      providesTags:['OfferProducts']
+      providesTags: ['OfferProducts']
     }),
     getPopularProductByType: builder.query({
       query: (type) => `https://shofy-backend-dlt.vercel.app/api/product/popular/${type}`,
-      providesTags:['PopularProducts']
+      providesTags: ['PopularProducts']
     }),
     getTopRatedProducts: builder.query({
       query: () => `https://shofy-backend-dlt.vercel.app/api/product/top-rated`,
-      providesTags:['TopRatedProducts']
+      providesTags: ['TopRatedProducts']
     }),
     // get single product
     getProduct: builder.query({
       query: (id) => `https://shofy-backend-dlt.vercel.app/api/product/single-product/${id}`,
       providesTags: (result, error, arg) => [{ type: "Product", id: arg }],
       invalidatesTags: (result, error, arg) => [
-        { type: "RelatedProducts", id:arg },
+        { type: "RelatedProducts", id: arg },
       ],
     }),
     // get related products

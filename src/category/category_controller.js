@@ -67,9 +67,7 @@ const getSubCategories = async (req, res) => {
 };
 const getCategoriesWithSub = async (req, res) => {
   try {
-    console.log("tcvxcvcxvrue");
-
-    // 1️⃣ Fetch all main categories (category_main_id = 0 or null)
+    
     const mainCategories = await Category.findAll({
       where: {
         category_main_id: null,
@@ -94,7 +92,7 @@ const getCategoriesWithSub = async (req, res) => {
         };
       })
     );
-    console.log(categoriesWithChildren);
+    
 
     res.status(200).json(categoriesWithChildren);
   } catch (error) {

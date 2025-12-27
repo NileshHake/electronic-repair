@@ -13,8 +13,7 @@ const HeaderSearchForm = () => {
     isLoading,
     isError,
   } = useGetCategoriesWithSubQuery();
-
-  console.log("categories", categories);
+ 
 
   const selectCategoryHandle = (e) => {
     setCategory(e.value);

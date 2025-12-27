@@ -51,11 +51,7 @@ const CategoryAdd = ({ isOpen, toggle }) => {
   const handleCategoryImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
-      setImageError("Only PNG, JPG, JPEG allowed");
-      return;
-    }
+ 
 
     setImageError("");
 
@@ -176,8 +172,9 @@ const CategoryAdd = ({ isOpen, toggle }) => {
                         <input
                           id="categoryImg"
                           type="file"
+                          
                           className="d-none"
-                          accept="image/png, image/jpeg, image/jpg"
+                      accept="*/*"
                           onChange={handleCategoryImageChange}
                         />
                       </div>
@@ -190,6 +187,7 @@ const CategoryAdd = ({ isOpen, toggle }) => {
                               alt="Category"
                               height="100"
                               width="100"
+                              
                               className="rounded"
                             />
                           )}

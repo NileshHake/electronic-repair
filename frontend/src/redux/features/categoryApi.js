@@ -15,8 +15,8 @@ export const categoryApi = apiSlice.injectEndpoints({
     // Get main categories with subcategories
     getCategoriesWithSub: builder.query({
       query: () => {
-        console.log("Query called!");
-        return "/categories-with-sub"; // endpoint path
+      
+        return "/categories-with-sub"; 
       },
     }),
 
