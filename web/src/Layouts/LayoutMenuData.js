@@ -181,7 +181,7 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
- 
+
     {
       id: "REPAIRINGCUSTOMER",
       label: "Repairing  ",
@@ -195,11 +195,11 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
- 
+
     {
       id: "CUSTOMERSALES",
       label: "  Sales",
-      icon: "mdi mdi-cash-multiple", 
+      icon: "mdi mdi-cash-multiple",
       link: "/apps-ecommerce-products",
       stateVariables: isCustomerSales,
       click: function (e) {
@@ -379,6 +379,14 @@ const Navdata = () => {
             },
           ]
           : []),
+
+        {
+          id: "slider",
+          label: "Slider",
+          icon: "mdi mdi-package-variant-closed",
+          link: "/slider-list",
+          parentId: "SETTINGS",
+        },
 
         ...(permissions.find(
           (p) =>

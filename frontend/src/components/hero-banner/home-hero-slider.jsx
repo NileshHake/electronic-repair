@@ -19,9 +19,9 @@ const sliderData = [
   {
     id: 1,
     pre_title: { text: "Starting at", price: 274 },
-    title: "The best tablet Collection 2023",
+    title: "The best tablet Collection 2023", 
     subtitle: {
-      text_1: "Exclusive offer ",
+      text_1: " New ",
       percent: 35,
       text_2: "off this week",
     },
@@ -33,7 +33,7 @@ const sliderData = [
     pre_title: { text: "Starting at", price: 999 },
     title: "The best note book collection 2023",
     subtitle: {
-      text_1: "Exclusive offer ",
+      text_1: " New ",
       percent: 10,
       text_2: "off this week",
     },
@@ -45,7 +45,7 @@ const sliderData = [
     pre_title: { text: "Starting at", price: 999 },
     title: "The best note book collection 2023",
     subtitle: {
-      text_1: "Exclusive offer ",
+      text_1: " New ",
       percent: 10,
       text_2: "off this week",
     },

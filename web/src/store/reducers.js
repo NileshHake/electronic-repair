@@ -97,6 +97,7 @@ import { OtpReducer } from "./StageRemark";
 import { StageRemarkReducer } from "./StageRemarkData";
 import { QuotationBillingReducer } from "./QuotationAndBilling";
 import { CartReducer } from "./AddToCart";
+import { SliderReducer } from "./slider";
  
 const rootReducer = combineReducers({
   // public
@@ -129,6 +130,7 @@ const rootReducer = combineReducers({
   StageRemarkReducer,  
   RepairReducer,  
   roleReducer,
+  SliderReducer,
   PaymentTypeReducer,
   StatusReducer,
   CustomerAddressReducer,

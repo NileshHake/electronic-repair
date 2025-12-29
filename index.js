@@ -156,6 +156,9 @@ app.use("/api", inventory);
 const add_to_card = require("./src/add_to_card/add_to_card_route");
 app.use("/api", add_to_card);
 
+const slider = require("./src/slider/slider_route");
+app.use("/api", slider);
+
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
