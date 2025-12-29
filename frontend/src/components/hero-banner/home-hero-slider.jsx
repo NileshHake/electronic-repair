@@ -13,13 +13,15 @@ import shape_2 from "@assets/img/slider/shape/slider-shape-2.png";
 import shape_3 from "@assets/img/slider/shape/slider-shape-3.png";
 import shape_4 from "@assets/img/slider/shape/slider-shape-4.png";
 import { ArrowRightLong, SliderNextBtn, SliderPrevBtn, TextShape } from "@/svg";
+import { useGetSlidersQuery } from "@/redux/features/sliderApi";
+import { api } from "../../../config";
 
 // slider data
 const sliderData = [
   {
     id: 1,
     pre_title: { text: "Starting at", price: 274 },
-    title: "The best tablet Collection 2023", 
+    title: "The best tablet Collection 2023",
     subtitle: {
       text_1: " New ",
       percent: 35,
@@ -61,11 +63,14 @@ function Shape({ img, num }) {
 }
 
 const HomeHeroSlider = () => {
-  const [active,setActive] = useState(false);
-
+  const [active, setActive] = useState(false);
+  const { data: sliders, isLoading, isError } = useGetSlidersQuery();
   // handleActiveIndex
+
+  console.log("sliders", sliders);
+
   const handleActiveIndex = (index) => {
-    if(index === 2){
+    if (index === 2) {
       setActive(true)
     }
     else {
@@ -87,20 +92,18 @@ const HomeHeroSlider = () => {
           onSlideChange={(swiper) => handleActiveIndex(swiper.activeIndex)}
           pagination={{ el: ".tp-slider-dot", clickable: true }}
           modules={[Navigation, Pagination, EffectFade]}
-          className={`tp-slider-active tp-slider-variation swiper-container ${
-            active ? "is-light" : ""
-          }`}
+          className={`tp-slider-active tp-slider-variation swiper-container ${active ? "is-light" : ""
+            }`}
         >
-          {sliderData.map((item) => (
+          {sliders?.data.map((item) => (
             <SwiperSlide
               key={item.id}
-              className={`tp-slider-item tp-slider-height d-flex align-items-center ${
-                item?.green_bg
-                  ? "green-dark-bg"
-                  : item?.is_light
+              className={`tp-slider-item tp-slider-height d-flex align-items-center ${item?.green_bg
+                ? "green-dark-bg"
+                : item?.is_light
                   ? "is-light"
                   : ""
-              }`}
+                }`}
               style={{ backgroundColor: item.is_light && "#E3EDF6" }}
             >
               <div className="tp-slider-shape">
@@ -114,7 +117,7 @@ const HomeHeroSlider = () => {
                   <div className="col-xl-5 col-lg-6 col-md-6">
                     <div className="tp-slider-content p-relative z-index-1">
                       <span>
-                        {item.pre_title.text} <b>${item.pre_title.text}</b>
+                        {item.pre_title.text} <b>₹{item.pre_title.price}</b>
                       </span>
                       <h3 className="tp-slider-title">{item.title}</h3>
                       <p>
@@ -135,10 +138,19 @@ const HomeHeroSlider = () => {
                     </div>
                   </div>
                   <div className="col-xl-7 col-lg-6 col-md-6">
-                    <div className="tp-slider-thumb text-end">
-                      <Image src={item.img} alt="slider-img" />
+                    <div
+                      className="tp-slider-thumb text-end"
+                      style={{ position: "relative", width: "100%", aspectRatio: "16/9" }}
+                    >
+                      <Image
+                        src={`${api.IMG_URL}slider_image/${item.img}`}
+                        fill
+                        alt="slider-img"
+                        style={{ objectFit: "contain" }} // fits entire image, no cropping
+                      />
                     </div>
                   </div>
+
                 </div>
               </div>
             </SwiperSlide>

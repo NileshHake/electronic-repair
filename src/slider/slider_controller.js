@@ -1,4 +1,4 @@
-const { saveImage } = require("../helper/fileUpload");
+const { saveImage, deleteImage } = require("../helper/fileUpload");
 const Slider = require("./slider_model");
 
 // ✅ Store slider
@@ -124,4 +124,46 @@ exports.delete = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
+};
+
+exports.InWebindex = async (req, res) => {
+  try {
+    const sliders = await Slider.findAll({
+      where: { slider_status: 1 },
+      order: [["slider_id", "ASC"]],
+    });
+
+    // 🔥 Transform DB rows into frontend format
+    const formattedSliders = sliders.map((item) => ({
+      id: item.slider_id,
+
+      pre_title: {
+        text: item.pre_title_text,
+        price: item.pre_title_price,
+      },
+
+      title: item.title,
+
+      subtitle: {
+        text_1: item.subtitle_text_1,
+        percent: item.subtitle_percent,
+        text_2: item.subtitle_text_2,
+      },
+
+      img: item.slider_image, // image name only
+      green_bg: item.green_bg === 1,
+      is_light: item.is_light === 1,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: formattedSliders,
+    });
+  } catch (error) {
+    console.error("❌ Slider fetch error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching sliders",
+    });
+  }
 };
