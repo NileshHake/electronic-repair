@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectFade, Pagination } from 'swiper';
@@ -13,31 +13,39 @@ import b_bg_2 from '@assets/img/product/gadget/gadget-banner-2.jpg';
 import { useGetProductTypeQuery } from '@/redux/features/productApi';
 import gadget_girl from '@assets/img/product/gadget/gadget-girl.png';
 import HomeGadgetPrdLoader from '@/components/loader/home/home-gadget-prd-loader';
+import { HomePrdLoader } from '@/components/loader';
 
 const ProductGadgetArea = () => {
-  const { data: products, isError, isLoading } = useGetProductTypeQuery({type:'electronics'});
 
-  // decide what to render
+  const { data: products, isError, isLoading, refetch } =
+    useGetProductTypeQuery({ tab: "" });
+
+
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  const productItems = products
+    ? Array.isArray(products)
+      ? products
+      : [products]
+    : [];
+
   let content = null;
 
   if (isLoading) {
-    content = (
-      <HomeGadgetPrdLoader loading={isLoading} />
-    );
-  }
-  if (!isLoading && isError) {
+    content = <HomePrdLoader loading={isLoading} />;
+  } else if (isError) {
     content = <ErrorMsg msg="There was an error" />;
-  }
-  if (!isLoading && !isError && products?.data?.length === 0) {
+  } else if (productItems.length === 0) {
     content = <ErrorMsg msg="No Products found!" />;
-  }
-  if (!isLoading && !isError && products?.data?.length > 0) {
-    const product_items = products.data.slice(0, 6);
-    content = product_items.map((prd, i) => (
+  } else {
+    content = productItems.map((prd, i) => (
       <div key={i} className="col-xl-4 col-sm-6">
         <ProductItem product={prd} />
       </div>
-    ))
+    ));
   }
 
   // gadget banner 
@@ -59,8 +67,8 @@ const ProductGadgetArea = () => {
     return (
       <Swiper {...settings} effect='fade' modules={[Pagination, EffectFade]} className="tp-product-gadget-banner-slider-active swiper-container">
         {banner_data.map((b, i) => (
-          <SwiperSlide key={i} className="tp-product-gadget-banner-item include-bg" 
-          style={{ backgroundImage: `url(${b.bg.src})`}}>
+          <SwiperSlide key={i} className="tp-product-gadget-banner-item include-bg"
+            style={{ backgroundImage: `url(${b.bg.src})` }}>
             <div className="tp-product-gadget-banner-content">
               <span className="tp-product-gadget-banner-price">Only ${b.price.toFixed(2)}</span>
               <h3 className="tp-product-gadget-banner-title">

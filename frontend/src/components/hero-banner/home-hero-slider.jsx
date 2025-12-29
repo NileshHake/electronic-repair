@@ -65,9 +65,7 @@ function Shape({ img, num }) {
 const HomeHeroSlider = () => {
   const [active, setActive] = useState(false);
   const { data: sliders, isLoading, isError } = useGetSlidersQuery();
-  // handleActiveIndex
-
-  console.log("sliders", sliders);
+ 
 
   const handleActiveIndex = (index) => {
     if (index === 2) {
@@ -146,7 +144,7 @@ const HomeHeroSlider = () => {
                         src={`${api.IMG_URL}slider_image/${item.img}`}
                         fill
                         alt="slider-img"
-                        style={{ objectFit: "contain" }} // fits entire image, no cropping
+                        style={{ objectFit: "contain" }} 
                       />
                     </div>
                   </div>

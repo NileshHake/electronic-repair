@@ -70,8 +70,7 @@ exports.get = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const file = req.files?.slider_image;
-console.log(req.body);
-
+ 
     // Find existing slider
     const slider = await Slider.findByPk(req.body.slider_id);
     if (!slider) {
