@@ -18,10 +18,10 @@ const CartMiniSidebar = () => {
     dispatch(remove_product(prd))
   }
 
-// handle close cart mini 
-const handleCloseCartMini = () => {
-  dispatch(closeCartMini())
-}
+  // handle close cart mini 
+  const handleCloseCartMini = () => {
+    dispatch(closeCartMini())
+  }
   return (
     <>
       <div className={`cartmini__area tp-all-font-roboto ${cartMiniOpen ? 'cartmini-opened' : ''}`}>
@@ -38,7 +38,7 @@ const handleCloseCartMini = () => {
               </div>
             </div>
             <div className="cartmini__shipping">
-              <RenderCartProgress/>
+              <RenderCartProgress />
             </div>
             {cart_products.length > 0 && <div className="cartmini__widget">
               {cart_products.map((item) => (
@@ -53,9 +53,21 @@ const handleCloseCartMini = () => {
                       <Link href={`/product-details/${item._id}`}>{item.title}</Link>
                     </h5>
                     <div className="cartmini__price-wrapper">
-                      {item.discount > 0 ? <span className="cartmini__price">${(Number(item.price) - (Number(item.price) * Number(item.discount)) / 100).toFixed(2)}</span> : <span className="cartmini__price">${item.price.toFixed(2)}</span>}
-                      <span className="cartmini__quantity">{" "}x{item.orderQuantity}</span>
+                      <span className="cartmini__price">
+                        $
+                        {item.discount > 0
+                          ? (
+                            Number(item.price) -
+                            (Number(item.price) * Number(item.discount)) / 100
+                          ).toFixed(2)
+                          : Number(item.price).toFixed(2)}
+                      </span>
+
+                      <span className="cartmini__quantity">
+                        {" "}x{item.orderQuantity}
+                      </span>
                     </div>
+
                   </div>
                   <a onClick={() => handleRemovePrd({ title: item.title, id: item._id })} className="cartmini__del cursor-pointer"><i className="fa-regular fa-xmark"></i></a>
                 </div>

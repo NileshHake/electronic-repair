@@ -177,7 +177,7 @@ const Header = () => {
       {/* cart mini sidebar start */}
       {/* <CartMiniSidebar /> */}
       {/* cart mini sidebar end */}
-
+<CartMiniSidebar />
       {/* off canvas start */}
       <OffCanvas isOffCanvasOpen={isOffCanvasOpen} setIsCanvasOpen={setIsCanvasOpen} categoryType="electronics" />
       {/* off canvas end */}
