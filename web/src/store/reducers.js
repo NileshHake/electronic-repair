@@ -98,6 +98,7 @@ import { StageRemarkReducer } from "./StageRemarkData";
 import { QuotationBillingReducer } from "./QuotationAndBilling";
 import { CartReducer } from "./AddToCart";
 import { SliderReducer } from "./slider";
+import { StoreFeatureReducer } from "./StoreFeatures";
  
 const rootReducer = combineReducers({
   // public
@@ -124,6 +125,7 @@ const rootReducer = combineReducers({
   StorageLocationReducer,  
   DeviceColorReducer,  
   DeviceModelReducer,  
+  StoreFeatureReducer,  
   ServiceTypeReducer,  
   BusinessReducer,  
   OtpReducer,  

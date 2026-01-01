@@ -387,6 +387,13 @@ const Navdata = () => {
           link: "/slider-list",
           parentId: "SETTINGS",
         },
+        {
+          id: "store-feature",
+          label: "Store Feature",
+          icon: "mdi mdi-package-variant-closed",
+          link: "/store-feature-list",
+          parentId: "SETTINGS",
+        },
 
         ...(permissions.find(
           (p) =>

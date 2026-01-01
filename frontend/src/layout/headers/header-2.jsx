@@ -121,7 +121,7 @@ const HeaderTwo = ({ style_2 = false }) => {
       </header>
 
       {/* cart mini sidebar start */}
-      <CartMiniSidebar />
+      {/* <CartMiniSidebar /> */}
       {/* cart mini sidebar end */}
 
       {/* off canvas start */}

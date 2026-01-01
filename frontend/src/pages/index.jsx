@@ -25,7 +25,7 @@ export default function Home() {
       <ElectronicCategory/>
       <FeatureArea/>
       <ProductArea/>
-      <BannerArea/>
+      {/* <BannerArea/> */}
       <OfferProducts/>
       <ProductGadgetArea/>
       <ProductBanner/>

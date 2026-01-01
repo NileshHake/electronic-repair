@@ -159,6 +159,9 @@ app.use("/api", add_to_card);
 const slider = require("./src/slider/slider_route");
 app.use("/api", slider);
 
+const store_feature = require("./src/store_features/store_feature_routes");
+app.use("/api", store_feature);
+
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

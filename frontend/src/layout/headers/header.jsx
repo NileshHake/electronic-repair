@@ -175,7 +175,7 @@ const Header = () => {
       {/* sticky header end */}
 
       {/* cart mini sidebar start */}
-      <CartMiniSidebar />
+      {/* <CartMiniSidebar /> */}
       {/* cart mini sidebar end */}
 
       {/* off canvas start */}

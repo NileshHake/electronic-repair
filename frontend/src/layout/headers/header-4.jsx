@@ -81,7 +81,7 @@ const HeaderFour = () => {
       {/* search bar end */}
 
       {/* cart mini sidebar start */}
-      <CartMiniSidebar />
+      {/* <CartMiniSidebar /> */}
       {/* cart mini sidebar end */}
 
       {/* off canvas start */}

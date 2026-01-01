@@ -102,11 +102,11 @@ const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
         <div className="tp-footer-bottom">
           <div className="container">
             <div className="tp-footer-bottom-wrapper">
-              <div className="row align-items-center">
-                <div className="col-md-6">
+                <div className="row align-items-center">
+                  <div className="col-md-6">
                   <div className="tp-footer-copyright">
-                    <p>© {new Date().getFullYear()} All Rights Reserved  |  Next js Template by
-                      <Link href="/">{" "}❤</Link>.
+                    <p>© {new Date().getFullYear()} All Rights Reserved  |   Develop  by
+                      <Link href="/">{" "}NBH HEALTH SOFT</Link>.
                     </p>
                   </div>
                 </div>

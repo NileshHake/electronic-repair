@@ -90,6 +90,7 @@ import { stageRemarkSaga } from "./StageRemarkData";
 import { watchQuotationBilling } from "./QuotationAndBilling";
 import { cartSaga } from "./AddToCart";
 import { sliderSaga } from "./slider";
+import { storeFeatureSaga } from "./StoreFeatures";
 export default function* rootSaga() {
   yield all([
     //public
@@ -113,6 +114,7 @@ export default function* rootSaga() {
     fork(sourceSaga),
     fork(technicianSaga),
     fork(deliveryBoySaga),
+    fork(storeFeatureSaga),
     fork(statusSaga),
     fork(paymentTypeSaga),
     fork(businessSaga),

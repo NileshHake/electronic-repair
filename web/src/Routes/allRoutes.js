@@ -267,6 +267,7 @@ import QuotationAndBillingList from "../pages/Repairing/QuotationAndBilling/Quot
 import EcommerceListProduct from "../pages/Ecommerce/EcommerceProducts/EcommerceListProduct";
 import SubCategoryList from "../pages/category/SubCategory/SubCategoryList";
 import SliderList from "../pages/Slider/SliderList";
+import StoreFeaturesList from "../pages/StoreFeatures/StoreFeaturesList";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -320,6 +321,7 @@ const authProtectedRoutes = [
   { path: "/sub-category-list/:category_id", component: <SubCategoryList /> },
   { path: "/repair/overview/:repair_id", component: <OverView /> },
   { path: "/slider-list", component: <SliderList /> },
+  { path: "/store-feature-list", component: <StoreFeaturesList /> },
   { path: "/quotation-billing", component: <QuotationAndBillingList /> },
   {
     path: "/hardware-configuration-list",

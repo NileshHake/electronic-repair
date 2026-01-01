@@ -69,6 +69,7 @@
     "react-filepond": "^7.1.2",
     "react-flatpickr": "^3.10.13",
     "react-i18next": "^13.0.1",
+    "react-icons": "^5.5.0",
     "react-jvectormap": "^0.0.16",
     "react-leaflet": "^4.2.1",
     "react-masonry-css": "^1.0.16",
@@ -101,17 +102,15 @@
     "web-vitals": "^3.3.2",
     "yup": "^1.2.0"
   },
-  
   "scripts": {
-  "start": "craco start",
-  "build": "craco build",
-  "test": "craco test",
-  "eject": "react-scripts eject",
-  "lint": "eslint .",
-  "lint:fix": "eslint --fix .",
-  "format": "prettier --write \"**/*.{js,jsx,json,md,html,css,less,scss}\""
-}
-,
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write \"**/*.{js,jsx,json,md,html,css,less,scss}\""
+  },
   "babelOptions": {
     "presets": [
       "@babel/preset-react"
