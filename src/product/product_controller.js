@@ -95,6 +95,39 @@ const index = async (req, res) => {
   }
 };
 
+const LatestProduct = async (req, res) => {
+  try {
+    const products = await sequelize.query(
+      `
+      SELECT 
+        pro.*,
+        tx.tax_name,
+        tx.tax_percentage,
+        cat.category_name,
+        br.brand_name
+      FROM tbl_products AS pro
+      LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
+      LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
+      LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
+       
+      ORDER BY pro.product_id DESC
+      LIMIT 8
+      `,
+      {
+
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+    res.status(500).json({
+      message: "Error fetching products",
+      error: error.message,
+    });
+  }
+};
 
 const RepairandSaleProduct = async (req, res) => {
   try {
@@ -278,7 +311,7 @@ const filterstrendingproduct = async (req, res) => {
     const products = await sequelize.query(query, {
       type: sequelize.QueryTypes.SELECT,
     });
- 
+
     return res.status(200).json(products);
   } catch (error) {
     console.error("❌ Error fetching products:", error);
@@ -373,5 +406,6 @@ module.exports = {
   deleted,
   RepairandSaleProduct,
   SaleAndBothProduct,
+  LatestProduct,
   filterstrendingproduct,
 };

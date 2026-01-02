@@ -2,7 +2,7 @@ import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation,Pagination } from 'swiper';
 // internal
-import { useGetProductTypeQuery } from '@/redux/features/productApi';
+import { useGetLatestProductsQuery, useGetProductTypeQuery } from '@/redux/features/productApi';
 import { NextArr, PrevArr, ShapeLine } from '@/svg';
 import ErrorMsg from '@/components/common/error-msg';
 import ProductItem from './product-item';
@@ -40,9 +40,10 @@ const slider_setting = {
 }
 
 const NewArrivals = () => {
-  const { data: products, isError, isLoading } = useGetProductTypeQuery({type:'electronics',query:'new=true'});
+  // const { data: products, isError, isLoading } = useGetProductTypeQuery({type:'electronics',query:'new=true'});
+  const { data: products, isError, isLoading } = useGetLatestProductsQuery()
   // decide what to render
-  let content = null;
+  let content = null; 
 
   if (isLoading) {
     content = (
@@ -55,10 +56,13 @@ const NewArrivals = () => {
   if (!isLoading && !isError && products?.data?.length === 0) {
     content = <ErrorMsg msg="No Products found!" />;
   }
-  if (!isLoading && !isError && products?.data?.length > 0) {
-    const product_items = products.data;
+  if (!isLoading && !isError && products.length > 0) {
+    const product_items = products;
+    
     content = <Swiper {...slider_setting} modules={[Navigation,Pagination]} className="tp-product-arrival-active swiper-container">
-      {product_items.map((item) => (
+      
+      
+      {products.map((item) => (
         <SwiperSlide key={item._id}>
           <ProductItem product={item} />
         </SwiperSlide>

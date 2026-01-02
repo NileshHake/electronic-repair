@@ -32,8 +32,8 @@ export default function Home() {
        <NewArrivals/> 
       {/* <ProductSmArea/> */}
       <BlogArea/>
-      <InstagramArea/>
-      <CtaArea/>
+      {/* <InstagramArea/>
+      <CtaArea/> */}
       <Footer/>
     </Wrapper>
   )

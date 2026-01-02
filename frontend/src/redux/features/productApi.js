@@ -7,12 +7,18 @@ export const productApi = apiSlice.injectEndpoints({
       query: () => `https://shofy-backend-dlt.vercel.app/api/product/all`,
       providesTags: ['Products']
     }),
+
+    getLatestProducts: builder.query({
+      query: () => `product/latest-list`,
+      providesTags: ['Products']
+    }),
+
     getProductType: builder.query({
       query: ({ type, query }) => ({
         url: "/trending-product-filter",
         method: "POST",
         body: {
-          type, 
+          type,
           query,
         },
       }),
@@ -48,9 +54,9 @@ export const productApi = apiSlice.injectEndpoints({
     }),
   }),
 });
-
 export const {
   useGetAllProductsQuery,
+  useGetLatestProductsQuery,
   useGetProductTypeQuery,
   useGetOfferProductsQuery,
   useGetPopularProductByTypeQuery,

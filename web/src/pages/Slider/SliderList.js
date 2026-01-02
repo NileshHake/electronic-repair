@@ -93,7 +93,7 @@ const SliderList = () => {
                     </div>
 
                     {/* Button */}
-                    <Button color="success">
+                    <Button onClick={() => setIsOpen(true)} color="success">
                       + Add Slider
                     </Button>
                   </Col>

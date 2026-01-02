@@ -7,6 +7,9 @@ export const sliderApi = apiSlice.injectEndpoints({
     getSliders: builder.query({
       query: () => "/slider/web/list", // GET request
     }),
+    GetProductSliders: builder.query({
+      query: () => "/slider/product-list", // GET request
+    }),
 
     // Add slider
     addSlider: builder.mutation({
@@ -38,6 +41,7 @@ export const sliderApi = apiSlice.injectEndpoints({
 
 export const {
   useGetSlidersQuery,
+  useGetProductSlidersQuery,
   useAddSliderMutation,
   useUpdateSliderMutation,
   useDeleteSliderMutation,
