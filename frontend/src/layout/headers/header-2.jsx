@@ -66,33 +66,18 @@ const HeaderTwo = ({ style_2 = false }) => {
                       </Link>
                     </div>
                   </div>
-                  <div className="col-xl-5 d-none d-xl-block">
+                  <div className="col-xl-6   d-none d-xl-block">
                     <div className="main-menu menu-style-2">
                       <nav className="tp-main-menu-content">
                         <Menus />
                       </nav>
                     </div>
                   </div>
-                  <div className="col-xl-5 col-lg-7 col-md-7 col-sm-8 col-6">
+                  <div className="col-xl-4 col-lg-7 col-md-7 col-sm-8 col-6">
                     <div className="tp-header-bottom-right d-flex align-items-center justify-content-end pl-30">
-                      <div className="tp-header-search-2 d-none d-sm-block">
-                        <form onSubmit={handleSubmit}>
-                          <input
-                            onChange={(e) => setSearchText(e.target.value)}
-                            value={searchText}
-                            type="text"
-                            placeholder="Search for Products..." />
-                          <button type="submit">
-                            <Search />
-                          </button>
-                        </form>
-                      </div>
+                     
                       <div className="tp-header-action d-flex align-items-center ml-30">
-                        <div className="tp-header-action-item d-none d-lg-block">
-                          <Link href="/compare" className="tp-header-action-btn">
-                            <Compare />
-                          </Link>
-                        </div>
+                        
                         <div className="tp-header-action-item d-none d-lg-block">
                           <Link href="/wishlist" className="tp-header-action-btn">
                             <Wishlist />
@@ -121,7 +106,7 @@ const HeaderTwo = ({ style_2 = false }) => {
       </header>
 
       {/* cart mini sidebar start */}
-      {/* <CartMiniSidebar /> */}
+      <CartMiniSidebar />
       {/* cart mini sidebar end */}
 
       {/* off canvas start */}

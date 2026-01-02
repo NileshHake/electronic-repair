@@ -55,11 +55,7 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
         </div>
       </div>
       <div className="tp-header-action d-flex align-items-center ml-50">
-        <div className="tp-header-action-item d-none d-lg-block">
-          <Link href="/compare" className="tp-header-action-btn">
-            <Compare />
-          </Link>
-        </div>
+        
         <div className="tp-header-action-item d-none d-lg-block">
           <Link href="/wishlist" className="tp-header-action-btn">
             <Wishlist />

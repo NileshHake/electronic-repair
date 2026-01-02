@@ -47,7 +47,7 @@ const HeaderThree = () => {
                   <div className="tp-header-action d-flex align-items-center justify-content-end ml-50">
                     <div className="tp-header-action-item d-none d-sm-block">
                       <button onClick={() => setIsSearchOpen(true)} type="button" className="tp-header-action-btn tp-search-open-btn">
-                        <Search />
+                        {/* <Search /> */}
                       </button>
                     </div>
                     <div className="tp-header-action-item d-none d-sm-block">
@@ -76,11 +76,11 @@ const HeaderThree = () => {
       </header>
 
       {/* search bar start */}
-      <SearchBar isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
+      {/* <SearchBar isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} /> */}
       {/* search bar end */}
 
       {/* cart mini sidebar start */}
-      {/* <CartMiniSidebar /> */}
+      <CartMiniSidebar />
       {/* cart mini sidebar end */}
 
       {/* off canvas start */}

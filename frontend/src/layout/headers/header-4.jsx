@@ -77,11 +77,11 @@ const HeaderFour = () => {
       </header>
 
       {/* search bar start */}
-      <SearchBar isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
+      {/* <SearchBar isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} /> */}
       {/* search bar end */}
 
       {/* cart mini sidebar start */}
-      {/* <CartMiniSidebar /> */}
+      <CartMiniSidebar />
       {/* cart mini sidebar end */}
 
       {/* off canvas start */}

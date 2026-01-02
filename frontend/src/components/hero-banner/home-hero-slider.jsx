@@ -93,7 +93,7 @@ const HomeHeroSlider = () => {
           className={`tp-slider-active tp-slider-variation swiper-container ${active ? "is-light" : ""
             }`}
         >
-          {sliders?.data.map((item) => (
+          {sliders?.data.slice(0,3).map((item) => (
             <SwiperSlide
               key={item.id}
               className={`tp-slider-item tp-slider-height d-flex align-items-center ${item?.green_bg

@@ -19,7 +19,7 @@ const DetailsWrapper = ({ productItem, activeImg }) => {
   const {
     product_image,
     category_name,
-    product_name,
+    product_name, 
     reviews = [],
     product_mrp,
     product_sale_price,
