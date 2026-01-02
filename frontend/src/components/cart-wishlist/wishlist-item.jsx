@@ -36,7 +36,7 @@ const WishlistItem = ({ product }) => {
         <Link href={`/product-details/${_id}`}>{title}</Link>
       </td>
       <td className="tp-cart-price">
-        <span>${price.toFixed(2)}</span>
+        <span>${price}</span>
       </td>
       <td className="tp-cart-quantity">
         <div className="tp-product-quantity mt-10 mb-10">

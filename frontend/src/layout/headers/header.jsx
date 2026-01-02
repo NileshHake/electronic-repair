@@ -51,44 +51,42 @@ const Header = () => {
           </div>
 
           {/* header main start */}
-        <div className="tp-header-main tp-header-sticky py-2 border-bottom bg-white p-5">
-  <div className="container-fluid px-4 p-3">
-    <div className="row align-items-center">
+          <div className="tp-header-main tp-header-sticky py-2 border-bottom bg-white p-5">
+            <div className="container-fluid px-4 p-3">
+              <div className="row align-items-center">
+                <div className="col-xl-2 col-lg-2 col-md-4 col-6">
+                  <div className="d-flex align-items-center">
+                    <Link href="/">
+                      <Image src={logo} alt="logo" className="img-fluid" />
+                    </Link>
+                  </div>
+                </div>
 
-      {/* LOGO */}
-      <div className="col-xl-2 col-lg-2 col-md-4 col-6">
-        <div className="d-flex align-items-center">
-          <Link href="/">
-            <Image src={logo} alt="logo" className="img-fluid" />
-          </Link>
-        </div>
-      </div>
+                {/* SEARCH */}
+                <div className="col-xl-4 col-lg-4 d-none d-lg-block">
+                  <div className="ps-4">
+                    <HeaderSearchForm />
+                  </div>
+                </div>
 
-      {/* SEARCH */}
-      <div className="col-xl-4 col-lg-4 d-none d-lg-block">
-        <div className="ps-4">
-          <HeaderSearchForm />
-        </div>
-      </div>
+                {/* BUTTONS */}
+                <div className="col-xl-3 col-lg-3 d-none d-lg-block">
+                  <div className="d-flex align-items-center justify-content-center gap-2">
+                    <RepairButton />
+                    <RecoveryButton />
+                  </div>
+                </div>
 
-      {/* BUTTONS */}
-      <div className="col-xl-3 col-lg-3 d-none d-lg-block">
-        <div className="d-flex align-items-center justify-content-center gap-2">
-          <RepairButton />
-          <RecoveryButton />
-        </div>
-      </div>
+                {/* RIGHT ICONS */}
+                <div className="col-xl-3 col-lg-3 col-md-8 col-6">
+                  <div className="d-flex justify-content-end align-items-center">
+                    <HeaderMainRight setIsCanvasOpen={setIsCanvasOpen} />
+                  </div>
+                </div>
 
-      {/* RIGHT ICONS */}
-      <div className="col-xl-3 col-lg-3 col-md-8 col-6">
-        <div className="d-flex justify-content-end align-items-center">
-          <HeaderMainRight setIsCanvasOpen={setIsCanvasOpen} />
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
+              </div>
+            </div>
+          </div>
 
 
 

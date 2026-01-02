@@ -48,7 +48,7 @@ const HeaderFour = () => {
 
                     <div className="tp-header-action-item d-none d-sm-block">
                       <button onClick={() => setIsSearchOpen(true)} type="button" className="tp-header-action-btn tp-search-open-btn">
-                        <Search />
+                        {/* <Search /> */}
                       </button>
                     </div>
                     <div className="tp-header-action-item d-none d-sm-block">

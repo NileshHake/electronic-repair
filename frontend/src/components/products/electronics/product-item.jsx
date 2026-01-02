@@ -14,8 +14,8 @@ import { add_to_wishlist } from "@/redux/features/wishlist-slice";
 import { api } from "../../../../config";
 
 const ProductItem = ({ product, offer_style = false }) => {
- 
-  
+
+
   const {
     product_id,
     product_image,
@@ -52,20 +52,31 @@ const ProductItem = ({ product, offer_style = false }) => {
       setRatingVal(0);
     }
   }, [reviews]);
-const images = JSON.parse(product_image || "[]"); 
-const firstImage = images.length > 0 ? images[0] : "default.jpg"; 
- 
+
+  let images = [];
+  try {
+    images = JSON.parse(product_image);
+    if (!Array.isArray(images)) {
+      // Ensure it's always an array
+      images = [];
+    }
+  } catch (err) {
+    console.error("Invalid product_image JSON:", err);
+    images = []; // fallback empty array
+  }
+
+  const firstImage = images.length > 0 ? images[0] : "default.jpg";
+
 
   return (
     <div
-      className={`${
-        offer_style ? "tp-product-offer-item" : "mb-25"
-      } tp-product-item transition-3`}
+      className={`${offer_style ? "tp-product-offer-item" : "mb-25"
+        } tp-product-item transition-3`}
     >
       {/* IMAGE */}
       <div className="tp-product-thumb p-relative fix">
         <Image
-           src={`${api.IMG_URL}product_images/${firstImage}`}
+          src={`${api.IMG_URL}product_images/${firstImage}`}
           width={300}
           height={300}
           alt={product_name}
@@ -110,9 +121,8 @@ const firstImage = images.length > 0 ? images[0] : "default.jpg";
 
             <button
               onClick={() => dispatch(add_to_wishlist(product))}
-              className={`tp-product-action-btn ${
-                isAddedToWishlist ? "active" : ""
-              }`}
+              className={`tp-product-action-btn ${isAddedToWishlist ? "active" : ""
+                }`}
               disabled={status === "out-of-stock"}
             >
               <Wishlist />

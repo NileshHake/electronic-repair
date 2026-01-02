@@ -23,20 +23,20 @@ const ProductModal = () => {
   const { productItem, isModalOpen } = useSelector(
     (state) => state.productModal
   );
-  const { img, imageURLs,status } = productItem || {};
+  const { img, imageURLs, status } = productItem || {};
   const [activeImg, setActiveImg] = useState(img);
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   // active image change when img change
   useEffect(() => {
     setActiveImg(img);
     dispatch(initialOrderQuantity())
     setLoading(false)
-  }, [img,dispatch]);
+  }, [img, dispatch]);
 
   // handle image active
   const handleImageActive = (item) => {
-    setActiveImg(item.img);
+    setActiveImg(item);
     setLoading(true)
   };
 
@@ -59,12 +59,12 @@ const ProductModal = () => {
             </button>
             {/* product-details-thumb-wrapper start */}
             <DetailsThumbWrapper
+              productItem={productItem}
               activeImg={activeImg}
               handleImageActive={handleImageActive}
-              imageURLs={imageURLs}
-              imgWidth={416}
-              imgHeight={480}
-              loading={loading}
+              imageURLs={imageURLs || [{ img }]}
+              imgWidth={580}
+              imgHeight={670} 
               status={status}
             />
             {/* product-details-thumb-wrapper end */}
