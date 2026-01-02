@@ -22,7 +22,7 @@ const bannerProducts = [
   },
   {
     id: 2,
-    banner_bg_txt: 'tablet',
+    banner_bg_txt: 'laptop',
     subtitle: 'Tablet Collection 2023',
     title: 'Galaxy Tab S6 Lite Android Tablet',
     oldPrice: 320,

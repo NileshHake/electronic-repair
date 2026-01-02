@@ -7,6 +7,8 @@ import {
   Container,
   Row,
   Col,
+  Input,
+  Label,
 } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
@@ -27,12 +29,14 @@ const SliderList = () => {
   const dispatch = useDispatch();
 
   const { sliders } = useSelector((state) => state.SliderReducer);
- 
+
 
   const [isOpen, setIsOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [sliderData, setSliderData] = useState({});
   const [deleteModal, setDeleteModal] = useState(false);
+  const [isTable, setIsTable] = useState(true);
+
   const [selectedSlider, setSelectedSlider] = useState(null);
 
   // ----------------------------------
@@ -60,7 +64,7 @@ const SliderList = () => {
   return (
     <div className="page-content">
       <Container fluid>
-        
+
         <Row>
           <Col lg={12}>
             <Card>
@@ -69,17 +73,37 @@ const SliderList = () => {
                   <Col>
                     <h5 className="mb-0 fw-bold">Slider List</h5>
                   </Col>
-                  <Col className="text-end">
-                    <Button color="success" onClick={() => setIsOpen(true)}>
+                  <Col className="d-flex justify-content-end align-items-center gap-3">
+                    {/* Switch */}
+                    <div className="form-check form-switch d-flex align-items-center mb-0">
+                      <Input
+                        id="productSliderSwitch"
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        checked={isTable}
+                        onChange={() => setIsTable((prev) => !prev)}
+                      />
+                      <Label
+                        htmlFor="productSliderSwitch"
+                        className="form-check-label fw-semibold ms-2 mb-0"
+                      >
+                        Product Slider
+                      </Label>
+                    </div>
+
+                    {/* Button */}
+                    <Button color="success">
                       + Add Slider
                     </Button>
                   </Col>
+
                 </Row>
               </CardHeader>
 
               <CardBody className="pt-0">
                 <div className="table-responsive">
-                  <table className="table align-middle table-hover mb-0">
+                  {!isTable ? <table className="table align-middle table-hover mb-0">
                     <thead className="table-light text-uppercase text-muted">
                       <tr>
                         <th>#</th>
@@ -99,7 +123,7 @@ const SliderList = () => {
 
                     <tbody>
                       {sliders.data && sliders.data.length > 0 ? (
-                        sliders.data.map((slider, index) => (
+                        sliders.data.filter((s) => s.slider_for_product == 0).map((slider, index) => (
                           <tr key={slider.slider_id}>
                             <td>{index + 1}</td>
 
@@ -187,8 +211,91 @@ const SliderList = () => {
                         </tr>
                       )}
                     </tbody>
-                  </table>
+                  </table> :
+                    <table className="table align-middle table-hover mb-0">
+                      <thead className="table-light text-uppercase text-muted">
+                        <tr>
+                          <th>#</th>
+                          <th className="text-center">Image</th>
+
+                          <th>Price</th>
+                          <th>Old Price</th>
+                          <th>Title</th>
+                          <th>Sub Text 1</th>
+                          <th>Background Text</th>
+
+                          <th className="text-center">Actions</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {sliders.data && sliders.data.length > 0 ? (
+                          sliders.data.filter((s) => s.slider_for_product == 1).map((slider, index) => (
+                            <tr key={slider.slider_id}>
+                              <td>{index + 1}</td>
+
+                              {/* Image */}
+                              <td className="text-center">
+                                {slider.slider_image ? (
+                                  <img
+                                    src={`${api.IMG_URL}slider_image/${slider.slider_image}`}
+                                    alt="slider"
+                                    width="120"
+                                    height="70"
+                                    className="rounded"
+                                  />
+                                ) : (
+                                  <D_img width="80px" height="50px" />
+                                )}
+                              </td>
+
+                              <td>₹ {slider.pre_title_price}</td>
+                              <td>₹ {slider.slider_old_price}</td>
+                              <td className="fw-semibold">{slider.title}</td>
+                              <td>{slider.subtitle_text_1}</td>
+                              <td>{slider.slider_bg_text}</td>
+
+                              {/* Green BG */}
+
+
+                              {/* Actions */}
+                              <td className="text-center">
+                                <ul className="list-inline hstack gap-2 mb-0 justify-content-center">
+                                  <li className="list-inline-item">
+                                    <button
+                                      className="text-primary border-0 bg-transparent"
+                                      onClick={() => {
+                                        setSliderData(slider);
+                                        setIsUpdateOpen(true);
+                                      }}
+                                    >
+                                      <i className="ri-pencil-fill fs-16"></i>
+                                    </button>
+                                  </li>
+
+                                  <li className="list-inline-item">
+                                    <button
+                                      onClick={() => onClickDelete(slider)}
+                                      className="text-danger border-0 bg-transparent"
+                                    >
+                                      <i className="ri-delete-bin-5-fill fs-16"></i>
+                                    </button>
+                                  </li>
+                                </ul>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="12" className="text-center py-5">
+                              <h5>No Slider Found</h5>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>}
                 </div>
+
               </CardBody>
             </Card>
           </Col>

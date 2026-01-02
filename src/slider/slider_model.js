@@ -12,39 +12,50 @@ const Slider = sequelize.define(
 
     pre_title_text: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
 
     pre_title_price: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
 
     title: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
 
     subtitle_text_1: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
 
     subtitle_percent: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
 
     subtitle_text_2: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
 
     slider_image: {
-      type: DataTypes.STRING, // image name
-      allowNull: false,
+      type: DataTypes.STRING,  
+      allowNull: true,
     },
-
+    slider_for_product: {
+      type: DataTypes.STRING,  
+      allowNull: true,
+    },
+    slider_old_price: {
+      type: DataTypes.STRING,  
+      allowNull: true,
+    },
+    slider_bg_text: {
+      type: DataTypes.STRING,  
+      allowNull: true,
+    },
     green_bg: {
       type: DataTypes.TINYINT,
       defaultValue: 0,

@@ -15,6 +15,8 @@ import HeaderMainRight from "./header-com/header-main-right";
 import CartMiniSidebar from "@/components/common/cart-mini-sidebar";
 import HeaderSearchForm from "@/components/forms/header-search-form";
 import { CartTwo, CategoryMenu, Compare, Menu, Phone, ShippingCar, Wishlist } from "@/svg";
+import RepairButton from "@/svg/RepairButton";
+import RecoveryButton from "@/svg/RecoveryButton";
 
 const Header = () => {
   const { wishlist } = useSelector((state) => state.wishlist);
@@ -29,7 +31,7 @@ const Header = () => {
         <div className="tp-header-area p-relative z-index-11">
           {/* header top start  */}
           <div className="tp-header-top black-bg p-relative z-index-1 d-none d-md-block">
-            <div className="container">
+            <div className="container-fluid">
               <div className="row align-items-center">
                 <div className="col-md-6">
                   <div className="tp-header-welcome d-flex align-items-center">
@@ -49,27 +51,46 @@ const Header = () => {
           </div>
 
           {/* header main start */}
-          <div className="tp-header-main tp-header-sticky">
-            <div className="container">
-              <div className="row align-items-center">
-                <div className="col-xl-2 col-lg-2 col-md-4 col-6">
-                  <div className="logo">
-                    <Link href="/">
-                      <Image src={logo} alt="logo" />
-                    </Link>
-                  </div>
-                </div>
-                <div className="col-xl-6 col-lg-7 d-none d-lg-block">
-                  <div className="tp-header-search pl-70">
-                    <HeaderSearchForm />
-                  </div>
-                </div>
-                <div className="col-xl-4 col-lg-3 col-md-8 col-6">
-                  <HeaderMainRight setIsCanvasOpen={setIsCanvasOpen} />
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="tp-header-main tp-header-sticky py-2 border-bottom bg-white p-5">
+  <div className="container-fluid px-4 p-3">
+    <div className="row align-items-center">
+
+      {/* LOGO */}
+      <div className="col-xl-2 col-lg-2 col-md-4 col-6">
+        <div className="d-flex align-items-center">
+          <Link href="/">
+            <Image src={logo} alt="logo" className="img-fluid" />
+          </Link>
+        </div>
+      </div>
+
+      {/* SEARCH */}
+      <div className="col-xl-4 col-lg-4 d-none d-lg-block">
+        <div className="ps-4">
+          <HeaderSearchForm />
+        </div>
+      </div>
+
+      {/* BUTTONS */}
+      <div className="col-xl-3 col-lg-3 d-none d-lg-block">
+        <div className="d-flex align-items-center justify-content-center gap-2">
+          <RepairButton />
+          <RecoveryButton />
+        </div>
+      </div>
+
+      {/* RIGHT ICONS */}
+      <div className="col-xl-3 col-lg-3 col-md-8 col-6">
+        <div className="d-flex justify-content-end align-items-center">
+          <HeaderMainRight setIsCanvasOpen={setIsCanvasOpen} />
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 
           {/* header bottom start */}
           <div className="tp-header-bottom tp-header-bottom-border d-none d-lg-block">
@@ -177,7 +198,7 @@ const Header = () => {
       {/* cart mini sidebar start */}
       {/* <CartMiniSidebar /> */}
       {/* cart mini sidebar end */}
-<CartMiniSidebar />
+      <CartMiniSidebar />
       {/* off canvas start */}
       <OffCanvas isOffCanvasOpen={isOffCanvasOpen} setIsCanvasOpen={setIsCanvasOpen} categoryType="electronics" />
       {/* off canvas end */}

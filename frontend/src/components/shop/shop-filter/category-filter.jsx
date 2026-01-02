@@ -8,7 +8,7 @@ import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
 import ShopCategoryLoader from "@/components/loader/shop/shop-category-loader";
 
 const CategoryFilter = ({setCurrPage,shop_right=false}) => {
-  const { data: categories, isLoading, isError } = useGetShowCategoryQuery();
+  // const { data: categories, isLoading, isError } = useGetShowCategoryQuery();
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -27,41 +27,41 @@ const CategoryFilter = ({setCurrPage,shop_right=false}) => {
   // decide what to render
   let content = null;
 
-  if (isLoading) {
-    content = <ShopCategoryLoader loading={isLoading}/>;
-  }
-  if (!isLoading && isError) {
-    content = <ErrorMsg msg="There was an error" />;
-  }
-  if (!isLoading && !isError && categories?.result?.length === 0) {
-    content = <ErrorMsg msg="No Category found!" />;
-  }
-  if (!isLoading && !isError && categories?.result?.length > 0) {
-    const category_items = categories.result;
-    content = category_items.map((item) => (
-      <li key={item._id}>
-        <a
-          onClick={() => handleCategoryRoute(item.parent)}
-          style={{ cursor: "pointer" }}
-          className={
-            router.query.category ===
-            item.parent.toLowerCase().replace("&", "").split(" ").join("-")
-              ? "active"
-              : ""
-          }
-        >
-          {item.parent} <span>{item.products.length}</span>
-        </a>
-      </li>
-    ));
-  }
+  // if (isLoading) {
+  //   content = <ShopCategoryLoader loading={isLoading}/>;
+  // }
+  // if (!isLoading && isError) {
+  //   content = <ErrorMsg msg="There was an error" />;
+  // }
+  // if (!isLoading && !isError && categories?.result?.length === 0) {
+  //   content = <ErrorMsg msg="No Category found!" />;
+  // }
+  // if (!isLoading && !isError && categories?.result?.length > 0) {
+  //   const category_items = categories.result;
+  //   content = category_items.map((item) => (
+  //     <li key={item._id}>
+  //       <a
+  //         onClick={() => handleCategoryRoute(item.parent)}
+  //         style={{ cursor: "pointer" }}
+  //         className={
+  //           router.query.category ===
+  //           item.parent.toLowerCase().replace("&", "").split(" ").join("-")
+  //             ? "active"
+  //             : ""
+  //         }
+  //       >
+  //         {item.parent} <span>{item.products.length}</span>
+  //       </a>
+  //     </li>
+  //   ));
+  // }
   return (
     <>
       <div className="tp-shop-widget mb-50">
         <h3 className="tp-shop-widget-title">Categories</h3>
         <div className="tp-shop-widget-content">
           <div className="tp-shop-widget-categories">
-            <ul>{content}</ul>
+            {/* <ul>{content}</ul> */}
           </div>
         </div>
       </div>
