@@ -20,6 +20,7 @@ const googleCustomerLogin = async (req, res) => {
       picture,
       email_verified,
     } = req.body;
+console.log(req.body);
 
     if (!email) {
       return res.status(400).json({
@@ -29,27 +30,30 @@ const googleCustomerLogin = async (req, res) => {
     }
 
     // 1️⃣ Find user by email
-    const user = await User.findOne({ where: { user_email: email } });
+    let user = await User.findOne({ where: { user_email: email } });
 
-    // 2️⃣ If user does NOT exist → tell frontend to redirect to sig  nup
+    // 2️⃣ If user NOT exist → CREATE user
     if (!user) {
-      return res.status(200).json({
-        success: false,
-        userNotFound: true,
-        message: "User not found. Please sign up first.",
-        email,              // so frontend can prefill signup form
-        name: name || `${given_name || ""} ${family_name || ""}`.trim(),
-        picture,
+      user = await User.create({
+        user_email: email,
+        user_name: name || `${given_name || ""} ${family_name || ""}`.trim(),
+        user_profile: picture || null,
+        user_type: 3, // 👈 default (Customer / Employee / User)
+        user_google_id: sub,
+        user_email_verified: email_verified ? 1 : 0,
+        user_status: 1,
+        user_created_by: null,
       });
     }
+
+    // 3️⃣ Fetch Business Data (same logic you had)
     const BusinessData = await (
       [2, 3].includes(user.user_type)
         ? User.findByPk(user.user_id)
         : User.findOne({ where: { user_id: user.user_created_by } })
     );
 
-
-    // 3️⃣ If user exists → create JWT token and login
+    // 4️⃣ Create JWT Token
     const token = jwt.sign(
       {
         user_id: user.user_id,
@@ -60,13 +64,16 @@ const googleCustomerLogin = async (req, res) => {
       { expiresIn: "1d" }
     );
 
+    // 5️⃣ Return success
     return res.status(200).json({
       success: true,
       message: "Login successful (Google)",
       token,
       BusinessData,
       user,
+      isNewUser: !user._previousDataValues, // optional
     });
+
   } catch (error) {
     console.error("❌ Error in googleCustomerLogin:", error);
     return res.status(500).json({
@@ -76,79 +83,8 @@ const googleCustomerLogin = async (req, res) => {
     });
   }
 };
-const googleLoginOrSignup = async (req, res) => {
-  try {
-    const {
-      user_name,
-      user_email,
-      user_phone_number,
-      user_type = 6, // default Google customer type
-      user_password = null,
-      user_created_by = 1, // default business
-      user_picture,
-      name,          // optional Google fields
-      given_name,
-      family_name,
-    } = req.body;
 
-    const email = user_email || req.body.email; // support both
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email not found",
-      });
-    }
-
-    // 1️⃣ Check if user exists
-    let user = await User.findOne({ where: { user_email: email } });
-
-    if (!user) {
-      // 2️⃣ If user does not exist → create new user
-      const finalUserName = user_name || name || `${given_name || ""} ${family_name || ""}`.trim();
-      let hashedPassword = null;
-      if (user_password) {
-        hashedPassword = await bcrypt.hash(user_password, 10);
-      }
-      user = await User.create({
-        user_name: finalUserName,
-        user_email: email,
-        user_phone_number: user_phone_number || null,
-        user_type,
-        user_role_id: 3,
-        user_password: hashedPassword,
-        user_created_by,
-        user_picture: user_picture || null,
-      });
-    }
-
-    // 3️⃣ Generate JWT token
-    const token = jwt.sign(
-      {
-        user_id: user.user_id,
-        user_email: user.user_email,
-        user_type: user.user_type,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: user ? "Login successful" : "Signup & login successful",
-      token,
-
-      user,
-    });
-  } catch (error) {
-    console.error("❌ Error in googleLoginOrSignup:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error logging in or creating user",
-      error: error.message,
-    });
-  }
-};
+ 
 const store = async (req, res) => {
   try {
     const file = req.files?.user_profile;
@@ -444,8 +380,7 @@ module.exports = {
   store,
   index,
   Techniciansindex,
-  googleCustomerLogin,
-  googleLoginOrSignup,
+  googleCustomerLogin, 
   Userindex,
   Deliveryindex,
   Customerindex,

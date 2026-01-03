@@ -6,20 +6,22 @@ import { useRouter } from "next/router";
 import google_icon from "@assets/img/icon/login/google.svg";
 import { useSignUpProviderMutation } from "@/redux/features/auth/authApi";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import { jwtDecode } from "jwt-decode";
 
 const GoogleSignUp = () => {
-  const [signUpProvider, {}] = useSignUpProviderMutation();
+  const [signUpProvider, { }] = useSignUpProviderMutation();
   const router = useRouter();
   const { redirect } = router.query;
   // handleGoogleSignIn
   const handleGoogleSignIn = (user) => {
     if (user) {
-      signUpProvider(user?.credential).then((res) => {
+      const decoded = jwtDecode(user.credential);
+      signUpProvider(decoded).then((res) => {
         if (res?.data) {
           notifySuccess("Login success!");
           router.push(redirect || "/");
         } else {
-       
+
           notifyError(res.error?.message);
         }
       });

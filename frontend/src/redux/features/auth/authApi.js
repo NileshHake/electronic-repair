@@ -14,10 +14,18 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     // signUpProvider
     signUpProvider: builder.mutation({
-      query: (token) => ({
-        url: `https://shofy-backend-dlt.vercel.app/api/user/register/${token}`,
-        method: "POST",
-      }),
+
+
+      query: (data) => {
+        console.log("data", data);
+
+        return {
+          url: "/user/google-login",
+          method: "POST",
+          body: data,
+        };
+      },
+
 
       async onQueryStarted(arg, { queryFulfilled, dispatch }) {
         try {
@@ -26,16 +34,16 @@ export const authApi = apiSlice.injectEndpoints({
           Cookies.set(
             "userInfo",
             JSON.stringify({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
+              accessToken: result.data.token,
+              user: result.data.user,
             }),
             { expires: 0.5 }
           );
 
           dispatch(
             userLoggedIn({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
+              accessToken: result.data.token,
+              user: result.data.user,
             })
           );
         } catch (err) {
@@ -46,7 +54,7 @@ export const authApi = apiSlice.injectEndpoints({
     // login
     loginUser: builder.mutation({
       query: (data) => ({
-        url:  "/user/login",
+        url: "/user/login",
         method: "POST",
         body: data,
       }),

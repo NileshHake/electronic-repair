@@ -62,7 +62,7 @@ function* socialLogin({ payload }) {
   try {
     const { data, navigate } = payload;
      
-    const apiResponse = yield call(api.create, "/customer/google-login", {
+    const apiResponse = yield call(api.create, "/user/google-login", {
       email: data.email,
       name: data.name,
       picture: data.picture,
