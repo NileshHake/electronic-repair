@@ -20,7 +20,7 @@ const googleCustomerLogin = async (req, res) => {
       picture,
       email_verified,
     } = req.body;
-console.log(req.body);
+
 
     if (!email) {
       return res.status(400).json({
@@ -84,7 +84,7 @@ console.log(req.body);
   }
 };
 
- 
+
 const store = async (req, res) => {
   try {
     const file = req.files?.user_profile;
@@ -274,6 +274,30 @@ const update = async (req, res) => {
     });
   }
 };
+const CustomerUpdate = async (req, res) => {
+  try {
+    const { user_id } = req.body;
+console.log(req.body);
+
+    const user = await User.findByPk(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "❌ User not found" });
+    }
+
+    await user.update(req.body);
+
+    return res.status(200).json({
+      message: " Updated successfully ",
+      data: user,
+    });
+  } catch (error) {
+    console.error("❌ Error updating user:", error);
+    res.status(500).json({  
+      message: "Error updating user ❌",
+      error: error.message,
+    });
+  }
+};
 
 
 const changePassword = async (req, res) => {
@@ -380,7 +404,7 @@ module.exports = {
   store,
   index,
   Techniciansindex,
-  googleCustomerLogin, 
+  googleCustomerLogin,
   Userindex,
   Deliveryindex,
   Customerindex,
@@ -388,6 +412,7 @@ module.exports = {
   login,
   Get,
   changePassword,
+  CustomerUpdate,
   update,
   deleted,
 };

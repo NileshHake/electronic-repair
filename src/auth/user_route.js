@@ -10,6 +10,7 @@ router.get("/user/list", verifyToken, controller.index);
 router.get("/technicians/list", verifyToken, controller.Techniciansindex);
 router.get("/business/list", controller.Businessindex);
 router.get("/delivery/list", verifyToken, controller.Deliveryindex);
+router.put("/customer/update", controller.CustomerUpdate);
 
 router.get("/customer/list", verifyToken, controller.Customerindex);
 router.get("/user/user/list", verifyToken, controller.Userindex);

@@ -17,8 +17,6 @@ export const authApi = apiSlice.injectEndpoints({
 
 
       query: (data) => {
-        console.log("data", data);
-
         return {
           url: "/user/google-login",
           method: "POST",
@@ -154,35 +152,18 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     // updateProfile password
     updateProfile: builder.mutation({
-      query: ({ id, ...data }) => ({
-        url: `https://shofy-backend-dlt.vercel.app/api/user/update-user/${id}`,
-        method: "PUT",
-        body: data,
-      }),
+      query: (data) => {
+         
+        
+        return {
 
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const result = await queryFulfilled;
-
-          Cookies.set(
-            "userInfo",
-            JSON.stringify({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            }),
-            { expires: 0.5 }
-          );
-
-          dispatch(
-            userLoggedIn({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            })
-          );
-        } catch (err) {
-          // do nothing
+          url: `/customer/update`,
+          method: "PUT",
+          body: data,
         }
       },
+
+       
     }),
   }),
 });
