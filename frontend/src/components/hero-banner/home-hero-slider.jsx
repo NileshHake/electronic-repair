@@ -13,49 +13,10 @@ import shape_2 from "@assets/img/slider/shape/slider-shape-2.png";
 import shape_3 from "@assets/img/slider/shape/slider-shape-3.png";
 import shape_4 from "@assets/img/slider/shape/slider-shape-4.png";
 import { ArrowRightLong, SliderNextBtn, SliderPrevBtn, TextShape } from "@/svg";
+import { api } from "../../../config"; 
 import { useGetSlidersQuery } from "@/redux/features/sliderApi";
-import { api } from "../../../config";
 
-// slider data
-const sliderData = [
-  {
-    id: 1,
-    pre_title: { text: "Starting at", price: 274 },
-    title: "The best tablet Collection 2023",
-    subtitle: {
-      text_1: " New ",
-      percent: 35,
-      text_2: "off this week",
-    },
-    img: slider_img_1,
-    green_bg: true,
-  },
-  {
-    id: 2,
-    pre_title: { text: "Starting at", price: 999 },
-    title: "The best note book collection 2023",
-    subtitle: {
-      text_1: " New ",
-      percent: 10,
-      text_2: "off this week",
-    },
-    img: slider_img_2,
-    green_bg: true,
-  },
-  {
-    id: 3,
-    pre_title: { text: "Starting at", price: 999 },
-    title: "The best note book collection 2023",
-    subtitle: {
-      text_1: " New ",
-      percent: 10,
-      text_2: "off this week",
-    },
-    img: slider_img_3,
-    is_light: true,
-  },
-];
-
+ 
 function Shape({ img, num }) {
   return (
     <Image className={`tp-slider-shape-${num}`} src={img} alt="slider-shape" priority />
@@ -64,8 +25,9 @@ function Shape({ img, num }) {
 
 const HomeHeroSlider = () => {
   const [active, setActive] = useState(false);
-  const { data: sliders, isLoading, isError } = useGetSlidersQuery();
- 
+  const { data, isLoading, isError } = useGetSlidersQuery();
+  console.log(data);
+
 
   const handleActiveIndex = (index) => {
     if (index === 2) {
@@ -93,7 +55,7 @@ const HomeHeroSlider = () => {
           className={`tp-slider-active tp-slider-variation swiper-container ${active ? "is-light" : ""
             }`}
         >
-          {sliders?.data.slice(0,3).map((item) => (
+          {data?.map((item) => (
             <SwiperSlide
               key={item.id}
               className={`tp-slider-item tp-slider-height d-flex align-items-center ${item?.green_bg
@@ -144,7 +106,7 @@ const HomeHeroSlider = () => {
                         src={`${api.IMG_URL}slider_image/${item.img}`}
                         fill
                         alt="slider-img"
-                        style={{ objectFit: "contain" }} 
+                        style={{ objectFit: "contain" }}
                       />
                     </div>
                   </div>

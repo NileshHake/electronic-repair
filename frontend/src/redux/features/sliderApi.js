@@ -4,9 +4,23 @@ export const sliderApi = apiSlice.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
     // Get all sliders
-    getSliders: builder.query({
-      query: () => "/slider/web/list", // GET request
+    GetSliders: builder.query({
+      query: () => {
+        console.log("🔥 GetSliders API called");
+        return "/slider/home-list";
+      },
+
+      async onQueryStarted(arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          console.log("✅ Slider API response:", data);
+        } catch (err) {
+          console.error("❌ Slider API error:", err);
+        }
+      },
     }),
+
+
     GetProductSliders: builder.query({
       query: () => "/slider/product-list", // GET request
     }),

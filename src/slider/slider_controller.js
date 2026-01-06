@@ -71,6 +71,44 @@ exports.Prodcutindex = async (req, res) => {
     });
   }
 };
+exports.Webindex = async (req, res) => {
+  try {
+    const sliders = await Slider.findAll({
+      where: { slider_status: 1, slider_for_product: 0 },
+      order: [["slider_id", "ASC"]],
+
+    });
+    const formattedSliders = sliders.map((item) => ({
+      id: item.slider_id,
+
+      pre_title: {
+        text: item.pre_title_text,
+        price: item.pre_title_price,
+      },
+
+      title: item.title,
+
+      subtitle: {
+        text_1: item.subtitle_text_1,
+        percent: item.subtitle_percent,
+        text_2: item.subtitle_text_2,
+      },
+
+      img: item.slider_image, // image name only
+      green_bg: item.green_bg === 1,
+      is_light: item.is_light === 1,
+    }));
+
+
+    return res.status(200).json(formattedSliders);
+  } catch (error) {
+    console.error("❌ Slider fetch error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching sliders",
+    });
+  }
+};
 
 // ✅ Get single slider
 exports.get = async (req, res) => {
