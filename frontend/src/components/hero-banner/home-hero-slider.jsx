@@ -26,8 +26,7 @@ function Shape({ img, num }) {
 const HomeHeroSlider = () => {
   const [active, setActive] = useState(false);
   const { data, isLoading, isError } = useGetSlidersQuery();
-  console.log(data);
-
+ 
 
   const handleActiveIndex = (index) => {
     if (index === 2) {

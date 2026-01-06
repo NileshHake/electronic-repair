@@ -59,7 +59,7 @@ const ShopListItem = ({ product }) => {
                 Quick View
               </span>
             </button>
-            <button
+            {/* <button
               type="button"
               onClick={()=> handleWishlistProduct(product)}
               className="tp-product-action-btn-2 tp-product-add-to-wishlist-btn"
@@ -68,7 +68,7 @@ const ShopListItem = ({ product }) => {
               <span className="tp-product-tooltip tp-product-tooltip-right">
                 Add To Wishlist
               </span>
-            </button>
+            </button> */}
             <button
               type="button"
               onClick={()=> handleCompareProduct(product)}

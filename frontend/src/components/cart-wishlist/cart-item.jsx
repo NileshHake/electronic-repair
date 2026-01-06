@@ -1,63 +1,100 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { useDispatch } from "react-redux";
 import Link from "next/link";
-// internal
 import { Close, Minus, Plus } from "@/svg";
-import { add_cart_product, quantityDecrement, remove_product } from "@/redux/features/cartSlice";
+import { api } from "../../../config";
+import { useDeleteCartItemMutation, useUpdateCartMutation } from "@/redux/features/cartApi";
 
-const CartItem = ({product}) => {
-  const {_id, img,title,price, orderQuantity = 0 } = product || {};
+const CartItem = ({ product }) => {
+  const {
+    add_to_card_id,
+    product_image,
+    product_name,
+    product_sale_price,
+    add_to_card_product_qty,
+  } = product || {};
 
-  const dispatch = useDispatch();
+  const [quantity, setQuantity] = useState(add_to_card_product_qty || 1);
 
-    // handle add product
-    const handleAddProduct = (prd) => {
-      dispatch(add_cart_product(prd))
+  const [updateCart] = useUpdateCartMutation();
+  const [deleteCartItem] = useDeleteCartItemMutation();
+
+  // Handle increment
+  const handleAddProduct = async () => {
+    const newQty = quantity + 1;
+    setQuantity(newQty);
+    try {
+      await updateCart({ id: add_to_card_id, quantity: newQty }).unwrap();
+      // Cart list will auto-refresh because of invalidatesTags
+    } catch (err) {
+      console.error("Failed to update cart quantity:", err);
     }
-    // handle decrement product
-    const handleDecrement = (prd) => {
-      dispatch(quantityDecrement(prd))
+  };
+
+  // Handle decrement
+  const handleDecrement = async () => {
+    if (quantity <= 1) return;
+    const newQty = quantity - 1;
+    setQuantity(newQty);
+    try {
+      await updateCart({ id: add_to_card_id, quantity: newQty }).unwrap();
+      // Cart list will auto-refresh
+    } catch (err) {
+      console.error("Failed to update cart quantity:", err);
     }
-  
-    // handle remove product
-    const handleRemovePrd = (prd) => {
-      dispatch(remove_product(prd))
+  };
+
+  // Handle remove
+  const handleRemovePrd = async () => {
+    try {
+      await deleteCartItem(add_to_card_id).unwrap();
+      // Cart list will auto-refresh
+    } catch (err) {
+      console.error("Failed to remove cart item:", err);
     }
+  };
+
+  // Parse product_image JSON
+  let images = [];
+  try {
+    images = JSON.parse(product_image);
+    if (!Array.isArray(images)) images = [];
+  } catch (err) {
+    images = [];
+  }
+  const firstImage = images.length > 0 ? images[0] : "default.jpg";
+  const imgUrl = `${api.IMG_URL}product_images/${firstImage}`;
+
+  const price = product_sale_price || 0;
 
   return (
     <tr>
-      {/* img */}
       <td className="tp-cart-img">
-        <Link href={`/product-details/${_id}`}>
-          <Image src={img} alt="product img" width={70} height={100} />
+        <Link href={`/product-details/${add_to_card_id}`}>
+          <Image src={imgUrl} alt={product_name} width={70} height={100} />
         </Link>
       </td>
-      {/* title */}
       <td className="tp-cart-title">
-        <Link href={`/product-details/${_id}`}>{title}</Link>
+        <Link href={`/product-details/${add_to_card_id}`}>{product_name}</Link>
       </td>
-      {/* price */}
       <td className="tp-cart-price">
-        <span>${(price * orderQuantity).toFixed(2)}</span>
+        <span> ₹{(price * quantity).toFixed(2)}</span>
       </td>
-      {/* quantity */}
       <td className="tp-cart-quantity">
         <div className="tp-product-quantity mt-10 mb-10">
-          <span onClick={()=> handleDecrement(product)} className="tp-cart-minus">
+          <span onClick={handleDecrement} className="tp-cart-minus">
             <Minus />
           </span>
-          <input className="tp-cart-input" type="text" value={orderQuantity} readOnly />
-          <span onClick={()=> handleAddProduct(product)} className="tp-cart-plus">
+          <input className="tp-cart-input" type="text" value={quantity} readOnly />
+          <span onClick={handleAddProduct} className="tp-cart-plus">
             <Plus />
           </span>
         </div>
       </td>
-      {/* action */}
       <td className="tp-cart-action">
-        <button onClick={()=> handleRemovePrd({title,id:_id})} className="tp-cart-action-btn">
+        <button onClick={handleRemovePrd} className="tp-cart-action-btn">
           <Close />
-          <span>{" "}Remove</span>
+          <span> Remove</span>
         </button>
       </td>
     </tr>

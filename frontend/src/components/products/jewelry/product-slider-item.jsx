@@ -67,14 +67,14 @@ const ProductSliderItem = ({ product }) => {
             <QuickView />
             <span className="tp-product-tooltip">Quick View</span>
           </button>
-          <button
+          {/* <button
             type="button"
             onClick={() => handleWishlistProduct(product)}
             className={`tp-product-action-btn-3 ${isAddedToWishlist ? 'active' : ''} tp-product-add-to-wishlist-btn`}
           >
             <Wishlist />
             <span className="tp-product-tooltip">Add To Wishlist</span>
-          </button>
+          </button> */}
         </div>
       </div>
       <div className="tp-category-content-4">

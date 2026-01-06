@@ -1,8 +1,10 @@
+const sequelize = require("../../config/db");
 const AddToCard = require("./add_to_card_model");
 
 // ------------------- CREATE -------------------
 const store = async (req, res) => {
     try {
+
         const userId = req.currentUser.user_id;
         const {
             add_to_card_product_id,
@@ -49,6 +51,7 @@ const store = async (req, res) => {
         });
 
     } catch (err) {
+       
         return res.status(500).json({ error: err.message });
     }
 };
@@ -59,26 +62,42 @@ const index = async (req, res) => {
     try {
         const userId = req.currentUser.user_id;
 
-        // fetch cart items
-        const list = await AddToCard.findAll({
-            where: { add_to_card_user_id: userId },
-            order: [["add_to_card_id", "DESC"]],
-        });
+        // Get all cart items with full product details
+        const items = await sequelize.query(
+            `
+      SELECT 
+        a.*,    -- all fields from cart
+        b.*     -- all fields from product
+      FROM tbl_add_to_card AS a
+      INNER JOIN tbl_products AS b 
+        ON a.add_to_card_product_id = b.product_id
+      WHERE a.add_to_card_user_id = :userId
+      ORDER BY a.add_to_card_id DESC
+      `,
+            {
+                replacements: { userId },
+                type: sequelize.QueryTypes.SELECT
+            }
+        );
 
-        // calculate grand total
-        const grand_total = list.reduce(
-            (sum, item) => sum + Number(item.add_to_card_product_total),
+        // Calculate grand total from cart product totals
+        const grand_total = items.reduce(
+            (sum, item) => sum + Number(item.product_sale_price * item.add_to_card_product_qty),
             0
         );
 
         return res.json({
-            items: list,
-            grand_total,
+            items,       // all cart + product data
+            grand_total, // total price
         });
+
     } catch (err) {
+         console.log("500 Error", err);
+
         return res.status(500).json({ error: err.message });
     }
 };
+
 
 // ------------------- GET SINGLE -------------------
 const Get = async (req, res) => {
@@ -108,7 +127,8 @@ const update = async (req, res) => {
 
 // ------------------- DELETE -------------------
 const deleted = async (req, res) => {
-    try {
+    try { 
+        
         const item = await AddToCard.findByPk(req.params.id);
         if (!item) return res.status(404).json({ message: "Not found" });
 

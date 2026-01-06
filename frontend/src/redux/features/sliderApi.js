@@ -6,18 +6,10 @@ export const sliderApi = apiSlice.injectEndpoints({
     // Get all sliders
     GetSliders: builder.query({
       query: () => {
-        console.log("🔥 GetSliders API called");
+     
         return "/slider/home-list";
       },
-
-      async onQueryStarted(arg, { queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          console.log("✅ Slider API response:", data);
-        } catch (err) {
-          console.error("❌ Slider API error:", err);
-        }
-      },
+ 
     }),
 
 

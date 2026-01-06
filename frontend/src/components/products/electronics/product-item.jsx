@@ -12,8 +12,12 @@ import { handleProductModal } from "@/redux/features/productModalSlice";
 import { add_cart_product } from "@/redux/features/cartSlice";
 import { add_to_wishlist } from "@/redux/features/wishlist-slice";
 import { api } from "../../../../config";
+import { useAddToCartMutation } from "@/redux/features/cartApi";
+import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
 const ProductItem = ({ product, offer_style = false }) => {
+const router = useRouter();
 
 
   const {
@@ -67,7 +71,24 @@ const ProductItem = ({ product, offer_style = false }) => {
 
   const firstImage = images.length > 0 ? images[0] : "default.jpg";
 
+const [addToCart] = useAddToCartMutation();
 
+const handleAddProduct = async (prd) => {
+  const userInfo = Cookies.get("userInfo");
+ 
+  
+  if (userInfo) {
+     
+    
+    await addToCart({
+      add_to_card_product_id: prd.product_id,
+      
+    });
+  }else{
+    router.push("/login");
+  }
+  
+};
   return (
     <div
       className={`${offer_style ? "tp-product-offer-item" : "mb-25"
@@ -102,7 +123,7 @@ const ProductItem = ({ product, offer_style = false }) => {
               </Link>
             ) : (
               <button
-                onClick={() => dispatch(add_cart_product(product))}
+                onClick={() => handleAddProduct(product)}
                 className="tp-product-action-btn"
                 disabled={status === "out-of-stock"}
               >
@@ -119,7 +140,7 @@ const ProductItem = ({ product, offer_style = false }) => {
               <span className="tp-product-tooltip">Quick View</span>
             </button>
 
-            <button
+            {/* <button
               onClick={() => dispatch(add_to_wishlist(product))}
               className={`tp-product-action-btn ${isAddedToWishlist ? "active" : ""
                 }`}
@@ -127,7 +148,7 @@ const ProductItem = ({ product, offer_style = false }) => {
             >
               <Wishlist />
               <span className="tp-product-tooltip">Wishlist</span>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
