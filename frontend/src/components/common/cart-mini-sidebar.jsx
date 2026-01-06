@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSelector, useDispatch } from 'react-redux';
@@ -6,25 +6,36 @@ import empty_cart_img from '@assets/img/product/cartmini/empty-cart.png';
 import { closeCartMini } from '@/redux/features/cartSlice';
 import { api } from '../../../config';
 import { useGetCartListQuery, useDeleteCartItemMutation } from '@/redux/features/cartApi';
+import { useRouter } from 'next/router';
+import Cookies from 'js-cookie';
 
 const CartMiniSidebar = () => {
   const dispatch = useDispatch();
   const { cartMiniOpen } = useSelector((state) => state.cart);
+  const router = useRouter();
 
-  // Fetch cart from backend
+  // Check user login status
+  const userInfo = Cookies.get("userInfo");
+
+  // Redirect if not logged in & close mini cart
+  useEffect(() => {
+    if (!userInfo && cartMiniOpen) {
+      dispatch(closeCartMini());
+      router.push("/login");
+    }
+  }, [userInfo, cartMiniOpen, dispatch, router]);
+
+  // Fetch cart data
   const { data, isLoading, isError } = useGetCartListQuery();
   const [deleteCartItem] = useDeleteCartItemMutation();
-console.log(data);
 
   const cart_products = data?.items || [];
   const subtotal = data?.grand_total || 0;
 
-  // Close sidebar
-  const handleCloseCartMini = () => {
-    dispatch(closeCartMini());
-  };
+  // Close mini cart
+  const handleCloseCartMini = () => dispatch(closeCartMini());
 
-  // Remove product from cart
+  // Remove product
   const handleRemovePrd = async (id) => {
     try {
       await deleteCartItem(id).unwrap();
@@ -37,6 +48,7 @@ console.log(data);
     <>
       <div className={`cartmini__area tp-all-font-roboto ${cartMiniOpen ? 'cartmini-opened' : ''}`}>
         <div className="cartmini__wrapper d-flex justify-content-between flex-column">
+          
           <div className="cartmini__top-wrapper">
             <div className="cartmini__top p-relative">
               <div className="cartmini__top-title">
@@ -62,7 +74,6 @@ console.log(data);
             ) : (
               <div className="cartmini__widget">
                 {cart_products.map((item) => {
-                  // parse image
                   let images = [];
                   try {
                     images = JSON.parse(item.product_image);
@@ -72,7 +83,6 @@ console.log(data);
                   }
                   const firstImage = images.length > 0 ? images[0] : 'default.jpg';
                   const imgUrl = `${api.IMG_URL}product_images/${firstImage}`;
-
                   const price = item.product_sale_price || 0;
                   const qty = item.add_to_card_product_qty || 1;
 
@@ -88,7 +98,7 @@ console.log(data);
                           <Link href={`/product-details/${item.add_to_card_id}`}>{item.product_name}</Link>
                         </h5>
                         <div className="cartmini__price-wrapper">
-                          <span className="cartmini__price">  ₹{(price * qty).toFixed(2)}</span>
+                          <span className="cartmini__price">₹{(price * qty).toFixed(2)}</span>
                           <span className="cartmini__quantity"> x{qty}</span>
                         </div>
                       </div>
@@ -109,7 +119,7 @@ console.log(data);
             <div className="cartmini__checkout mt-3">
               <div className="cartmini__checkout-title mb-2 d-flex justify-content-between">
                 <h4>Subtotal:</h4>
-                <span>  ₹{subtotal.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="cartmini__checkout-btn d-flex flex-column gap-2">
                 <Link href="/cart" onClick={handleCloseCartMini} className="tp-btn w-100">View Cart</Link>

@@ -323,6 +323,132 @@ const filterstrendingproduct = async (req, res) => {
   }
 };
 
+const filterProducts = async (req, res) => {
+  try {
+    const {
+      category_id,
+      brand_id,
+      min_price,
+      max_price,
+      product_on_sale, 
+      sort,             
+      page = 1,
+    } = req.body;
+
+    const limit = 12;
+    const offset = (page - 1) * limit;
+
+    let whereConditions = [];
+    let replacements = { limit, offset };
+
+    // ✅ CATEGORY
+    if (category_id) {
+      whereConditions.push("pro.product_category = :category_id");
+      replacements.category_id = category_id;
+    }
+
+    // ✅ BRAND
+    if (brand_id) {
+      whereConditions.push("pro.product_brand = :brand_id");
+      replacements.brand_id = brand_id;
+    }
+
+    // ✅ PRICE RANGE
+    if (min_price != null && max_price != null) {
+      whereConditions.push(
+        "pro.product_sale_price BETWEEN :min_price AND :max_price"
+      );
+      replacements.min_price = min_price;
+      replacements.max_price = max_price;
+    }
+
+    // ✅ ON SALE FILTER
+    if (product_on_sale) {
+      whereConditions.push("pro.product_on_sale = 1");
+    }
+
+    const whereClause =
+      whereConditions.length > 0
+        ? `WHERE ${whereConditions.join(" AND ")}`
+        : "";
+
+    // ✅ SORT LOGIC
+    let orderBy = "pro.product_id DESC";
+
+    if (sort === "low_to_high") {
+      orderBy = "pro.product_sale_price ASC";
+    } 
+    else if (sort === "high_to_low") {
+      orderBy = "pro.product_sale_price DESC";
+    } 
+    else if (sort === "new") {
+      orderBy = "pro.createdAt DESC";
+    } 
+    else if (sort === "sale") {
+      orderBy = "pro.product_on_sale DESC";
+    }
+
+    // 🔹 TOTAL COUNT
+    const totalResult = await sequelize.query(
+      `
+      SELECT COUNT(*) as total
+      FROM tbl_products AS pro
+      ${whereClause}
+      `,
+      {
+        replacements,
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    const totalRecords = totalResult[0].total;
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    // 🔹 DATA QUERY
+    const products = await sequelize.query(
+      `
+      SELECT 
+        pro.*,
+        tx.tax_name,
+        tx.tax_percentage,
+        cat.category_name,
+        br.brand_name
+      FROM tbl_products AS pro
+      LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
+      LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
+      LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
+      ${whereClause}
+      ORDER BY ${orderBy}
+      LIMIT :limit OFFSET :offset
+      `,
+      {
+        replacements,
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      page,
+      limit,
+      totalRecords,
+      totalPages,
+      data: products,
+    });
+
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching products",
+      error: error.message,
+    });
+  }
+};
+
+
+ 
+
 
 
 const update = async (req, res) => {
@@ -408,4 +534,5 @@ module.exports = {
   SaleAndBothProduct,
   LatestProduct,
   filterstrendingproduct,
+  filterProducts,
 };

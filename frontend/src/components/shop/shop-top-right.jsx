@@ -1,35 +1,23 @@
 import React from "react";
-import { useDispatch } from "react-redux";
-// internal
-import { Filter } from "@/svg";
 import NiceSelect from "@/ui/nice-select";
-import {handleFilterSidebarOpen } from "@/redux/features/shop-filter-slice";
 
-const ShopTopRight = ({selectHandleFilter}) => {
-  const dispatch = useDispatch()
+const ShopTopRight = ({ selectHandleFilter ,otherProps }) => {
   return (
     <div className="tp-shop-top-right d-sm-flex align-items-center justify-content-xl-end">
       <div className="tp-shop-top-select">
         <NiceSelect
           options={[
-            { value: "Default Sorting", text: "Default Sorting" },
-            { value: "Low to High", text: "Low to High" },
-            { value: "High to Low", text: "High to Low" },
-            { value: "New Added", text: "New Added" },
-            { value: "On Sale", text: "On Sale" },
+            { value: "", text: "Default Sorting" },
+            { value: "low_to_high", text: "Low to High" },
+            { value: "high_to_low", text: "High to Low" },
+            { value: "new", text: "New Added" },
+            { value: "sale", text: "On Sale" },
           ]}
+
           defaultCurrent={0}
-          onChange={selectHandleFilter}
-          name="Default Sorting"
+          onChange={(e) => selectHandleFilter(e.value)}
+          name="sorting"
         />
-      </div>
-      <div className="tp-shop-top-filter">
-        <button onClick={()=> dispatch(handleFilterSidebarOpen())} type="button" className="tp-filter-btn">
-          <span>
-            <Filter />
-          </span>
-          {" "}Filter
-        </button>
       </div>
     </div>
   );

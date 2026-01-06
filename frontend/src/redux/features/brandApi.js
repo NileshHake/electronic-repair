@@ -6,9 +6,13 @@ export const brandApi = apiSlice.injectEndpoints({
     getActiveBrands: builder.query({
       query: () => `https://shofy-backend-dlt.vercel.app/api/brand/active`
     }),
+    GetallBrands: builder.query({
+      query: () => `/brand/list`
+    }),
   }),
 });
 
 export const {
- useGetActiveBrandsQuery
+  useGetActiveBrandsQuery,
+  useGetallBrandsQuery,
 } = brandApi;

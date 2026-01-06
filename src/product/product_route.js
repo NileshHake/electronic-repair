@@ -7,6 +7,7 @@ router.post("/product/store", verifyToken, controller.store);
 router.get("/product/list", verifyToken, controller.index);
 router.get("/product/latest-list", controller.LatestProduct);
 router.post("/products/repair-sale/list", verifyToken, controller.RepairandSaleProduct);
+router.post("/filter-products",  controller.filterProducts);
 router.post("/products/sale-list", verifyToken, controller.SaleAndBothProduct);
 router.post("/trending-product-filter" , controller.filterstrendingproduct);
 

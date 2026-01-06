@@ -4,10 +4,13 @@ export const productApi = apiSlice.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
     getAllProducts: builder.query({
-      query: () => `https://shofy-backend-dlt.vercel.app/api/product/all`,
-      providesTags: ['Products']
+      query: (body) => ({
+        url: "/filter-products",
+        method: "POST",
+        body,
+      }),
+      providesTags: ["Products"],
     }),
-
     getLatestProducts: builder.query({
       query: () => `product/latest-list`,
       providesTags: ['Products']

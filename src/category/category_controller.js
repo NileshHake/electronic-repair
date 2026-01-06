@@ -2,6 +2,7 @@ const { Op } = require("sequelize");
 const { getCreatedBy } = require("../helper/CurrentUser");
 const { saveImage, deleteImage } = require("../helper/fileUpload");
 const Category = require("./category_model");
+const sequelize = require("../../config/db");
 
 // 🟢 CREATE
 const store = async (req, res) => {
@@ -67,34 +68,49 @@ const getSubCategories = async (req, res) => {
 };
 const getCategoriesWithSub = async (req, res) => {
   try {
-    
-    const mainCategories = await Category.findAll({
-      where: {
-        category_main_id: null,
-      },
-      raw: true,
-    });
 
+    // 1️⃣ Main categories with product count
+    const mainCategories = await sequelize.query(
+      `
+      SELECT 
+        c.*,
+        COUNT(p.product_id) AS product_count
+      FROM tbl_categories AS c
+      LEFT JOIN tbl_products AS p 
+        ON p.product_category = c.category_id
+      WHERE c.category_main_id IS NULL
+      GROUP BY c.category_id
+      ORDER BY c.category_id DESC
+      `,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
 
-    // 2️⃣ For each main category, fetch its subcategories
+    // 2️⃣ Attach subcategories
     const categoriesWithChildren = await Promise.all(
       mainCategories.map(async (mainCat) => {
-        const subCategories = await Category.findAll({
-          where: {
-            category_main_id: mainCat.category_id,
-          },
-          raw: true,
-        });
+        const subCategories = await sequelize.query(
+          `
+          SELECT *
+          FROM tbl_categories
+          WHERE category_main_id = :mainCategoryId
+          `,
+          {
+            replacements: { mainCategoryId: mainCat.category_id },
+            type: sequelize.QueryTypes.SELECT,
+          }
+        );
 
         return {
           ...mainCat,
-          children: subCategories, // attach subcategories as children
+          children: subCategories,
         };
       })
     );
-    
 
     res.status(200).json(categoriesWithChildren);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -103,6 +119,7 @@ const getCategoriesWithSub = async (req, res) => {
     });
   }
 };
+
 
 // 🔵 READ SINGLE
 const Get = async (req, res) => {

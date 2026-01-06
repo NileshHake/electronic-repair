@@ -3,7 +3,7 @@ import React from 'react';
 const ShopBreadcrumb = ({title,subtitle}) => {
   return (
     <>
-      <section className="breadcrumb__area include-bg pt-100 pb-50">
+      <section className="breadcrumb__area include-bg pt-30 pb-50">
         <div className="container">
           <div className="row">
             <div className="col-xxl-12">

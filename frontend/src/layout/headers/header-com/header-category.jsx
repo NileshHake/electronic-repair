@@ -5,7 +5,7 @@ import { useGetCategoriesWithSubQuery } from "@/redux/features/categoryApi";
 import ErrorMsg from "@/components/common/error-msg";
 import Loader from "@/components/loader/loader";
 import { api } from "../../../../config";
-import D_img from "@/components/Default/D_img";
+import defaultIMG from "../../../../public/assets/img/istockphoto-1055079680-612x612.jpg";
 
 const HeaderCategory = ({ isCategoryActive }) => {
   const { data: categories, isLoading, isError } =
@@ -36,24 +36,21 @@ const HeaderCategory = ({ isCategoryActive }) => {
         {/* Parent Category */}
         <a
           className="cursor-pointer"
-          onClick={() =>
-            handleCategoryRoute(item.category_name, "parent")
-          }
+          onClick={() => handleCategoryRoute(item.category_name, "parent")}
         >
-        {item.category_img ? (
-  <span>
-    <Image
-      src={`${api.IMG_URL}category_img/${item.category_img}`}
-      alt={item.category_name}
-      width={50}
-      height={50}
-    />
-  </span>
-) : (
-  <D_img />
-)}
-{item.category_name}
-
+          <span>
+            <Image
+              src={
+                item.category_img
+                  ? `${api.IMG_URL}category_img/${item.category_img}`
+                  : defaultIMG
+              }
+              alt={item.category_name}
+              width={50}
+              height={50}
+            />
+          </span>
+          {item.category_name}
         </a>
 
         {/* Sub Categories */}
