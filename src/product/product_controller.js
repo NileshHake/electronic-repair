@@ -330,8 +330,8 @@ const filterProducts = async (req, res) => {
       brand_id,
       min_price,
       max_price,
-      product_on_sale, 
-      sort,             
+      product_on_sale,
+      sort,
       page = 1,
     } = req.body;
 
@@ -377,13 +377,13 @@ const filterProducts = async (req, res) => {
 
     if (sort === "low_to_high") {
       orderBy = "pro.product_sale_price ASC";
-    } 
+    }
     else if (sort === "high_to_low") {
       orderBy = "pro.product_sale_price DESC";
-    } 
+    }
     else if (sort === "new") {
       orderBy = "pro.createdAt DESC";
-    } 
+    }
     else if (sort === "sale") {
       orderBy = "pro.product_on_sale DESC";
     }
@@ -447,7 +447,59 @@ const filterProducts = async (req, res) => {
 };
 
 
- 
+
+
+const SearchProducts = async (req, res) => {
+  try {
+    const { search } = req.body; // or req.body if you want
+
+    const whereCondition = search
+      ? `
+        WHERE
+          LOWER(pro.product_name) LIKE LOWER(:search)
+          OR LOWER(cat.category_name) LIKE LOWER(:search)
+          OR LOWER(br.brand_name) LIKE LOWER(:search)
+      `
+      : "";
+
+    const products = await sequelize.query(
+      `
+      SELECT
+        pro.product_id,
+        pro.product_name,
+        br.brand_id,
+        br.brand_name,
+        cat.category_id,
+        cat.category_name
+      FROM tbl_products pro
+      INNER JOIN tbl_categories cat
+        ON pro.product_category = cat.category_id
+      INNER JOIN tbl_brands br
+        ON pro.product_brand = br.brand_id
+      ${whereCondition}
+      ORDER BY pro.product_id DESC
+      LIMIT 20
+      `,
+      {
+        replacements: search ? { search: `%${search}%` } : {},
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: products,
+    });
+
+  } catch (error) {
+    console.error("Search Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Search failed",
+    });
+  }
+};
+
 
 
 
@@ -526,6 +578,7 @@ const deleted = async (req, res) => {
 
 module.exports = {
   store,
+  SearchProducts,
   index,
   Get,
   update,

@@ -10,10 +10,15 @@ const NavProfileTab = ({ orderData }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   // handle logout
-  const handleLogout = () => {
-    dispatch(userLoggedOut());
-    router.push('/')
-  }
+ const handleLogout = () => {
+  dispatch(userLoggedOut()); // clear Redux user state
+  // clear cookies or localStorage if needed
+  // Cookies.remove("userInfo");
+
+  // refresh the page
+  window.location.href = '/';
+};
+
   return (
     <div className="profile__main">
       <div className="profile__main-top pb-80">

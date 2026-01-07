@@ -27,11 +27,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { api } from "../../config";
 import { resetAddProductResponse, resetUpdateProductResponse, updateProduct } from "../../store/product";
-import { resetAddCategoryResponse } from "../../store/category";
-import { resetAddTaxResponse } from "../../store/Tax";
+import { getCategoriesList, resetAddCategoryResponse } from "../../store/category";
+import { getTaxesList, resetAddTaxResponse } from "../../store/Tax";
 import CategoryAdd from "../category/CategoryAdd";
 import TaxAdd from "../Tax/TaxAdd";
 import BrandAdd from "../Brand/BrandAdd";
+import { getBrandsList } from "../../store/Brand";
 
 const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
   const [activeTab, setActiveTab] = useState("1");
@@ -70,6 +71,11 @@ const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
       }
     }
   }, [isProductData]);
+    useEffect(() => {
+      dispatch(getCategoriesList());
+      dispatch(getBrandsList());
+      dispatch(getTaxesList());
+    }, [dispatch])
   const handleInputChange = (key, value) => {
     setProductData((prev) => ({
       ...prev,

@@ -15,7 +15,13 @@ export const productApi = apiSlice.injectEndpoints({
       query: () => `product/latest-list`,
       providesTags: ['Products']
     }),
-
+    searchProducts: builder.query({
+      query: (search) => ({
+        url: "/search-products",
+        method: "POST",
+        body: { search },
+      }),
+    }),
     getProductType: builder.query({
       query: ({ type, query }) => ({
         url: "/trending-product-filter",
@@ -63,6 +69,7 @@ export const {
   useGetProductTypeQuery,
   useGetOfferProductsQuery,
   useGetPopularProductByTypeQuery,
+  useLazySearchProductsQuery,
   useGetTopRatedProductsQuery,
   useGetProductQuery,
   useGetRelatedProductsQuery,

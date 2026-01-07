@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import SEO from "@/components/seo";
 import Wrapper from "@/layout/wrapper";
 import HeaderTwo from "@/layout/headers/header-2";
@@ -8,8 +9,12 @@ import { useGetAllProductsQuery } from "@/redux/features/productApi";
 import ErrorMsg from "@/components/common/error-msg";
 import Footer from "@/layout/footers/footer";
 import ShopLoader from "@/components/loader/shop/shop-loader";
+import { api } from "../../config";
 
 const ShopPage = () => {
+  const router = useRouter();
+  const { category_id, brand_id } = router.query;
+
   const [currPage, setCurrPage] = useState(1);
   const [priceValue, setPriceValue] = useState([0, 999999]);
   const [selectValue, setSelectValue] = useState("default");
@@ -17,6 +22,19 @@ const ShopPage = () => {
     category_id: null,
     brand_id: null,
   });
+
+  // ✅ Set filterData when query params arrive
+  useEffect(() => {
+    if (category_id || brand_id) {
+       
+       
+
+      setFilterData({
+        category_id: category_id ? Number(category_id) : null,
+        brand_id: brand_id ? Number(brand_id) : null,
+      });
+    }
+  }, [category_id, brand_id]);
 
   // ✅ API BODY
   const apiBody = {
@@ -28,6 +46,7 @@ const ShopPage = () => {
     max_price: priceValue[1],
     sort: selectValue, // low_to_high | high_to_low | new | sale
   };
+   
 
   const { data, isLoading, isError } = useGetAllProductsQuery(apiBody);
 
@@ -58,7 +77,6 @@ const ShopPage = () => {
       />
     );
   }
-
 
   return (
     <Wrapper>
