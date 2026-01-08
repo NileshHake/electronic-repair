@@ -32,7 +32,7 @@ import ServiceAdd from "../Services/ServiceAdd";
 import CategoryAdd from "../category/CategoryAdd";
 import { getCategoriesList, resetAddCategoryResponse } from "../../store/category";
 import TaxAdd from "../Tax/TaxAdd";
-import { resetAddTaxResponse } from "../../store/Tax";
+import { getTaxesList, resetAddTaxResponse } from "../../store/Tax";
 import BrandAdd from "../Brand/BrandAdd";
 import { getBrandsList } from "../../store/Brand";
 
@@ -47,6 +47,7 @@ const ProductAdd = ({ isOpen, toggle }) => {
   useEffect(() => {
     dispatch(getCategoriesList());
     dispatch(getBrandsList());
+    dispatch(getTaxesList());
   }, [dispatch])
   const [activeTab, setActiveTab] = useState("1");
   // ✅ Product state
@@ -64,6 +65,8 @@ const ProductAdd = ({ isOpen, toggle }) => {
     product_weight: "",
     product_description: "",
     product_image: [],
+    product_on_sale: 0,        // 👈 switch value (0/1)
+    product_discount: "",
   });
   const { addCategoryResponse } = useSelector(
     (state) => state.CategoryReducer
@@ -164,6 +167,29 @@ const ProductAdd = ({ isOpen, toggle }) => {
       dispatch(resetAddTaxResponse());
     }
   }, [addCategoryResponse, addTaxResponse, dispatch, toggle]);
+  useEffect(() => {
+    const mrp = Number(productData.product_mrp);
+    const discount = Number(productData.product_discount);
+
+    if (
+      productData.product_on_sale === 1 &&
+      mrp > 0 &&
+      discount >= 0 &&
+      discount <= 100
+    ) {
+      const salePrice = mrp - (mrp * discount) / 100;
+
+      setProductData((prev) => ({
+        ...prev,
+        product_sale_price: salePrice.toFixed(2),
+      }));
+    }
+  }, [
+    productData.product_mrp,
+    productData.product_discount,
+    productData.product_on_sale,
+  ]);
+
   return (
     <Modal size="xl" isOpen={isOpen} centered toggle={() => toggle()}>
       <ModalHeader toggle={() => toggle()} className="modal-title ms-2">
@@ -328,9 +354,10 @@ const ProductAdd = ({ isOpen, toggle }) => {
                       )}
                     </Col>
                     {/* 1. Product Color Field */}
+
                     <Col lg={4} className="mt-2">
                       <Label className="form-label fw-bold">
-                        Product Color
+                        Product On Sale
                       </Label>
                       <Input
                         type="text"
@@ -340,7 +367,6 @@ const ProductAdd = ({ isOpen, toggle }) => {
                           handleInputChange("product_color", e.target.value)
                         }
                       />
-
                     </Col>
 
                     {/* 2. Product Material Field */}
@@ -374,6 +400,43 @@ const ProductAdd = ({ isOpen, toggle }) => {
                       />
 
                     </Col>
+                    <Col lg={4} className="mt-2">
+                      <Label className="form-label fw-bold">Product On Sale</Label>
+
+                      <div className="form-check form-switch">
+                        <Input
+                          type="switch"
+                          className="form-check-input"
+                          checked={productData.product_on_sale === 1}
+                          onChange={(e) =>
+                            handleInputChange("product_on_sale", e.target.checked ? 1 : 0)
+                          }
+                        />
+                      </div>
+                    </Col>
+                    {productData.product_on_sale === 1 && (
+                      <Col lg={4} className="mt-2">
+                        <Label className="form-label fw-bold">
+                          Discount (%) <span className="text-danger">*</span>
+                        </Label>
+
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          placeholder="Enter discount percentage"
+                          value={productData.product_discount}
+                          onChange={(e) => {
+                            let discount = Number(e.target.value);
+
+                            if (discount > 100) discount = 100; // 🚫 no >100
+
+                            handleInputChange("product_discount", discount);
+                          }}
+                        />
+                      </Col>
+                    )}
+
                     <Col lg={12}>
                       <div className="table-responsive table-card mt-4 p-3">
                         <table className="table text-center align-middle">
@@ -395,6 +458,7 @@ const ProductAdd = ({ isOpen, toggle }) => {
                                   <input
                                     type="number"
                                     className="form-control text-end fw-bold"
+                                    value={productData[field]}
                                     onChange={(e) =>
                                       handleInputChange(field, e.target.value)
                                     }

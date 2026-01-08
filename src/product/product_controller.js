@@ -18,6 +18,8 @@ const store = async (req, res) => {
       product_mrp,
       product_color, product_material, product_weight,
       product_status,
+      product_on_sale,
+      product_discount,
     } = req.body;
 
     let product_images = [];
@@ -47,6 +49,10 @@ const store = async (req, res) => {
       product_sale_price,
       product_mrp,
       product_status,
+      product_on_sale
+
+
+      , product_discount,
     });
 
     res.status(201).json({
@@ -445,10 +451,6 @@ const filterProducts = async (req, res) => {
     });
   }
 };
-
-
-
-
 const SearchProducts = async (req, res) => {
   try {
     const { search } = req.body; // or req.body if you want

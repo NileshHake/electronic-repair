@@ -23,11 +23,7 @@ const store = async (req, res) => {
 // 🟡 READ ALL
 const index = async (req, res) => {
   try {
-    const brands = await Brand.findAll({
-      where: {
-        brand_created_by: getCreatedBy(req.currentUser),
-      },
-    });
+    const brands = await Brand.findAll();
     res.status(200).json(brands);
   } catch (error) {
     res
