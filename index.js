@@ -49,7 +49,7 @@ io.on("connection", (socket) => {
   });
 });
 
-sequelize
+sequelize 
   .authenticate()
   .then(() => {
     console.log("✅ Database connected successfully");

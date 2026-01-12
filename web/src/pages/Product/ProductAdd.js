@@ -67,6 +67,8 @@ const ProductAdd = ({ isOpen, toggle }) => {
     product_image: [],
     product_on_sale: 0,        // 👈 switch value (0/1)
     product_discount: "",
+    product_on_free_delivery: 0,
+    product_delivery_charge: "",
   });
   const { addCategoryResponse } = useSelector(
     (state) => state.CategoryReducer
@@ -401,41 +403,87 @@ const ProductAdd = ({ isOpen, toggle }) => {
 
                     </Col>
                     <Col lg={4} className="mt-2">
-                      <Label className="form-label fw-bold">Product On Sale</Label>
-
-                      <div className="form-check form-switch">
-                        <Input
-                          type="switch"
-                          className="form-check-input"
-                          checked={productData.product_on_sale === 1}
-                          onChange={(e) =>
-                            handleInputChange("product_on_sale", e.target.checked ? 1 : 0)
-                          }
-                        />
-                      </div>
-                    </Col>
-                    {productData.product_on_sale === 1 && (
-                      <Col lg={4} className="mt-2">
-                        <Label className="form-label fw-bold">
-                          Discount (%) <span className="text-danger">*</span>
+                      <div className="d-flex align-items-center justify-content-between">
+                        <Label className="form-label fw-bold mb-0">
+                          {productData.product_on_sale === 1 ? "Discount" : "Product On Sale"}
                         </Label>
 
+                        <div className="form-check form-switch me-3">
+                          <Input
+                            type="switch"
+                            className="form-check-input"
+                            checked={productData.product_on_sale === 1}
+                            onChange={(e) => {
+                              const isSale = e.target.checked ? 1 : 0;
+                              handleInputChange("product_on_sale", isSale);
+
+                              // reset discount when OFF
+                              if (isSale === 0) handleInputChange("product_discount", 0);
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Discount Input (shows only when ON) */}
+                      {productData.product_on_sale === 1 && (
                         <Input
                           type="number"
                           min={0}
                           max={100}
-                          placeholder="Enter discount percentage"
-                          value={productData.product_discount}
+                          className="form-control mt-2"
+                          value={productData.product_discount || ""}
+                          placeholder="Enter discount %"
                           onChange={(e) => {
                             let discount = Number(e.target.value);
-
-                            if (discount > 100) discount = 100; // 🚫 no >100
-
+                            if (discount > 100) discount = 100;
                             handleInputChange("product_discount", discount);
                           }}
                         />
-                      </Col>
-                    )}
+                      )}
+                    </Col>
+                    <Col lg={4} className="mt-2">
+                      <div className="d-flex align-items-center justify-content-between">
+                        <Label className="form-label fw-bold mb-0">
+                          {productData.product_on_free_delivery === 1
+                            ? "Charge"
+                            : "Free Delivery"}
+                        </Label>
+
+                        <div className="form-check form-switch me-3">
+                          <Input
+                            type="switch"
+                            className="form-check-input"
+                            checked={productData.product_on_free_delivery === 1}
+                            onChange={(e) => {
+                              const isFree = e.target.checked ? 1 : 0;
+                              handleInputChange("product_on_free_delivery", isFree);
+
+                              // reset delivery charge when ON
+                              if (isFree === 0) handleInputChange("product_delivery_charge", 0);
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Delivery Charge Input (shows only when OFF) */}
+                      {productData.product_on_free_delivery === 1 && (
+                        <Input
+                          type="number"
+                          min={0}
+                          className="form-control mt-2"
+                          value={productData.product_delivery_charge || ""}
+                          placeholder="Enter delivery charge"
+                          onChange={(e) =>
+                            handleInputChange(
+                              "product_delivery_charge",
+                              Number(e.target.value)
+                            )
+                          }
+                        />
+                      )}
+                    </Col>
+
+
 
                     <Col lg={12}>
                       <div className="table-responsive table-card mt-4 p-3">

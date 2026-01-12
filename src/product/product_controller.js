@@ -20,6 +20,8 @@ const store = async (req, res) => {
       product_status,
       product_on_sale,
       product_discount,
+      product_on_free_delivery,
+      product_delivery_charge,
     } = req.body;
 
     let product_images = [];
@@ -49,10 +51,10 @@ const store = async (req, res) => {
       product_sale_price,
       product_mrp,
       product_status,
-      product_on_sale
-
-
-      , product_discount,
+      product_on_sale,
+      product_discount,
+      product_on_free_delivery,
+      product_delivery_charge,
     });
 
     res.status(201).json({
