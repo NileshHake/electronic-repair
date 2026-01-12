@@ -107,6 +107,14 @@ const User = sequelize.define("tbl_user", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  shop_lat: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  shop_lng: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   user_status: {
     type: DataTypes.TINYINT,
     allowNull: false,

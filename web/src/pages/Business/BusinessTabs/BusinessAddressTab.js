@@ -4,7 +4,31 @@ import { Row, Col, Label, Input } from "reactstrap";
 const BusinessAddressTab = ({
   businessData,
   handleInputChange,
+  setBusinessData
 }) => {
+  const fetchLatLngByPincode = async (pincode) => {
+    try {
+      if (pincode.length !== 6) return;
+
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?postalcode=${pincode}&country=India&format=json`
+      );
+
+      const data = await res.json();
+
+      if (!data || data.length === 0) return;
+
+      setBusinessData((prev) => ({
+        ...prev,
+        shop_lat: data[0].lat,
+        shop_lng: data[0].lon,
+       
+      }));
+    } catch (error) {
+      console.error("Pincode lookup failed", error);
+    }
+  };
+
 
   return (
     <Row className="gy-3">
@@ -14,10 +38,15 @@ const BusinessAddressTab = ({
         <Input
           name="user_address_pincode"
           value={businessData.user_address_pincode || ""}
-          onChange={handleInputChange}
+          onChange={(e) => {
+            handleInputChange(e);
+            fetchLatLngByPincode(e.target.value);
+          }}
           placeholder="Enter Pincode"
+          maxLength={6}
         />
       </Col>
+
 
       <Col lg={4}>
         <Label>City / Village</Label>
@@ -59,13 +88,22 @@ const BusinessAddressTab = ({
         />
       </Col>
 
+      
       <Col lg={4}>
-        <Label>Pincode</Label>
+        <Label>Latitude</Label>
         <Input
-          name="user_address_pincode"
-          value={businessData.user_address_pincode || ""}
-          onChange={handleInputChange}
-          placeholder="Enter Pincode"
+          value={businessData.shop_lat || ""}
+          readOnly
+          placeholder="Auto from pincode"
+        />
+      </Col>
+
+      <Col lg={4}>
+        <Label>Longitude</Label>
+        <Input
+          value={businessData.shop_lng || ""}
+          readOnly
+          placeholder="Auto from pincode"
         />
       </Col>
 

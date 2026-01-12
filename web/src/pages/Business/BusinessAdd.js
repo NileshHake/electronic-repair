@@ -60,6 +60,9 @@ const BusinessAdd = ({ isOpen, toggle }) => {
     user_address_description: "",
     user_terms_and_conditions: "",
     user_type: 2,
+    shop_lat: "",
+    shop_lng: "",
+
   });
 
   const [errors, setErrors] = useState({});
@@ -75,28 +78,7 @@ const BusinessAdd = ({ isOpen, toggle }) => {
     setBusinessData((prev) => {
       const updatedData = { ...prev, [name]: value };
 
-      // If any address-related field changes, update CKEditor content
-      if (
-        [
-          "user_address_city",
-          "user_address_block",
-          "user_address_district",
-          "user_address_state",
-          "user_address_pincode",
-        ].includes(name)
-      ) {
-        updatedData.user_address_description = `
-        <p><strong>Village:</strong> ${updatedData.user_address_city || ""}</p>
-        <p><strong>Block:</strong> ${updatedData.user_address_block || ""}</p>
-        <p><strong>District:</strong> ${
-          updatedData.user_address_district || ""
-        }</p>
-        <p><strong>State:</strong> ${updatedData.user_address_state || ""}</p>
-        <p><strong>Pincode:</strong> ${
-          updatedData.user_address_pincode || ""
-        }</p>
-      `;
-      }
+
 
       return updatedData;
     });
@@ -150,13 +132,6 @@ const BusinessAdd = ({ isOpen, toggle }) => {
     }
   }, [addBusinessResponse, dispatch, toggle]);
 
-  // ==============================
-  // 📍 PINCODE FETCH
-  // ==============================
-
-  // ==============================
-  // 📋 UI
-  // ==============================
   return (
     <>
       <Modal id="showModal" size="xl" isOpen={isOpen} centered>
