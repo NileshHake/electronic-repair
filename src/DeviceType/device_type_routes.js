@@ -7,7 +7,7 @@ const { verifyToken } = require("../auth/Middleware/authMiddleware");
 router.post("/device-type/store", verifyToken, controller.store);
 
 // 🟡 READ ALL
-router.get("/device-type/list", verifyToken, controller.index);
+router.get("/device-type/list",   controller.index);
 
 // 🔵 READ SINGLE
 router.get("/device-type/single/:id", verifyToken, controller.Get);

@@ -101,7 +101,7 @@ const CustomerAddressReducer = (state = INIT_STATE, action) => {
           return {
             ...state,
             customerAddressList: state.customerAddressList.filter(
-              (addr) => addr.customer_address__id !== data
+              (addr) => addr. customer_address_id !== data
             ),
           };
 

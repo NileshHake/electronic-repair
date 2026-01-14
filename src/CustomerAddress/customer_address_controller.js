@@ -55,9 +55,9 @@ const Get = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const { customer_address__id } = req.body;
+    const {  customer_address_id } = req.body;
 
-    const address = await CustomerAddress.findByPk(customer_address__id);
+    const address = await CustomerAddress.findByPk( customer_address_id);
     if (!address)
       return res.status(404).json({ message: "Customer address not found" });
 

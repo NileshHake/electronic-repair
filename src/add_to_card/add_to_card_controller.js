@@ -51,7 +51,7 @@ const store = async (req, res) => {
         });
 
     } catch (err) {
-       
+
         return res.status(500).json({ error: err.message });
     }
 };
@@ -62,12 +62,18 @@ const index = async (req, res) => {
     try {
         const userId = req.currentUser.user_id;
 
-        // Get all cart items with full product details
         const items = await sequelize.query(
             `
       SELECT 
-        a.*,    -- all fields from cart
-        b.*     -- all fields from product
+        a.add_to_card_id,
+        a.add_to_card_product_qty,
+
+        b.product_id,
+        b.product_name,
+        b.product_image,
+        b.product_sale_price,
+        b.product_delivery_charge
+
       FROM tbl_add_to_card AS a
       INNER JOIN tbl_products AS b 
         ON a.add_to_card_product_id = b.product_id
@@ -76,24 +82,36 @@ const index = async (req, res) => {
       `,
             {
                 replacements: { userId },
-                type: sequelize.QueryTypes.SELECT
+                type: sequelize.QueryTypes.SELECT,
             }
         );
 
-        // Calculate grand total from cart product totals
-        const grand_total = items.reduce(
-            (sum, item) => sum + Number(item.product_sale_price * item.add_to_card_product_qty),
+        // 🧮 SUB TOTAL
+        const sub_total = items.reduce(
+            (sum, item) =>
+                sum + Number(item.product_sale_price) * Number(item.add_to_card_product_qty),
             0
         );
 
+        // 🚚 SHIPPING COST
+        const shipping_cost = items.reduce(
+            (sum, item) => sum + Number(item.product_delivery_charge || 0),
+            0
+        );
+
+
+        // 💰 GRAND TOTAL
+        const grand_total = sub_total + shipping_cost;
+
         return res.json({
-            items,       // all cart + product data
-            grand_total, // total price
+            items,
+            sub_total,
+            shipping_cost,
+            grand_total,
         });
 
     } catch (err) {
-         console.log("500 Error", err);
-
+        console.error("500 Error", err);
         return res.status(500).json({ error: err.message });
     }
 };
@@ -127,8 +145,8 @@ const update = async (req, res) => {
 
 // ------------------- DELETE -------------------
 const deleted = async (req, res) => {
-    try { 
-        
+    try {
+
         const item = await AddToCard.findByPk(req.params.id);
         if (!item) return res.status(404).json({ message: "Not found" });
 

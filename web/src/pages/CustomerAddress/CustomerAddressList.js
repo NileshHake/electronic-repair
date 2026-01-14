@@ -70,7 +70,7 @@ const CustomerAddressList = () => {
 
   const handleDeleteAddress = () => {
     if (selectedAddress) {
-      dispatch(deleteCustomerAddress(selectedAddress.customer_address__id));
+      dispatch(deleteCustomerAddress(selectedAddress. customer_address_id));
     }
     setDeleteModal(false);
   };

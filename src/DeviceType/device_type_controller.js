@@ -24,11 +24,7 @@ const store = async (req, res) => {
 // 🟡 READ ALL
 const index = async (req, res) => {
   try {
-    const deviceTypes = await DeviceType.findAll({
-      where: {
-        device_type_created_by: getCreatedBy(req.currentUser),
-      },
-    });
+    const deviceTypes = await DeviceType.findAll();
     res.status(200).json(deviceTypes);
   } catch (error) {
     res

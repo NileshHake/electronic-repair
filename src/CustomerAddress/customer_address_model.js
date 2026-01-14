@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../../config/db");
 
 const CustomerAddress = sequelize.define("tbl_customer_address", {
-  customer_address__id: {
+   customer_address_id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
@@ -16,7 +16,7 @@ const CustomerAddress = sequelize.define("tbl_customer_address", {
     allowNull: true,
   },
 
-  customer_address_block: {
+  customer_address_taluka: {
     type: DataTypes.STRING,
     allowNull: true,
   },
@@ -29,6 +29,10 @@ const CustomerAddress = sequelize.define("tbl_customer_address", {
     allowNull: true,
   },
   customer_address_description: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  customer_address_mobile: {
     type: DataTypes.STRING,
     allowNull: true,
   },
