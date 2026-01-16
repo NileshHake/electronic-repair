@@ -38,7 +38,7 @@ const googleCustomerLogin = async (req, res) => {
         user_email: email,
         user_name: name || `${given_name || ""} ${family_name || ""}`.trim(),
         user_profile: picture || null,
-        user_type: 3, // 👈 default (Customer / Employee / User)
+        user_type: 6, // 👈 default (Customer / Employee / User)
         user_google_id: sub,
         user_email_verified: email_verified ? 1 : 0,
         user_status: 1,

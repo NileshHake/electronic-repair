@@ -13,8 +13,6 @@ const CheckoutAddressList = ({ selectedAddress, setSelectedAddress }) => {
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to delete this address?")) return;
         try {
-             
-            
             await deleteAddress(id).unwrap();
             // Address list will auto-refresh because of invalidatesTags in API slice
         } catch (err) {

@@ -99,6 +99,7 @@ import { QuotationBillingReducer } from "./QuotationAndBilling";
 import { CartReducer } from "./AddToCart";
 import { SliderReducer } from "./slider";
 import { StoreFeatureReducer } from "./StoreFeatures";
+import { OrderReducer } from "./order";
  
 const rootReducer = combineReducers({
   // public
@@ -118,6 +119,7 @@ const rootReducer = combineReducers({
   Crm,
   Invoice,
   TaxReducer,
+  OrderReducer,
   CustomerReducer,  
   SourceReducer,  
   HardwareConfigurationReducer,  

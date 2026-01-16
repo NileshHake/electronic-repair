@@ -268,6 +268,13 @@ import EcommerceListProduct from "../pages/Ecommerce/EcommerceProducts/Ecommerce
 import SubCategoryList from "../pages/category/SubCategory/SubCategoryList";
 import SliderList from "../pages/Slider/SliderList";
 import StoreFeaturesList from "../pages/StoreFeatures/StoreFeaturesList";
+import OrderList from "../pages/OrderTracking/OrderList";
+import NewOrderList from "../pages/OrderTracking/NewOrderList";
+import ApprovalOrderList from "../pages/OrderTracking/ApprovalOrderList";
+import PackingOrderList from "../pages/OrderTracking/PackingOrderList";
+import DispatchOrderList from "../pages/OrderTracking/DispatchOrderList";
+import RejectedOrderList from "../pages/OrderTracking/RejectedOrderList";
+import DeliveredOrderList from "../pages/OrderTracking/DeliveredOrderList";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -321,6 +328,15 @@ const authProtectedRoutes = [
   { path: "/sub-category-list/:category_id", component: <SubCategoryList /> },
   { path: "/repair/overview/:repair_id", component: <OverView /> },
   { path: "/slider-list", component: <SliderList /> },
+  // ORDER TRACKING ROUTES
+  { path: "/order-list", component: <OrderList /> },
+  { path: "/order-new", component: <NewOrderList /> },
+  { path: "/order-approval", component: <ApprovalOrderList /> },
+  { path: "/order-packing", component: <PackingOrderList /> },
+  { path: "/order-dispatch", component: <DispatchOrderList /> },
+  { path: "/order-rejected", component: <RejectedOrderList /> },
+  { path: "/order-delivered", component: <DeliveredOrderList /> },
+
   { path: "/store-feature-list", component: <StoreFeaturesList /> },
   { path: "/quotation-billing", component: <QuotationAndBillingList /> },
   {

@@ -14,7 +14,7 @@ const CheckoutArea = () => {
     handleSubmit,
     submitHandler,
     register,
-    errors,
+    errors, 
   } = checkoutData;
 
   const { cart_products } = useSelector((state) => state.cart);
@@ -36,12 +36,7 @@ const CheckoutArea = () => {
         )}
 
         {cart_products.length > 0 && (
-          <form onSubmit={handleSubmit((data) =>
-            submitHandler({
-              ...data,
-              customer_address_id: selectedAddress,
-            })
-          )}>
+           
             <div className="row">
               <div className="col-lg-7">
 
@@ -59,10 +54,10 @@ const CheckoutArea = () => {
               </div>
 
               <div className="col-lg-5">
-                <CheckoutOrderArea checkoutData={checkoutData} />
+                <CheckoutOrderArea selectedAddress={selectedAddress} />
               </div>
             </div>
-          </form>
+          
         )}
       </div>
     </section>

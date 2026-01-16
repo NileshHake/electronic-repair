@@ -13,6 +13,7 @@ const Navdata = () => {
   const [isBusiness, setIsBusiness] = useState(false);
   const [isRepairing, setIsRepairing] = useState(false);
   const [isCustomers, setIsCustomers] = useState(false);
+  const [isOrderTracking, setIsOrderTracking] = useState(false);
   const [isSettings, setIsSettings] = useState(false);
   const [isUserManagement, setIsUserManagement] = useState(false);
   const [isApps, setIsApps] = useState(false);
@@ -67,6 +68,9 @@ const Navdata = () => {
 
     if (iscurrentState !== "CustomerSales") {
       setIsCustomerSales(false);
+    }
+    if (iscurrentState !== "OrderTracking") {
+      setIsOrderTracking(false);
     }
     if (iscurrentState !== "QuotationBilling") {
       setIsQuotationBilling(false);
@@ -278,6 +282,129 @@ const Navdata = () => {
       },
     },
     {
+      id: "ORDERTRACKING",
+      label: "Order Tracking",
+      icon: "mdi mdi-truck-check-outline",
+      link: "/#",
+      click: function (e) {
+        e.preventDefault();
+        setIsOrderTracking(!isOrderTracking);
+        setIscurrentState("OrderTracking");
+        updateIconSidebar(e);
+      },
+      stateVariables: isOrderTracking,
+      subItems: [
+        ...(permissions.find(
+          (permission) =>
+            permission.permission_category === "ORDERTRACKING" &&
+            permission.permission_path === "1"
+        )
+          ? [
+            {
+              id: "allOrders",
+              label: "All Orders",
+              icon: "mdi mdi-format-list-bulleted",
+              link: "/order-list",
+              parentId: "orderTracking",
+            },
+          ]
+          : []),
+
+        ...(permissions.find(
+          (permission) =>
+            permission.permission_category === "ORDERTRACKING" &&
+            permission.permission_path === "2"
+        )
+          ? [
+            {
+              id: "newOrders",
+              label: "New Orders",
+              icon: "mdi mdi-cart-plus",
+              link: "/order-new",
+              parentId: "orderTracking",
+            },
+          ]
+          : []),
+
+        ...(permissions.find(
+          (permission) =>
+            permission.permission_category === "ORDERTRACKING" &&
+            permission.permission_path === "3"
+        )
+          ? [
+            {
+              id: "approvalOrders",
+              label: "Approval Orders",
+              icon: "mdi mdi-check-decagram-outline",
+              link: "/order-approval",
+              parentId: "orderTracking",
+            },
+          ]
+          : []),
+
+        ...(permissions.find(
+          (permission) =>
+            permission.permission_category === "ORDERTRACKING" &&
+            permission.permission_path === "4"
+        )
+          ? [
+            {
+              id: "packingOrders",
+              label: "Packing Orders",
+              icon: "mdi mdi-package-variant-closed",
+              link: "/order-packing",
+              parentId: "orderTracking",
+            },
+          ]
+          : []),
+        ...(permissions.find(
+          (permission) =>
+            permission.permission_category === "ORDERTRACKING" &&
+            permission.permission_path === "5"
+        )
+          ? [
+            {
+              id: "dispatchOrders",
+              label: "Dispatch Orders",
+              icon: "mdi mdi-truck-fast-outline",
+              link: "/order-dispatch",
+              parentId: "orderTracking",
+            },
+          ]
+          : []),
+        ...(permissions.find(
+          (permission) =>
+            permission.permission_category === "ORDERTRACKING" &&
+            permission.permission_path === "6"
+        )
+          ? [
+            {
+              id: "rejectedOrders",
+              label: "Rejected Orders",
+              icon: "mdi mdi-close-octagon-outline",
+              link: "/order-rejected",
+              parentId: "orderTracking",
+            },
+          ]
+          : []),
+        ...(permissions.find(
+          (permission) =>
+            permission.permission_category === "ORDERTRACKING" &&
+            permission.permission_path === "7"
+        )
+          ? [
+            {
+              id: "deliveredOrders",
+              label: "Delivered Orders",
+              icon: "mdi mdi-check-circle-outline",
+              link: "/order-delivered",
+              parentId: "orderTracking",
+            },
+          ]
+          : []),
+      ],
+    },
+    {
       id: "USERMANAGEMENT",
       label: "User Management",
       icon: "mdi mdi-account-cog-outline",
@@ -297,7 +424,7 @@ const Navdata = () => {
         )
           ? [
             {
-              id: "role",
+              id: "role", 
               label: "Roles",
               icon: "mdi mdi-account-key-outline",
               link: "/role-list",

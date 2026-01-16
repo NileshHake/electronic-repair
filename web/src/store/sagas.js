@@ -91,11 +91,13 @@ import { watchQuotationBilling } from "./QuotationAndBilling";
 import { cartSaga } from "./AddToCart";
 import { sliderSaga } from "./slider";
 import { storeFeatureSaga } from "./StoreFeatures";
+import { orderSaga } from "./order";
 export default function* rootSaga() {
   yield all([
     //public
     fork(LayoutSaga),
     fork(categorySaga),
+    fork(orderSaga),
     fork(userSaga),
     fork(storageLocationSaga),
     fork(deviceColorSaga),

@@ -59,12 +59,12 @@ const store = async (req, res) => {
 
 // ------------------- LIST / GET ALL -------------------
 const index = async (req, res) => {
-    try {
-        const userId = req.currentUser.user_id;
+  try {
+    const userId = req.currentUser.user_id;
 
-        const items = await sequelize.query(
-            `
-      SELECT 
+    const items = await sequelize.query(
+      `
+      SELECT
         a.add_to_card_id,
         a.add_to_card_product_qty,
 
@@ -72,49 +72,71 @@ const index = async (req, res) => {
         b.product_name,
         b.product_image,
         b.product_sale_price,
-        b.product_delivery_charge
+        b.product_delivery_charge,
+        b.product_tax,
+
+        t.tax_id,
+        t.tax_name,
+        t.tax_percentage
 
       FROM tbl_add_to_card AS a
-      INNER JOIN tbl_products AS b 
+
+      INNER JOIN tbl_products AS b
         ON a.add_to_card_product_id = b.product_id
+
+      LEFT JOIN tbl_taxes AS t
+        ON b.product_tax = t.tax_id
+
       WHERE a.add_to_card_user_id = :userId
       ORDER BY a.add_to_card_id DESC
       `,
-            {
-                replacements: { userId },
-                type: sequelize.QueryTypes.SELECT,
-            }
-        );
+      {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
 
-        // 🧮 SUB TOTAL
-        const sub_total = items.reduce(
-            (sum, item) =>
-                sum + Number(item.product_sale_price) * Number(item.add_to_card_product_qty),
-            0
-        );
+    // 🧮 SUB TOTAL
+    const sub_total = items.reduce(
+      (sum, item) =>
+        sum +
+        Number(item.product_sale_price) *
+          Number(item.add_to_card_product_qty),
+      0
+    );
 
-        // 🚚 SHIPPING COST
-        const shipping_cost = items.reduce(
-            (sum, item) => sum + Number(item.product_delivery_charge || 0),
-            0
-        );
+    // 🚚 SHIPPING COST
+    const shipping_cost = items.reduce(
+      (sum, item) => sum + Number(item.product_delivery_charge || 0),
+      0
+    );
 
+    // 🧾 TAX AMOUNT
+    const tax_total = items.reduce((sum, item) => {
+      const price =
+        Number(item.product_sale_price) *
+        Number(item.add_to_card_product_qty);
 
-        // 💰 GRAND TOTAL
-        const grand_total = sub_total + shipping_cost;
+      const taxPercent = Number(item.tax_percentage || 0);
+      return sum + (price * taxPercent) / 100;
+    }, 0);
 
-        return res.json({
-            items,
-            sub_total,
-            shipping_cost,
-            grand_total,
-        });
+    // 💰 GRAND TOTAL
+    const grand_total = sub_total + shipping_cost + tax_total;
 
-    } catch (err) {
-        console.error("500 Error", err);
-        return res.status(500).json({ error: err.message });
-    }
+    return res.json({
+      items,
+      sub_total,
+      shipping_cost,
+      tax_total,
+      grand_total,
+    });
+  } catch (err) {
+    console.error("500 Error", err);
+    return res.status(500).json({ error: err.message });
+  }
 };
+
 
 
 // ------------------- GET SINGLE -------------------

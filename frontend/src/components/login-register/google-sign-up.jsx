@@ -18,8 +18,8 @@ const GoogleSignUp = () => {
       const decoded = jwtDecode(user.credential);
       signUpProvider(decoded).then((res) => {
         if (res?.data) {
-          notifySuccess("Login success!");
           router.push(redirect || "/");
+          notifySuccess("Login success!");
         } else {
 
           notifyError(res.error?.message);

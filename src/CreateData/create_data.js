@@ -191,7 +191,41 @@ const createSuperAdmin = async () => {
         permission_path: 4,
         permission_category: "USERMANAGEMENT",
       },
-
+      {
+        permission_name: "All Orders",
+        permission_path: 1,
+        permission_category: "ORDERTRACKING",
+      },
+      {
+        permission_name: "New Orders",
+        permission_path: 2,
+        permission_category: "ORDERTRACKING",
+      },
+      {
+        permission_name: "Approval Orders",
+        permission_path: 3,
+        permission_category: "ORDERTRACKING",
+      },
+      {
+        permission_name: "Packing Orders",
+        permission_path: 4,
+        permission_category: "ORDERTRACKING",
+      },
+      {
+        permission_name: "Dispatch Orders",
+        permission_path: 5,
+        permission_category: "ORDERTRACKING",
+      },
+      {
+        permission_name: "Rejected Orders",
+        permission_path: 6,
+        permission_category: "ORDERTRACKING",
+      },
+      {
+        permission_name: "Delivered Orders",
+        permission_path: 7,
+        permission_category: "ORDERTRACKING",
+      },
       {
         permission_name: "Accessories",
         permission_path: 1,

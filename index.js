@@ -20,7 +20,7 @@ const io = new Server(server, {
 app.use(cors());
 app.use(cors({
   origin: "*", // allow all origins
-  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -48,16 +48,15 @@ io.on("connection", (socket) => {
     console.log("🔴 Client disconnected:", socket.id);
   });
 });
-
-sequelize 
+sequelize
   .authenticate()
   .then(() => {
     console.log("✅ Database connected successfully");
     return sequelize.sync({
-      alter:false
+      alter: false
 
     });
-  })  
+  })
   .then(() => {
     console.log("🔁 Models synchronized with database (force: true)");
 
@@ -160,6 +159,9 @@ app.use("/api", slider);
 
 const store_feature = require("./src/store_features/store_feature_routes");
 app.use("/api", store_feature);
+
+const order = require("./src/order/order_route");
+app.use("/api", order);
 
 
 const PORT = process.env.PORT || 5000;
