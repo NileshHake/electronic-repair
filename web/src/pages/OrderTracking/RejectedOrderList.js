@@ -12,6 +12,7 @@ import { getOrdersList, updateOrderStatusAdmin } from "../../store/order";
 import { formatDateTime } from "../../helpers/date_and_time_format";
 import Select from "react-select";
 import OrderViewModal from "./OrderViewModal";
+import socket from "../../utils/socket";
 
 const ApprovalOrderList = () => {
     document.title = "All Order List";
@@ -19,7 +20,7 @@ const ApprovalOrderList = () => {
     const dispatch = useDispatch();
     const { orders, loading } = useSelector((state) => state.OrderReducer);
 
-   
+
 
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -63,6 +64,27 @@ const ApprovalOrderList = () => {
         setSelectedOrder(order);
         setModalOpen(true);
     };
+    useEffect(() => {
+        socket.on("orderStatusUpdated", (data) => {
+            console.log("Order Updated via Socket:", data);
+
+            // Reload first page safely
+            setPage(1);
+            setHasMore(true);
+
+            dispatch(
+                getOrdersList({
+                    order_status: 4,
+                    page: 1,
+                    limit: 10,
+                })
+            );
+        });
+
+        return () => {
+            socket.off("orderStatusUpdated");
+        };
+    }, [dispatch]);
     return (
         <div className="page-content">
             <Container fluid>
@@ -137,8 +159,8 @@ const ApprovalOrderList = () => {
                                                             </strong>
                                                         </td>
 
-                                                       <td className=  "text-danger fw-bold"  >
-                                                             Rejected 
+                                                        <td className="text-danger fw-bold"  >
+                                                            Rejected
                                                         </td>
                                                         <td className="text-center">
                                                             <ul className="list-inline hstack   mb-0">

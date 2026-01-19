@@ -12,6 +12,7 @@ import { getOrdersList, updateOrderStatusAdmin } from "../../store/order";
 import { formatDateTime } from "../../helpers/date_and_time_format";
 import Select from "react-select";
 import OrderViewModal from "./OrderViewModal";
+import socket from "../../utils/socket";
 
 const DeliveredOrderList = () => {
     document.title = "All Order List";
@@ -63,6 +64,27 @@ const DeliveredOrderList = () => {
         setSelectedOrder(order);
         setModalOpen(true);
     };
+    useEffect(() => {
+        socket.on("orderStatusUpdated", (data) => {
+            console.log("Order Updated via Socket:", data);
+
+            // Reload first page safely
+            setPage(1);
+            setHasMore(true);
+
+            dispatch(
+                getOrdersList({
+                    order_status: 5,
+                    page: 1,
+                    limit: 10,
+                })
+            );
+        });
+
+        return () => {
+            socket.off("orderStatusUpdated");
+        };
+    }, [dispatch]);
     return (
         <div className="page-content">
             <Container fluid>

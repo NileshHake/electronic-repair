@@ -39,6 +39,12 @@ const store = async (req, res) => {
         }
 
         await transaction.commit();
+        req.io.emit("orderStatusUpdated", {
+            order_master_id: orderMaster.order_master_id,
+            order_master_status: orderMaster.order_master_status ?? 0,
+            type: "NEW_ORDER",
+        });
+
 
         res.status(201).json({
             message: "Order created successfully",

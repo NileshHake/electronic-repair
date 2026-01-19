@@ -48,6 +48,11 @@ io.on("connection", (socket) => {
     console.log("🔴 Client disconnected:", socket.id);
   });
 });
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 sequelize
   .authenticate()
   .then(() => {
