@@ -170,6 +170,26 @@ const createSuperAdmin = async () => {
         permission_category: "PRODUCT",
       },
       {
+        permission_name: "List",
+        permission_path: 1,
+        permission_category: "SUPPLIER",
+      },
+      {
+        permission_name: "Create",
+        permission_path: 2,
+        permission_category: "SUPPLIER",
+      },
+      {
+        permission_name: "Update",
+        permission_path: 3,
+        permission_category: "SUPPLIER",
+      },
+      {
+        permission_name: "Delete",
+        permission_path: 4,
+        permission_category: "SUPPLIER",
+      },
+      {
         permission_name: "Roles",
         permission_path: 1,
         permission_category: "USERMANAGEMENT",
@@ -355,27 +375,24 @@ const createSuperAdmin = async () => {
         rhp_permission_id: permission.permission_id,
       });
     }
-    const CustomerpermissionsLists = await Permission.findAll({
+   
+    const supplierPermissions = await Permission.findAll({
       where: {
         permission_category: {
-          [Op.in]: ["DASHBOARDCUSTOMER", "REPAIRINGCUSTOMER", "CUSTOMERSALES"],
+          [Op.in]: ["DASHBOARD", "PRODUCT"],
         },
       },
     });
-
-    const customerRole = await Role.create({
-      role_name: "Customer",
+    const supplierRole = await Role.create({
+      role_name: "Supplier",
       role_created_by: 1,
     });
-
-    for (const permission of CustomerpermissionsLists) {
+    for (const permission of supplierPermissions) {
       await RoleHasPermission.create({
-        rhp_role_id: customerRole.role_id,
+        rhp_role_id: supplierRole.role_id,
         rhp_permission_id: permission.permission_id,
       });
     }
-
-
     try {
       const colorOptions = [
         { label: "Primary", value: "bg-primary" },

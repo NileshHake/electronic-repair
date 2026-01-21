@@ -10,6 +10,7 @@ const BasicInfoTab = ({
   handleInputChange,
   handleProfileChange,
   previewProfile,
+  status
 }) => {
   // Auto-fill IFSC details
   useEffect(() => {
@@ -44,7 +45,7 @@ const BasicInfoTab = ({
       {/* Basic Info */}
       <Col lg={4}>
         <Label>
-          Business Name <span className="text-danger">*</span>
+          {status == 1 ? "Supplier" : "Business"} Name <span className="text-danger">*</span>
         </Label>
         <Input
           name="user_name"
@@ -111,11 +112,11 @@ const BasicInfoTab = ({
           placeholder="Enter GST number"
         />
       </Col>
- 
+
 
       {/* Profile Image */}
       <Col lg={6} className="mt-3">
-        <h5 className="fs-15 mb-1">Business Logo</h5>
+        <h5 className="fs-15 mb-1">   {status == 1 ? "Supplier" : "Business"} Logo</h5>
         <div className="text-center">
           <div className="position-relative d-inline-block">
             <div className="position-absolute top-100 start-100 translate-middle">
@@ -163,7 +164,7 @@ const BasicInfoTab = ({
         </div>
       </Col>
       {/* Business Address (CKEditor) */}
-     
+
 
     </Row>
   );

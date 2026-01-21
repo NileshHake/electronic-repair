@@ -92,6 +92,7 @@ import { cartSaga } from "./AddToCart";
 import { sliderSaga } from "./slider";
 import { storeFeatureSaga } from "./StoreFeatures";
 import { orderSaga } from "./order";
+import { supplierSaga } from "./Supplier";
 export default function* rootSaga() {
   yield all([
     //public
@@ -123,6 +124,7 @@ export default function* rootSaga() {
     fork(brandSaga),
     fork(AccountSaga),
     fork(repairSaga),
+    fork(supplierSaga),
     fork(AuthSaga),
     fork(ForgetSaga),
     fork(ProfileSaga),

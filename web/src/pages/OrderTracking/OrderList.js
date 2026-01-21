@@ -152,11 +152,10 @@ const OrderList = () => {
 
                                                         <td>
                                                             <span
-                                                                className={`badge ${
-                                                                    order.order_master_payment_status === "PAID"
-                                                                        ? "bg-success"
-                                                                        : "bg-warning"
-                                                                }`}
+                                                                className={`badge ${order.order_master_payment_status === "PAID"
+                                                                    ? "bg-success"
+                                                                    : "bg-warning"
+                                                                    }`}
                                                             >
                                                                 {order.order_master_payment_status}
                                                             </span>
@@ -213,17 +212,35 @@ const OrderList = () => {
                                                     </tr>
                                                 ))
                                             ) : !loading ? (
+
                                                 <tr>
                                                     <td colSpan="11" className="text-center py-5">
-                                                        <h5>No Orders Found</h5>
+                                                        <lord-icon
+                                                            src="https://cdn.lordicon.com/msoeawqm.json"
+                                                            trigger="loop"
+                                                            colors="primary:#405189,secondary:#0ab39c"
+                                                            style={{ width: "72px", height: "72px" }}
+                                                        ></lord-icon>
+                                                        <div className="mt-4">
+                                                            <h5>No Orders Found</h5>
+                                                        </div>
                                                     </td>
+
                                                 </tr>
                                             ) : null}
 
                                             {loading && (
                                                 <tr>
-                                                    <td colSpan="11" className="text-center py-3">
-                                                        Loading more orders...
+                                                    <td colSpan="11" className="text-center py-5">
+                                                        <lord-icon
+                                                            src="https://cdn.lordicon.com/msoeawqm.json"
+                                                            trigger="loop"
+                                                            colors="primary:#405189,secondary:#0ab39c"
+                                                            style={{ width: "72px", height: "72px" }}
+                                                        ></lord-icon>
+                                                        <div className="mt-4">
+                                                            <h5>Loading more orders...</h5>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             )}

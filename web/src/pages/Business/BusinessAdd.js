@@ -27,7 +27,9 @@ import BasicInfoTab from "./BusinessTabs/BasicInfoTab";
 import BusinessAddressTab from "./BusinessTabs/BusinessAddressTab";
 import BankDetails from "./BusinessTabs/BankDetails";
 
-const BusinessAdd = ({ isOpen, toggle }) => {
+const BusinessAdd = ({ isOpen, toggle, status }) => {
+   
+
   const dispatch = useDispatch();
   const { addBusinessResponse } = useSelector((state) => state.BusinessReducer);
 
@@ -62,6 +64,7 @@ const BusinessAdd = ({ isOpen, toggle }) => {
     user_type: 2,
     shop_lat: "",
     shop_lng: "",
+    status: status,
 
   });
 
@@ -112,6 +115,7 @@ const BusinessAdd = ({ isOpen, toggle }) => {
   const handleAddBusiness = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    
     dispatch(addBusiness(businessData));
   };
 
@@ -136,7 +140,7 @@ const BusinessAdd = ({ isOpen, toggle }) => {
     <>
       <Modal id="showModal" size="xl" isOpen={isOpen} centered>
         <ModalHeader toggle={toggle}>
-          <h4>Create Business</h4>
+          <h4>Create    {status == 1 ? "Supplier" : "Business"} </h4>
         </ModalHeader>
         <form onSubmit={handleAddBusiness}>
           <ModalBody>
@@ -167,17 +171,17 @@ const BusinessAdd = ({ isOpen, toggle }) => {
                     className={classnames({ active: activeTab === "3" })}
                     onClick={() => toggleTab("3")}
                   >
-                    Business Address
+                    {status == 1 ? "Supplier" : "Business"} Address
                   </NavLink>
                 </NavItem>
-                <NavItem>
+                {status == false && <NavItem>
                   <NavLink
                     className={classnames({ active: activeTab === "4" })}
                     onClick={() => toggleTab("4")}
                   >
                     Terms & Conditions
                   </NavLink>
-                </NavItem>
+                </NavItem>}
               </Nav>
 
               {/* ==================== TAB CONTENT ==================== */}
@@ -192,6 +196,7 @@ const BusinessAdd = ({ isOpen, toggle }) => {
                       handleProfileChange={handleProfileChange}
                       previewProfile={previewProfile}
                       errors={errors}
+                      status={status}
                     />
                   </Card>
                 </TabPane>

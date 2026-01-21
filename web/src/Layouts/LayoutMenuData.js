@@ -31,6 +31,7 @@ const Navdata = () => {
   const [isRepairingCustomer, setIsRepairingCustomer] = useState(false);
   const [isCustomerSales, setIsCustomerSales] = useState(false);
   const [isQuotationBilling, setIsQuotationBilling] = useState(false);
+  const [isSupplier, setIsSupplier] = useState(false);
 
   const [isLanding, setIsLanding] = useState(false);
 
@@ -60,6 +61,9 @@ const Navdata = () => {
     }
     if (iscurrentState !== "DashboardCustomer") {
       setIsDashboardCustomer(false);
+    }
+    if (iscurrentState !== "Supplier") {
+      setIsSupplier(false);
     }
 
     if (iscurrentState !== "RepairingCustomer") {
@@ -227,6 +231,7 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
+
     {
       id: "REPAIRING",
       label: "Repairing",
@@ -237,6 +242,19 @@ const Navdata = () => {
         e.preventDefault();
         setIsRepairing(!isRepairing);
         setIscurrentState("Repairing");
+        updateIconSidebar(e);
+      },
+    },
+    {
+      id: "SUPPLIER",
+      label: "Supplier",
+      icon: "mdi mdi-truck-outline",
+      link: "/supplier-list", // or whatever route you want
+      stateVariables: isSupplier,
+      click: function (e) {
+        e.preventDefault();
+        setIsSupplier(!isSupplier);
+        setIscurrentState("Supplier");
         updateIconSidebar(e);
       },
     },
@@ -424,7 +442,7 @@ const Navdata = () => {
         )
           ? [
             {
-              id: "role", 
+              id: "role",
               label: "Roles",
               icon: "mdi mdi-account-key-outline",
               link: "/role-list",

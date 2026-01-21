@@ -145,7 +145,12 @@ function* getSingleBusinessSaga({ payload }) {
 function* addBusinessSaga({ payload }) {
   try {
     let response;
-    payload.user_type = 2; // ✅ For Business (change user_type as needed)
+    if (payload.status === true) {
+      payload.user_type = 7; // Supplier
+    } else {
+      payload.user_type = 2; // Admin
+    }
+
 
     if (payload.user_profile && payload.user_profile instanceof File) {
       const formData = new FormData();
@@ -169,7 +174,13 @@ function* addBusinessSaga({ payload }) {
 function* updateBusinessSaga({ payload }) {
   try {
     let response;
-    payload.user_type = 2; // ✅ For Business
+    if (payload.status === true) {
+      payload.user_type = 7; // Supplier
+    } else {
+      payload.user_type = 2; // Admin
+    }
+
+
 
     if (payload.user_profile && payload.user_profile instanceof File) {
       const formData = new FormData();

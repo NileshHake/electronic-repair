@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Col, Row, CardHeader, Container, Form, CardBody } from "reactstrap";
 //import Components
 import BreadCrumb from "../../../Components/Common/BreadCrumb";
-import Nouislider from "nouislider-react";
-import 'nouislider/distribute/nouislider.css';
+import Nouislider from "nouislider-react"; 
 
 const FormRangeSlider = () => {
   

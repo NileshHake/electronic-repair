@@ -81,8 +81,8 @@ const ProfileDropdown = () => {
                       ? "Technician"
                       : user?.user_type == 5
                         ? "Delivery Boy"
-                        : user?.user_type == 6
-                          ? "Customer"
+                        : user?.user_type == 7
+                          ? "Supplier"
                           : ""}
             </span>
           </span>

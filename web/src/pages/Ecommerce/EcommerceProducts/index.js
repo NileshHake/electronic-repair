@@ -21,8 +21,7 @@ import classnames from "classnames";
 import { toast, ToastContainer } from "react-toastify";
 
 // RangeSlider
-import Nouislider from "nouislider-react";
-import "nouislider/distribute/nouislider.css";
+import Nouislider from "nouislider-react"; 
 import DeleteModal from "../../../Components/Common/DeleteModal";
 
 import BreadCrumb from "../../../Components/Common/BreadCrumb";

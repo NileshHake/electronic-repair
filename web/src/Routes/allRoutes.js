@@ -275,6 +275,7 @@ import PackingOrderList from "../pages/OrderTracking/PackingOrderList";
 import DispatchOrderList from "../pages/OrderTracking/DispatchOrderList";
 import RejectedOrderList from "../pages/OrderTracking/RejectedOrderList";
 import DeliveredOrderList from "../pages/OrderTracking/DeliveredOrderList";
+import SupplierList from "../pages/Supplier/Supplierlist";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -328,6 +329,7 @@ const authProtectedRoutes = [
   { path: "/sub-category-list/:category_id", component: <SubCategoryList /> },
   { path: "/repair/overview/:repair_id", component: <OverView /> },
   { path: "/slider-list", component: <SliderList /> },
+  { path: "/supplier-list", component: <SupplierList /> },
   // ORDER TRACKING ROUTES
   { path: "/order-list", component: <OrderList /> },
   { path: "/order-new", component: <NewOrderList /> },

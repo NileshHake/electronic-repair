@@ -67,7 +67,7 @@ import Todos from "./todos/reducer";
 //Jobs
 import Jobs from "./job/reducer";
 //API Key
-import APIKey from "./apikey/reducer"; 
+import APIKey from "./apikey/reducer";
 import { TaxReducer } from "./Tax";
 import { CategoryReducer } from "./category";
 import { BrandReducer } from "./Brand";
@@ -75,7 +75,7 @@ import { PaymentTypeReducer } from "./PaymentMode";
 import { StatusReducer } from "./Status";
 import { UserReducer } from "./User";
 import { TechnicianReducer } from "./Technician";
-import { DeliveryBoyReducer } from "./DeliveryAndPickUpBoy"; 
+import { DeliveryBoyReducer } from "./DeliveryAndPickUpBoy";
 import CustomerAddressReducer from "./CustomerAddress";
 import CustomerReducer from "./Customer";
 import { roleReducer } from "./Role";
@@ -100,7 +100,8 @@ import { CartReducer } from "./AddToCart";
 import { SliderReducer } from "./slider";
 import { StoreFeatureReducer } from "./StoreFeatures";
 import { OrderReducer } from "./order";
- 
+import { SupplierReducer } from "./Supplier";
+
 const rootReducer = combineReducers({
   // public
   Layout,
@@ -120,19 +121,19 @@ const rootReducer = combineReducers({
   Invoice,
   TaxReducer,
   OrderReducer,
-  CustomerReducer,  
-  SourceReducer,  
-  HardwareConfigurationReducer,  
-  ServiceReducer,  
-  StorageLocationReducer,  
-  DeviceColorReducer,  
-  DeviceModelReducer,  
-  StoreFeatureReducer,  
-  ServiceTypeReducer,  
-  BusinessReducer,  
-  OtpReducer,  
-  StageRemarkReducer,  
-  RepairReducer,  
+  CustomerReducer,
+  SourceReducer,
+  HardwareConfigurationReducer,
+  ServiceReducer,
+  StorageLocationReducer,
+  DeviceColorReducer,
+  DeviceModelReducer,
+  StoreFeatureReducer,
+  ServiceTypeReducer,
+  BusinessReducer,
+  OtpReducer,
+  StageRemarkReducer,
+  RepairReducer,
   roleReducer,
   SliderReducer,
   PaymentTypeReducer,
@@ -155,13 +156,14 @@ const rootReducer = combineReducers({
   ProductReducer,
   AccessoriesReducer,
   WorkflowReducer,
+  SupplierReducer,
   CartReducer,
   QuotationBillingReducer,
   // Team,
   // FileManager,
   // Todos,
   // Jobs,
-  // APIKey,
+  // APIKey,p
 });
 
 export default rootReducer;

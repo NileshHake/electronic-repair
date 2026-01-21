@@ -100,6 +100,9 @@ const store = async (req, res) => {
     if (Number(req.body.user_type) === 2) {
       req.body.user_role_id = 2;
     }
+    if (Number(req.body.user_type) === 7) {
+      req.body.user_role_id = 3;
+    }
     const user = await User.create({
       ...req.body,
       user_profile: savedPath,
@@ -156,6 +159,26 @@ const Businessindex = async (req, res) => {
     const users = await User.findAll({
       where: {
         user_type: 2,
+      },
+    });
+    res.status(200).json(users);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching users", error: error.message });
+  }
+};
+/**
+ * Get all suppliers
+ * @param {Object} req - Request object
+ * @param {Object} res - Response object
+ * @returns {Promise<Object>} - Response object with array of suppliers
+ */
+const Supplierindex = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      where: {
+        user_type: 7,
       },
     });
     res.status(200).json(users);
@@ -277,7 +300,7 @@ const update = async (req, res) => {
 const CustomerUpdate = async (req, res) => {
   try {
     const { user_id } = req.body;
-console.log(req.body);
+    console.log(req.body);
 
     const user = await User.findByPk(user_id);
     if (!user) {
@@ -292,7 +315,7 @@ console.log(req.body);
     });
   } catch (error) {
     console.error("❌ Error updating user:", error);
-    res.status(500).json({  
+    res.status(500).json({
       message: "Error updating user ❌",
       error: error.message,
     });
@@ -404,6 +427,7 @@ module.exports = {
   store,
   index,
   Techniciansindex,
+  Supplierindex,
   googleCustomerLogin,
   Userindex,
   Deliveryindex,

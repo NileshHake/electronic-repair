@@ -9,6 +9,7 @@ router.post("/user/store", verifyToken, controller.store);
 router.get("/user/list", verifyToken, controller.index);
 router.get("/technicians/list", verifyToken, controller.Techniciansindex);
 router.get("/business/list", controller.Businessindex);
+router.get("/supplier/list", controller.Supplierindex);
 router.get("/delivery/list", verifyToken, controller.Deliveryindex);
 router.put("/customer/update", controller.CustomerUpdate);
 
