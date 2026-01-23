@@ -35,6 +35,10 @@ const User = sequelize.define("tbl_user", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  supplier_brand_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 
   user_upi_id: {
     type: DataTypes.STRING,

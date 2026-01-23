@@ -145,18 +145,15 @@ function* getSingleBusinessSaga({ payload }) {
 function* addBusinessSaga({ payload }) {
   try {
     let response;
-    if (payload.status === true) {
-      payload.user_type = 7; // Supplier
-    } else {
-      payload.user_type = 2; // Admin
-    }
 
+    const isSupplier = payload.status == true;
+    payload.user_type = isSupplier ? 7 : 2;
+
+    const entityName = isSupplier ? "Supplier" : "Business";
 
     if (payload.user_profile && payload.user_profile instanceof File) {
       const formData = new FormData();
-      for (const key in payload) {
-        formData.append(key, payload[key]);
-      }
+      for (const key in payload) formData.append(key, payload[key]);
       response = yield call(addBusinessApi, formData);
     } else {
       response = yield call(api.create, `/user/store`, payload);
@@ -164,29 +161,26 @@ function* addBusinessSaga({ payload }) {
 
     yield put(businessApiResponseSuccess(ADD_BUSINESS, response));
     yield call(getBusinessesListSaga);
-    toast.success("Business added successfully!");
+
+    toast.success(`${entityName} added successfully!`);
   } catch (error) {
     yield put(businessApiResponseError(ADD_BUSINESS, error));
-    toast.error("Failed to add business!");
+    toast.error(`Failed to add ${payload?.status === true ? "Supplier" : "Business"}!`);
   }
 }
 
 function* updateBusinessSaga({ payload }) {
   try {
     let response;
-    if (payload.status === true) {
-      payload.user_type = 7; // Supplier
-    } else {
-      payload.user_type = 2; // Admin
-    }
 
+    const isSupplier = payload.status == true;
+    payload.user_type = isSupplier ? 7 : 2;
 
+    const entityName = isSupplier ? "Supplier" : "Business";
 
     if (payload.user_profile && payload.user_profile instanceof File) {
       const formData = new FormData();
-      for (const key in payload) {
-        formData.append(key, payload[key]);
-      }
+      for (const key in payload) formData.append(key, payload[key]);
       response = yield call(api.putFormData, `/user/update`, formData);
     } else {
       response = yield call(api.put, `/user/update`, payload);
@@ -194,12 +188,14 @@ function* updateBusinessSaga({ payload }) {
 
     yield put(businessApiResponseSuccess(UPDATE_BUSINESS, response));
     yield call(getBusinessesListSaga);
-    toast.success("Business updated successfully!");
+
+    toast.success(`${entityName} updated successfully!`);
   } catch (error) {
     yield put(businessApiResponseError(UPDATE_BUSINESS, error));
-    toast.error("Failed to update business!");
+    toast.error(`Failed to update ${payload?.status === true ? "Supplier" : "Business"}!`);
   }
 }
+
 
 function* deleteBusinessSaga({ payload }) {
   try {

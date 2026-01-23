@@ -73,8 +73,7 @@ const BusinessList = () => {
   return (
     <div className="page-content">
       <Container fluid>
-        <ToastContainer closeButton={false} limit={1} autoClose={800} />
-        <Row>
+         <Row>
           <Col lg={12}>
             <Card>
               <CardHeader className="card-header border-0">

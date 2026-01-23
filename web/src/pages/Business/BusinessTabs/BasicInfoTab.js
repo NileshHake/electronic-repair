@@ -2,7 +2,9 @@ import React, { useEffect } from "react";
 import { Row, Col, Label, Input } from "reactstrap";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
+import { useDispatch, useSelector } from "react-redux";
+import { getBrandsList } from "../../../store/Brand";
+import Select from "react-select";
 const BasicInfoTab = ({
   businessData,
   errors,
@@ -12,7 +14,13 @@ const BasicInfoTab = ({
   previewProfile,
   status
 }) => {
-  // Auto-fill IFSC details
+
+  const dispatch = useDispatch();
+  const { brands } = useSelector((state) => state.BrandReducer);
+
+  useEffect(() => {
+    dispatch(getBrandsList());
+  }, [dispatch]);
   useEffect(() => {
     if (businessData.user_ifsc_code?.length === 11) {
       fetch(`https://ifsc.razorpay.com/${businessData.user_ifsc_code}`)
@@ -112,6 +120,25 @@ const BasicInfoTab = ({
           placeholder="Enter GST number"
         />
       </Col>
+      {status && (
+        <Col lg={4}>
+          <Label>Supplier Brand</Label>
+          <Select
+            options={brands.map((b) => ({ value: b.brand_id, label: b.brand_name }))}
+            value={
+              brands
+                .map((b) => ({ value: b.brand_id, label: b.brand_name }))
+                .find((opt) => opt.value === businessData.supplier_brand_id) || null
+            }
+            onChange={(opt) =>
+              setBusinessData((prev) => ({ ...prev, supplier_brand_id: opt?.value || "" }))
+            }
+            placeholder="Select brand"
+            isClearable
+          />
+        </Col>
+      )}
+
 
 
       {/* Profile Image */}

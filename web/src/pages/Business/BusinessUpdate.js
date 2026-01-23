@@ -30,7 +30,7 @@ import BasicInfoTab from "./BusinessTabs/BasicInfoTab";
 import BusinessAddressTab from "./BusinessTabs/BusinessAddressTab";
 import BankDetails from "./BusinessTabs/BankDetails";
 
-const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
+const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit, status }) => {
   const dispatch = useDispatch();
   const { updateBusinessResponse } = useSelector(
     (state) => state.BusinessReducer
@@ -63,7 +63,7 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
     user_address_state: "",
     user_address_description: "",
     user_terms_and_conditions: "",
-    user_type: 2,
+    status: status,
   });
 
   const [previewProfile, setPreviewProfile] = useState(null);
@@ -96,6 +96,8 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
         user_terms_and_conditions:
           businessDataToEdit.user_terms_and_conditions || "",
         user_type: 2,
+        status: status,
+
       });
 
       if (businessDataToEdit?.user_profile) {
@@ -128,13 +130,11 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
         updatedData.user_address_description = `
         <p><strong>Village:</strong> ${updatedData.user_address_city || ""}</p>
         <p><strong>Block:</strong> ${updatedData.user_address_block || ""}</p>
-        <p><strong>District:</strong> ${
-          updatedData.user_address_district || ""
-        }</p>
+        <p><strong>District:</strong> ${updatedData.user_address_district || ""
+          }</p>
         <p><strong>State:</strong> ${updatedData.user_address_state || ""}</p>
-        <p><strong>Pincode:</strong> ${
-          updatedData.user_address_pincode || ""
-        }</p>
+        <p><strong>Pincode:</strong> ${updatedData.user_address_pincode || ""
+          }</p>
       `;
       }
 
@@ -172,42 +172,15 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const formData = new FormData();
-    Object.keys(businessData).forEach((key) => {
-      if (businessData[key] !== null && businessData[key] !== undefined) {
-        formData.append(key, businessData[key]);
-      }
-    });
 
-    dispatch(IsBusinessUpdate(formData));
+
+    dispatch(IsBusinessUpdate(businessData));
   };
-  const handleIFSCBlur = async () => {
-    const ifsc = businessData.user_ifsc_code.trim();
-    if (ifsc.length < 5) return;
-    try {
-      const res = await fetch(`https://ifsc.razorpay.com/${ifsc}`);
-      console.log(res);
 
-      const data = await res.json();
-      console.log(data);
-
-      if (data && data.BANK) {
-        console.log(data);
-
-        setBusinessData((prev) => ({
-          ...prev,
-          user_bank_name: data.BANK || "",
-          user_branch_name: data.BRANCH || "",
-        }));
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
   // 🧩 Success Response
   useEffect(() => {
     if (updateBusinessResponse) {
-      toast.success("Business updated successfully!");
+
       toggle();
       setPreviewProfile(null);
       dispatch(resetUpdateBusinessResponse());
@@ -218,7 +191,7 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
     <>
       <Modal id="showModal" size="xl" isOpen={isOpen} centered>
         <ModalHeader toggle={toggle}>
-          <h4>Update Business</h4>
+          <h4>Update  {status == 1 ? "Supplier" : "Business"}  </h4>
         </ModalHeader>
         <form onSubmit={handleUpdateBusiness}>
           <ModalBody>
@@ -249,17 +222,17 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
                     className={classnames({ active: activeTab === "3" })}
                     onClick={() => toggleTab("3")}
                   >
-                    Business Address
+                    {status == 1 ? "Supplier" : "Business"} Address
                   </NavLink>
                 </NavItem>
-                <NavItem>
+                {!status && <NavItem>
                   <NavLink
                     className={classnames({ active: activeTab === "4" })}
                     onClick={() => toggleTab("4")}
                   >
                     Terms & Conditions
                   </NavLink>
-                </NavItem>
+                </NavItem>}
               </Nav>
 
               {/* ==================== TAB CONTENT ==================== */}
@@ -274,6 +247,7 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit }) => {
                       handleProfileChange={handleProfileChange}
                       previewProfile={previewProfile}
                       errors={errors}
+                      status={status}
                     />
                   </Card>
                 </TabPane>

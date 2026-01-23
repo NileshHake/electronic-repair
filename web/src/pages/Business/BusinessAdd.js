@@ -28,7 +28,7 @@ import BusinessAddressTab from "./BusinessTabs/BusinessAddressTab";
 import BankDetails from "./BusinessTabs/BankDetails";
 
 const BusinessAdd = ({ isOpen, toggle, status }) => {
-   
+
 
   const dispatch = useDispatch();
   const { addBusinessResponse } = useSelector((state) => state.BusinessReducer);
@@ -62,6 +62,7 @@ const BusinessAdd = ({ isOpen, toggle, status }) => {
     user_address_description: "",
     user_terms_and_conditions: "",
     user_type: 2,
+    supplier_brand_id: 0,
     shop_lat: "",
     shop_lng: "",
     status: status,
@@ -115,7 +116,7 @@ const BusinessAdd = ({ isOpen, toggle, status }) => {
   const handleAddBusiness = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
     dispatch(addBusiness(businessData));
   };
 
@@ -174,7 +175,7 @@ const BusinessAdd = ({ isOpen, toggle, status }) => {
                     {status == 1 ? "Supplier" : "Business"} Address
                   </NavLink>
                 </NavItem>
-                {status == false && <NavItem>
+                {!status   && <NavItem>
                   <NavLink
                     className={classnames({ active: activeTab === "4" })}
                     onClick={() => toggleTab("4")}

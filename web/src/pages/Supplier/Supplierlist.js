@@ -19,6 +19,7 @@ import {
   getSuppliersList,
 } from "../../store/Supplier";
 import BusinessAdd from "../Business/BusinessAdd";
+import BusinessUpdate from "../Business/BusinessUpdate";
 
 const SupplierList = () => {
   document.title = "Supplier List";
@@ -77,7 +78,6 @@ const SupplierList = () => {
   return (
     <div className="page-content">
       <Container fluid>
-        <ToastContainer closeButton={false} limit={1} autoClose={800} />
         <Row>
           <Col lg={12}>
             <Card>
@@ -159,18 +159,19 @@ const SupplierList = () => {
           </Col>
         </Row>
       </Container>
- 
+
       {isAddOpen && (
-        <BusinessAdd isOpen={isAddOpen}   toggle={handleModalClose} status={true} />
+        <BusinessAdd isOpen={isAddOpen} toggle={handleModalClose} status={true} />
       )}
- 
-      {/* {isUpdateOpen && (
-        <SupplierUpdate
+
+      {isUpdateOpen && (
+        <BusinessUpdate
           isOpen={isUpdateOpen}
           toggle={handleModalClose}
-          supplierDataToEdit={selectedSupplier}
+          businessDataToEdit={selectedSupplier}
+          status={true}
         />
-      )} */}
+      )}
 
       {/* ✅ Delete Modal */}
       <DeleteModal
