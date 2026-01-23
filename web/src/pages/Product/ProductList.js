@@ -12,9 +12,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import DeleteModal from "../../Components/Common/DeleteModal";
 import ProductAdd from "./ProductAdd";
-import ProductUpdate from "./ProductUpdate"; 
+import ProductUpdate from "./ProductUpdate";
 import {
   deleteProduct,
+  getAdminProductList,
   getProductList,
   resetAddProductResponse,
 } from "../../store/product";
@@ -33,10 +34,18 @@ const ProductList = () => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
+  const fetchProducts = () => {
+    dispatch(
+      getAdminProductList({
+        product_status: 0,
+      })
+    );
+  };
   useEffect(() => {
-    dispatch(getProductList());
+    fetchProducts();
     dispatch(resetAddProductResponse());
   }, [dispatch]);
+
 
   const onClickDelete = (product) => {
     setIsProduct(product);
@@ -65,8 +74,6 @@ const ProductList = () => {
   }, []);
   return (
     <div className="page-content">
-      <ToastContainer closeButton={false} limit={1} autoClose={100} />
-
       <DeleteModal
         show={deleteModal}
         onDeleteClick={handleDeleteProduct}
@@ -117,6 +124,7 @@ const ProductList = () => {
                               <th>Purchase Price</th>
                               <th>Sale Price</th>
                               <th>MRP</th>
+                              <th>Status</th>
                               <th>Action</th>
                             </tr>
                           </thead>
@@ -161,6 +169,20 @@ const ProductList = () => {
                                     <td>₹{item.product_purchase_price}</td>
                                     <td>₹{item.product_sale_price}</td>
                                     <td>₹{item.product_mrp}</td>
+                                   <td>
+  {item.product_status === 1 && (
+    <span className="badge bg-warning text-dark">New</span>
+  )}
+
+  {item.product_status === 2 && (
+    <span className="badge bg-success">Accepted</span>
+  )}
+
+  {item.product_status === 3 && (
+    <span className="badge bg-danger">Rejected</span>
+  )}
+</td>
+
                                     <td className="text-center">
                                       <ul className="list-inline hstack   mb-0">
                                         <li className="list-inline-item edit">
@@ -246,13 +268,17 @@ const ProductList = () => {
           isProductData={isProduct}
         />
       )}
-        {isViewModalOpen && (
-          <ProductView
-            isOpen={isViewModalOpen}
-            toggle={() => setIsViewModalOpen(false)}
-            isProductData={isProduct}
-          />
-        )}
+      {isViewModalOpen && (
+        <ProductView
+          isOpen={isViewModalOpen}
+          toggle={() => {
+            setIsViewModalOpen(false);
+            fetchProducts(); // 👈 REFRESH LIST
+          }}
+          isProductData={isProduct}
+        />
+      )}
+
     </div>
   );
 };

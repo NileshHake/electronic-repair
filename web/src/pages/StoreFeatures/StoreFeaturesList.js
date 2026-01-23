@@ -34,8 +34,7 @@ const StoreFeaturesList = () => {
     const [isUpdateOpen, setIsUpdateOpen] = useState(false);
     const [selectedFeature, setSelectedFeature] = useState(null);
     const [deleteModal, setDeleteModal] = useState(false);
-
-    // Fetch store features
+ 
     useEffect(() => {
         dispatch(getStoreFeaturesList());
         if (addFeatureResponse) {

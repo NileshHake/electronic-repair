@@ -20,11 +20,7 @@ const store = async (req, res) => {
 // 🟡 READ ALL
 const index = async (req, res) => {
   try {
-    const taxes = await Tax.findAll({
-      where: {
-        tax_created_by: getCreatedBy(req.currentUser),
-      },
-    });
+    const taxes = await Tax.findAll();
     res.status(200).json(taxes);
   } catch (error) {
     res

@@ -35,7 +35,7 @@ const index = async (req, res) => {
   try {
     const categories = await Category.findAll({
       where: {
-        category_created_by: getCreatedBy(req.currentUser),
+         
         category_main_id: {
           [Op.or]: [0, null],
         },

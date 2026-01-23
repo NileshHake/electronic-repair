@@ -5,12 +5,13 @@ const { verifyToken } = require("../auth/Middleware/authMiddleware");
 
 router.post("/product/store", verifyToken, controller.store);
 router.get("/product/list", verifyToken, controller.index);
+router.post("/admin/products/list", verifyToken, controller.AdminProductList);
+
 router.get("/product/latest-list", controller.LatestProduct);
 router.post("/products/repair-sale/list", verifyToken, controller.RepairandSaleProduct);
-router.post("/filter-products",  controller.filterProducts);
-router.post("/search-products",  controller.SearchProducts);
-router.post("/products/sale-list", verifyToken, controller.SaleAndBothProduct);
-router.post("/trending-product-filter" , controller.filterstrendingproduct);
+router.post("/filter-products", controller.filterProducts);
+router.post("/search-products", controller.SearchProducts); 
+router.post("/trending-product-filter", controller.filterstrendingproduct);
 
 router.get("/product/single/:id", verifyToken, controller.Get);
 router.put("/product/update", verifyToken, controller.update);

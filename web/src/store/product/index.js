@@ -6,6 +6,7 @@ import { APIClient } from "../../helpers/api_helper";
 export const GET_PRODUCT = "GET_PRODUCT";
 export const ADD_PRODUCT = "ADD_PRODUCT";
 export const FILTER_PRODUCT_FOR_REPAIR = "FILTER_PRODUCT_FOR_REPAIR";
+export const GET_ADMIN_PRODUCT_LIST = "GET_ADMIN_PRODUCT_LIST";
 export const FILTER_PRODUCT_FOR_SALE = "FILTER_PRODUCT_FOR_SALE";
 export const UPDATE_PRODUCT = "UPDATE_PRODUCT";
 export const DELETE_PRODUCT = "DELETE_PRODUCT";
@@ -24,6 +25,10 @@ export const productApiResponseSuccess = (actionType, data) => ({
 export const productApiResponseError = (actionType, error) => ({
   type: API_RESPONSE_ERROR,
   payload: { actionType, error },
+});
+export const getAdminProductList = (filterData = {}) => ({
+  type: GET_ADMIN_PRODUCT_LIST,
+  payload: filterData,
 });
 
 export const resetAddProductResponse = () => ({
@@ -90,6 +95,12 @@ export const ProductReducer = (state = INIT_STATE, action) => {
       switch (action.payload.actionType) {
         case GET_PRODUCT:
           return { ...state, products: action.payload.data, loading: false };
+        case GET_ADMIN_PRODUCT_LIST:
+          return {
+            ...state,
+            products: action.payload.data, // admin list replaces products
+            loading: false,
+          };
 
         case GET_SINGLE_PRODUCT:
           return {
@@ -159,6 +170,9 @@ export const ProductReducer = (state = INIT_STATE, action) => {
 const api = new APIClient();
 
 const getProductApi = () => api.get("/product/list");
+const getAdminProductListApi = (data) =>
+  api.create("/admin/products/list", data);
+
 const getSingleProductApi = (id) => api.get(`/product/single/${id}`);
 const addProductApi = (formData) => api.create(`/product/store`, formData);
 const filterProductForRepairApi = (formData) =>
@@ -216,6 +230,19 @@ function* filterProductForSaleSaga({ payload }) {
   } catch (error) {
     yield put(productApiResponseError(FILTER_PRODUCT_FOR_SALE, error));
     toast.error("Failed to filter products for Sale!");
+  }
+}
+function* getAdminProductListSaga({ payload }) {
+  try {
+    const response = yield call(getAdminProductListApi, payload);
+
+    yield put(
+      productApiResponseSuccess(GET_ADMIN_PRODUCT_LIST, response)
+    );
+  } catch (error) {
+    console.error("❌ Error fetching admin product list:", error);
+    yield put(productApiResponseError(GET_ADMIN_PRODUCT_LIST, error));
+    toast.error("Failed to fetch admin products!");
   }
 }
 
@@ -313,6 +340,9 @@ function* watchUpdateProduct() {
 function* watchDeleteProduct() {
   yield takeEvery(DELETE_PRODUCT, deleteProductSaga);
 }
+function* watchGetAdminProductList() {
+  yield takeEvery(GET_ADMIN_PRODUCT_LIST, getAdminProductListSaga);
+}
 
 // ================== ROOT SAGA ==================
 export function* productSaga() {
@@ -324,5 +354,6 @@ export function* productSaga() {
     fork(watchAddProduct),
     fork(watchUpdateProduct),
     fork(watchDeleteProduct),
+      fork(watchGetAdminProductList), // ✅ NEW
   ]);
 }

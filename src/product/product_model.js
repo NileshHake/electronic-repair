@@ -80,6 +80,10 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  product_reject_message: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   product_status: {
     type: DataTypes.INTEGER,
     defaultValue: 1,

@@ -21,6 +21,7 @@ const store = async (req, res) => {
       product_on_sale,
       product_discount,
       product_on_free_delivery,
+      product_reject_message,
       product_delivery_charge,
     } = req.body;
 
@@ -54,6 +55,7 @@ const store = async (req, res) => {
       product_on_sale,
       product_discount,
       product_on_free_delivery,
+      product_reject_message,
       product_delivery_charge,
     });
 
@@ -102,6 +104,86 @@ const index = async (req, res) => {
     });
   }
 };
+const AdminProductList = async (req, res) => {
+  try {
+    const { product_status } = req.body;
+    const userType = Number(req.currentUser?.user_type);
+    const userId = req.currentUser?.user_id;
+
+    // ✅ Build WHERE conditions dynamically
+    const whereParts = [];
+    const replacements = {};
+
+    // ✅ If user_type is 1 or 3 => show ALL products (no created_by filter)
+    // ✅ If user_type is 7 => show only own products
+    if (userType === 7) {
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid user_id",
+        });
+      }
+      whereParts.push("pro.product_created_by = :created_by");
+      replacements.created_by = userId;
+    }
+
+    // ✅ status filter
+    // If product_status = 0 → show all products (no filter)
+    // Else → apply status filter
+    if (
+      product_status !== undefined &&
+      product_status !== "" &&
+      Number(product_status) !== 0
+    ) {
+      whereParts.push("pro.product_status = :product_status");
+      replacements.product_status = product_status;
+    }
+
+    const whereCondition = whereParts.length
+      ? `WHERE ${whereParts.join(" AND ")}`
+      : ""; // ✅ empty => no WHERE => all products
+
+    const products = await sequelize.query(
+      `
+      SELECT 
+        pro.*,
+        tx.tax_id,
+        tx.tax_name,
+        tx.tax_percentage,
+        cat.category_id,
+        cat.category_name,
+        br.brand_id,
+        br.brand_name
+      FROM tbl_products AS pro
+      LEFT JOIN tbl_taxes AS tx 
+        ON pro.product_tax = tx.tax_id
+      LEFT JOIN tbl_categories AS cat 
+        ON pro.product_category = cat.category_id
+      LEFT JOIN tbl_brands AS br 
+        ON pro.product_brand = br.brand_id
+      ${whereCondition}
+      ORDER BY pro.product_id DESC
+      `,
+      {
+        replacements,
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    return res.status(200).json(products
+
+    );
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching products",
+      error: error.message,
+    });
+  }
+};
+
+
 
 const LatestProduct = async (req, res) => {
   try {
@@ -117,7 +199,7 @@ const LatestProduct = async (req, res) => {
       LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
-       
+       WHERE pro.product_status = 2
       ORDER BY pro.product_id DESC
       LIMIT 8
       `,
@@ -154,6 +236,7 @@ const RepairandSaleProduct = async (req, res) => {
       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
       WHERE pro.product_created_by = :created_by
+      AND pro.product_status = 2
         AND pro.product_usage_type IN ('repair', 'both')
     `;
 
@@ -189,100 +272,8 @@ const RepairandSaleProduct = async (req, res) => {
   }
 };
 
-const SaleAndBothProduct = async (req, res) => {
-  try {
-    const {
-      categoryId = 0,
-      brandIds = [],
-      product_search = "",
-      minPrice,
-      maxPrice
-    } = req.body;
 
-    const createdBy = getCreatedBy(req.currentUser);
 
-    // ----- Base WHERE condition -----
-    let baseWhere = `WHERE pro.product_created_by = :created_by
-      AND pro.product_usage_type IN ('sale','both')`;
-
-    if (categoryId && categoryId !== 0) baseWhere += ` AND pro.product_category = :categoryId`;
-    if (brandIds.length > 0) baseWhere += ` AND pro.product_brand IN (:brandIds)`;
-    if (product_search.trim() !== "") baseWhere += ` AND pro.product_name LIKE :product_search`;
-
-    const replacementsBase = {
-      created_by: createdBy,
-      categoryId: categoryId || null,
-      brandIds: brandIds || [],
-      product_search: `%${product_search}%`,
-    };
-
-    // ----- 1) Get min & max price without price filter -----
-    const priceRange = await sequelize.query(
-      `SELECT MIN(product_sale_price) AS minPrice, MAX(product_sale_price) AS maxPrice
-       FROM tbl_products AS pro
-       ${baseWhere}`,
-      { replacements: replacementsBase, type: sequelize.QueryTypes.SELECT }
-    );
-
-    const { minPrice: dbMinPrice, maxPrice: dbMaxPrice } = priceRange[0];
-
-    // ----- 2) Apply price filter for product listing -----
-    const safeMinPrice = minPrice ?? dbMinPrice ?? 0;
-    const safeMaxPrice = maxPrice ?? dbMaxPrice ?? 9999999;
-
-    const whereWithPrice = `${baseWhere} AND pro.product_sale_price BETWEEN :minPrice AND :maxPrice`;
-
-    const replacementsFiltered = { ...replacementsBase, minPrice: safeMinPrice, maxPrice: safeMaxPrice };
-
-    // Cheapest product
-    const minProduct = await sequelize.query(
-      `SELECT pro.*, tx.tax_name, tx.tax_percentage, cat.category_name, br.brand_name
-       FROM tbl_products AS pro
-       LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
-       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
-       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
-       ${whereWithPrice} AND pro.product_sale_price = :minPrice
-       LIMIT 1`,
-      { replacements: replacementsFiltered, type: sequelize.QueryTypes.SELECT }
-    );
-
-    // Most expensive product
-    const maxProduct = await sequelize.query(
-      `SELECT pro.*, tx.tax_name, tx.tax_percentage, cat.category_name, br.brand_name
-       FROM tbl_products AS pro
-       LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
-       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
-       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
-       ${whereWithPrice} AND pro.product_sale_price = :maxPrice
-       LIMIT 1`,
-      { replacements: replacementsFiltered, type: sequelize.QueryTypes.SELECT }
-    );
-
-    // All filtered products
-    const allProducts = await sequelize.query(
-      `SELECT pro.*, tx.tax_name, tx.tax_percentage, cat.category_name, br.brand_name
-       FROM tbl_products AS pro
-       LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
-       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
-       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
-       ${whereWithPrice}
-       ORDER BY pro.product_id DESC`,
-      { replacements: replacementsFiltered, type: sequelize.QueryTypes.SELECT }
-    );
-
-    return res.status(200).json({
-      min_price: dbMinPrice ?? 0, // updated based on category/brand/search
-      max_price: dbMaxPrice ?? 9999999,
-      cheapest: minProduct[0] || null,
-      expensive: maxProduct[0] || null,
-      products: allProducts,
-    });
-
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: error.message });
-  }
-};
 
 
 
@@ -312,6 +303,7 @@ const filterstrendingproduct = async (req, res) => {
       LEFT JOIN tbl_taxes AS tx ON pro.product_tax = tx.tax_id
       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
+      WHERE pro.product_status = 2
       ORDER BY pro.createdAt DESC
       LIMIT 8
     `;
@@ -349,6 +341,9 @@ const filterProducts = async (req, res) => {
     let whereConditions = [];
     let replacements = { limit, offset };
 
+    // ✅ ALWAYS FILTER STATUS = 2
+    whereConditions.push("pro.product_status = 2");
+
     // ✅ CATEGORY
     if (category_id) {
       whereConditions.push("pro.product_category = :category_id");
@@ -363,9 +358,7 @@ const filterProducts = async (req, res) => {
 
     // ✅ PRICE RANGE
     if (min_price != null && max_price != null) {
-      whereConditions.push(
-        "pro.product_sale_price BETWEEN :min_price AND :max_price"
-      );
+      whereConditions.push("pro.product_sale_price BETWEEN :min_price AND :max_price");
       replacements.min_price = min_price;
       replacements.max_price = max_price;
     }
@@ -376,25 +369,14 @@ const filterProducts = async (req, res) => {
     }
 
     const whereClause =
-      whereConditions.length > 0
-        ? `WHERE ${whereConditions.join(" AND ")}`
-        : "";
+      whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
 
     // ✅ SORT LOGIC
     let orderBy = "pro.product_id DESC";
-
-    if (sort === "low_to_high") {
-      orderBy = "pro.product_sale_price ASC";
-    }
-    else if (sort === "high_to_low") {
-      orderBy = "pro.product_sale_price DESC";
-    }
-    else if (sort === "new") {
-      orderBy = "pro.createdAt DESC";
-    }
-    else if (sort === "sale") {
-      orderBy = "pro.product_on_sale DESC";
-    }
+    if (sort === "low_to_high") orderBy = "pro.product_sale_price ASC";
+    else if (sort === "high_to_low") orderBy = "pro.product_sale_price DESC";
+    else if (sort === "new") orderBy = "pro.createdAt DESC";
+    else if (sort === "sale") orderBy = "pro.product_on_sale DESC";
 
     // 🔹 TOTAL COUNT
     const totalResult = await sequelize.query(
@@ -409,7 +391,7 @@ const filterProducts = async (req, res) => {
       }
     );
 
-    const totalRecords = totalResult[0].total;
+    const totalRecords = Number(totalResult[0].total || 0);
     const totalPages = Math.ceil(totalRecords / limit);
 
     // 🔹 DATA QUERY
@@ -453,18 +435,26 @@ const filterProducts = async (req, res) => {
     });
   }
 };
+
 const SearchProducts = async (req, res) => {
   try {
-    const { search } = req.body; // or req.body if you want
+    const { search } = req.body;
 
-    const whereCondition = search
-      ? `
-        WHERE
+    // ✅ Base condition (ALWAYS applied)
+    let whereCondition = `
+      WHERE pro.product_status = 2
+    `;
+
+    // ✅ Search condition
+    if (search) {
+      whereCondition += `
+        AND (
           LOWER(pro.product_name) LIKE LOWER(:search)
           OR LOWER(cat.category_name) LIKE LOWER(:search)
           OR LOWER(br.brand_name) LIKE LOWER(:search)
-      `
-      : "";
+        )
+      `;
+    }
 
     const products = await sequelize.query(
       `
@@ -503,6 +493,7 @@ const SearchProducts = async (req, res) => {
     });
   }
 };
+
 
 
 
@@ -582,13 +573,13 @@ const deleted = async (req, res) => {
 
 module.exports = {
   store,
+  AdminProductList,
   SearchProducts,
   index,
   Get,
   update,
   deleted,
   RepairandSaleProduct,
-  SaleAndBothProduct,
   LatestProduct,
   filterstrendingproduct,
   filterProducts,

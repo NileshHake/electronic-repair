@@ -16,37 +16,22 @@ import {
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import classnames from "classnames";
-
-// ✅ NEW: Import modules from 'swiper/modules' path
 import { FreeMode, Navigation, Thumbs } from "swiper";
-
-// Import Swiper styles
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
 
-import { Link } from "react-router-dom";
-// import BreadCrumb from "../../Components/Common/BreadCrumb"; // Removed as it's typically for pages, not modals
 import { api } from "../../config";
-import ProductUpdate from "./ProductUpdate"; // Assuming this component exists
+import ProductUpdate from "./ProductUpdate";
 import { useDispatch, useSelector } from "react-redux";
-import { getProductList } from "../../store/product"; // Assuming this Redux action exists
-import AuthUser from "../../helpers/AuthType/AuthUser"; // Assuming this helper exists
-import { formatDateTime } from "../../helpers/date_and_time_format"; // Assuming this helper exists
-
-// ✅ CORRECTION: Import the default image as requested
+import { getAdminProductList, getProductList, resetUpdateProductResponse } from "../../store/product";
+import AuthUser from "../../helpers/AuthType/AuthUser";
+import { formatDateTime } from "../../helpers/date_and_time_format";
 import defaultImage from "../../assets/images/productdefaultimg/istockphoto-1396814518-612x612.jpg";
+import ProductActionButtons from "./component/ProductActionButtons";
 
-// --- Supporting Component: ProductReview ---
-// (Kept commented out as it was in the original request's main component body)
-/*
-const ProductReview = (props) => {
-  // ... Review component implementation
-};
-*/
 
-// --- Supporting Component: PricingWidgetList ---
 const PricingWidgetList = (props) => {
   return (
     <React.Fragment>
@@ -75,26 +60,9 @@ function ProductView(props) {
   const { BusinessData, user } = AuthUser();
   const { isProductData } = props;
   const dispatch = useDispatch();
-  const products = useSelector((state) => state.ProductReducer.products);
+  console.log("isProductData.product_image", isProductData.product_image);
 
-  const [filteredProduct, setFilteredProduct] = useState({});
-
-  useEffect(() => {
-    dispatch(getProductList());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (isProductData && products.length > 0) {
-      const matched = products.find(
-        (p) => p.product_id === isProductData.product_id
-      );
-      setFilteredProduct(matched || {});
-    }
-  }, [isProductData, products]);
-
-  // Safely parse JSON array of image names, default to empty array
-  // Use a fallback to ensure it's a valid string for JSON.parse
-  const imageArray = JSON.parse(filteredProduct.product_image || "[]");
+  const imageArray = JSON.parse(isProductData.product_image || "[]");
 
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [ttop, setttop] = useState(false);
@@ -116,26 +84,34 @@ function ProductView(props) {
   const productDetailsWidgets = [
     {
       label: "MRP",
-      labelDetail: filteredProduct.product_mrp || "0",
+      labelDetail: isProductData.product_mrp || "0",
       icon: "bx bx-rupee",
     },
     {
       label: "Sale Price",
-      labelDetail: filteredProduct.product_sale_price || "0",
+      labelDetail: isProductData.product_sale_price || "0",
       icon: "bx bx-purchase-tag",
     },
     {
       label: "Tax",
-      labelDetail: `${filteredProduct.tax_percentage || 0}%`,
+      labelDetail: `${isProductData.tax_percentage || 0}%`,
       icon: "bx bx-calculator",
     },
     {
       label: "Purchase",
-      labelDetail: filteredProduct.product_purchase_price || "0",
+      labelDetail: isProductData.product_purchase_price || "0",
       icon: "bx bx-cart",
     },
   ];
+  const updateProductResponse = useSelector(
+    (state) => state.ProductReducer.updateProductResponse
+  );
+  useEffect(() => {
+    if (updateProductResponse === true) {
+      props.toggle()
+    }
 
+  }, [updateProductResponse]);
   return (
     <Modal
       isOpen={props.isOpen}
@@ -167,123 +143,67 @@ function ProductView(props) {
                     <Col xl={4} md={8} className="mx-auto">
                       <div className="product-img-slider sticky-side-div">
 
-                        {/* 1. Main Product Slider (Navigation + Thumbs) */}
+                        {/* ✅ Main Slider */}
                         <Swiper
                           modules={[Navigation, Thumbs]}
                           navigation={true}
-                          thumbs={{ swiper: thumbsSwiper }}
+                          thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
                           className="swiper product-thumbnail-slider p-2 rounded bg-light"
                         >
-                          <div className="swiper-wrapper">
-                            {imageArray?.length > 0 ? (
-                              imageArray.map((imgName, index) => (
-                                <SwiperSlide key={index}>
-                                  <img
-                                    src={`${api.IMG_URL}product_images/${imgName}`}
-                                    alt={`product-${index}`}
-                                    className="img-fluid d-block"
-                                  />
-                                </SwiperSlide>
-                              ))
-                            ) : (
-                              <SwiperSlide>
-                                {/* ✅ CORRECTION: Use imported defaultImage */}
-                                <img
-                                  src={defaultImage}
-                                  alt="default"
-                                  className="img-fluid d-block"
-                                />
-                              </SwiperSlide>
-                            )}
-                          </div>
+                          {(imageArray?.length ? imageArray : [null]).map((imgName, index) => (
+                            <SwiperSlide key={index}>
+                              <img
+                                src={
+                                  imgName
+                                    ? `${api.IMG_URL}product_images/${imgName}`
+                                    : defaultImage
+                                }
+                                alt={`thumb-${index}`}
+                                className="img-fluid d-block rounded"
+                              />
+                            </SwiperSlide>
+                          ))}
                         </Swiper>
 
-                        {/* 2. Thumbnail Slider (FreeMode + Thumbs controller) */}
-                        <div className="product-nav-slider mt-3">
+                        {/* ✅ Thumbnail Slider */}
+                        <div className="product-nav-slider mt-2">
                           <Swiper
-                            modules={[FreeMode, Navigation, Thumbs]}
+                            modules={[FreeMode, Thumbs]}
                             onSwiper={setThumbsSwiper}
                             slidesPerView={4}
                             freeMode={true}
                             watchSlidesProgress={true}
-                            spaceBetween={12}
-                            className="swiper product-nav-slider overflow-hidden"
+                            spaceBetween={10}
+                            className="swiper product-nav-slider mt-2 overflow-hidden"
                           >
-                            {imageArray?.length > 0 ? (
-                              imageArray.map((imgName, index) => (
-                                <SwiperSlide
-                                  key={index}
-                                  style={{
-                                    cursor: "pointer",
-                                    transition: "transform 0.2s ease-in-out",
-                                  }}
-                                  onMouseEnter={(e) =>
-                                  (e.currentTarget.style.transform =
-                                    "scale(1.05)")
-                                  }
-                                  onMouseLeave={(e) =>
-                                    (e.currentTarget.style.transform = "scale(1)")
-                                  }
-                                >
-                                  <div
-                                    className="nav-slide-item position-relative rounded shadow-sm overflow-hidden"
-                                    style={{
-                                      aspectRatio: "1 / 1",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      backgroundColor: "#f8f9fa",
-                                      borderRadius: "10px",
-                                      height: "80px",
-                                    }}
-                                  >
-                                    <img
-                                      src={`${api.IMG_URL}product_images/${imgName}`}
-                                      alt={`thumb-${index}`}
-                                      className="img-fluid d-block w-100 h-100"
-                                      style={{
-                                        objectFit: "cover",
-                                        borderRadius: "10px",
-                                      }}
-                                    />
-                                  </div>
-                                </SwiperSlide>
-                              ))
-                            ) : (
-                              <SwiperSlide>
-                                {/* ✅ CORRECTION: Use imported defaultImage for thumbnail placeholder */}
-                                <div
-                                  className="nav-slide-item position-relative rounded shadow-sm overflow-hidden"
-                                  style={{
-                                    aspectRatio: "1 / 1",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    backgroundColor: "#f8f9fa",
-                                    borderRadius: "10px",
-                                    height: "80px",
-                                  }}
-                                >
+                            {(imageArray?.length ? imageArray : [null]).map((imgName, index) => (
+                              <SwiperSlide key={index} className="rounded">
+                                <div className="nav-slide-item">
                                   <img
-                                    src={defaultImage}
-                                    alt="default-thumb"
-                                    className="img-fluid d-block w-100 h-100"
-                                    style={{ objectFit: "cover", borderRadius: "10px" }}
+                                    src={
+                                      imgName
+                                        ? `${api.IMG_URL}product_images/${imgName}`
+                                        : defaultImage
+                                    }
+                                    alt={`thumb-${index}`}
+                                    className="img-fluid d-block rounded"
                                   />
                                 </div>
                               </SwiperSlide>
-                            )}
+                            ))}
                           </Swiper>
                         </div>
+
                       </div>
                     </Col>
+
 
                     {/* Product Details Section */}
                     <Col xl={8}>
                       <div className="mt-xl-0 mt-5">
                         <div className="d-flex">
                           <div className="flex-grow-1">
-                            <h4>{filteredProduct.product_name}</h4>
+                            <h4>{isProductData.product_name}</h4>
                             <div className="hstack gap-3 flex-wrap">
                               <div className="text-muted">
                                 Seller :{" "}
@@ -295,34 +215,22 @@ function ProductView(props) {
                               <div className="text-muted">
                                 Published :{" "}
                                 <span className="text-body fw-medium">
-                                  {formatDateTime(filteredProduct?.createdAt)}
+                                  {formatDateTime(isProductData?.createdAt)}
                                 </span>
                               </div>
                             </div>
                           </div>
                           <div className="flex-shrink-0">
-                            {user.user_type != 6 && <div>
-                              <Tooltip
-                                placement="top"
-                                isOpen={ttop}
-                                target="TooltipTop"
-                                toggle={() => {
-                                  setttop(!ttop);
-                                }}
-                              >
-                                Edit Product
-                              </Tooltip>
-                              <a
-                                onClick={() => {
-                                  setIsProduct(filteredProduct);
-                                  setIsUpdateModalOpen(true);
-                                }}
-                                id="TooltipTop"
-                                className="btn btn-light"
-                              >
-                                <i className="ri-pencil-fill align-bottom"></i>
-                              </a>
-                            </div>}
+                            <ProductActionButtons
+                              userType={user.user_type}
+                              product={isProductData}
+
+                              onEdit={(product) => {
+                                setIsProduct(product);
+                                setIsUpdateModalOpen(true);
+                              }}
+                            />
+
                           </div>
                         </div>
 
@@ -344,33 +252,40 @@ function ProductView(props) {
                         {/* Description Tabs */}
                         <div className="product-content mt-5">
                           <h5 className="fs-14 mb-3">Product Description :</h5>
+
                           <Nav tabs className="nav-tabs-custom nav-success">
                             <NavItem>
                               <NavLink
                                 style={{ cursor: "pointer" }}
-                                className={classnames({
-                                  active: customActiveTab === "1",
-                                })}
-                                onClick={() => {
-                                  toggleCustom("1");
-                                }}
+                                className={classnames({ active: customActiveTab === "1" })}
+                                onClick={() => toggleCustom("1")}
                               >
                                 Specification
                               </NavLink>
                             </NavItem>
+
                             <NavItem>
                               <NavLink
                                 style={{ cursor: "pointer" }}
-                                className={classnames({
-                                  active: customActiveTab === "2",
-                                })}
-                                onClick={() => {
-                                  toggleCustom("2");
-                                }}
+                                className={classnames({ active: customActiveTab === "2" })}
+                                onClick={() => toggleCustom("2")}
                               >
                                 Details
                               </NavLink>
                             </NavItem>
+
+                            {/* ✅ Show only when rejected */}
+                            {Number(isProductData?.product_status) === 3 && (
+                              <NavItem>
+                                <NavLink
+                                  style={{ cursor: "pointer" }}
+                                  className={classnames({ active: customActiveTab === "3" })}
+                                  onClick={() => toggleCustom("3")}
+                                >
+                                  Reject Reason
+                                </NavLink>
+                              </NavItem>
+                            )}
                           </Nav>
 
                           <TabContent
@@ -383,56 +298,69 @@ function ProductView(props) {
                                 <table className="table mb-0">
                                   <tbody>
                                     <tr>
-                                      <th scope="row" style={{ width: "200px" }}>
-                                        Category
-                                      </th>
-                                      <td>
-                                        {filteredProduct?.category_name || "-"}
-                                      </td>
+                                      <th scope="row" style={{ width: "200px" }}>Category</th>
+                                      <td>{isProductData?.category_name || "-"}</td>
                                     </tr>
                                     <tr>
                                       <th scope="row">Brand</th>
-                                      <td>{filteredProduct?.brand_name || "-"}</td>
+                                      <td>{isProductData?.brand_name || "-"}</td>
                                     </tr>
                                     <tr>
                                       <th scope="row">Color</th>
-                                      <td>{filteredProduct?.product_color || "-"}</td>
+                                      <td>{isProductData?.product_color || "-"}</td>
                                     </tr>
                                     <tr>
                                       <th scope="row">Material</th>
-                                      <td>{filteredProduct?.product_material || "-"}</td>
+                                      <td>{isProductData?.product_material || "-"}</td>
                                     </tr>
                                     <tr>
                                       <th scope="row">Weight</th>
-                                      <td> {filteredProduct?.product_weight || "-"}</td>
+                                      <td>{isProductData?.product_weight || "-"}</td>
                                     </tr>
                                   </tbody>
                                 </table>
                               </div>
                             </TabPane>
+
                             <TabPane id="nav-detail" tabId="2">
                               <div>
                                 <h5 className="font-size-16 mb-3">
-                                  {filteredProduct.product_name || "Product Name"}
+                                  {isProductData?.product_name || "Product Name"}
                                 </h5>
 
-                                {/* Render CKEditor description */}
-                                {filteredProduct.product_description ? (
+                                {isProductData?.product_description ? (
                                   <div
                                     className="product-description"
                                     dangerouslySetInnerHTML={{
-                                      __html: filteredProduct.product_description,
+                                      __html: isProductData.product_description,
                                     }}
                                   />
                                 ) : (
-                                  <p className="text-muted">
-                                    No description available.
-                                  </p>
+                                  <p className="text-muted">No description available.</p>
                                 )}
                               </div>
                             </TabPane>
+
+                            {/* ✅ Reject message tab content */}
+                            {Number(isProductData?.product_status) === 3 && (
+                              <TabPane id="nav-reject" tabId="3">
+                                <div className="bg-light rounded p-3 border">
+                                  <h6 className="mb-2 text-danger">
+                                    <i className="ri-error-warning-line me-1"></i>
+                                    Rejected Message
+                                  </h6>
+
+                                  {isProductData?.product_reject_message ? (
+                                    <p className="mb-0">{isProductData.product_reject_message}</p>
+                                  ) : (
+                                    <p className="text-muted mb-0">No reject reason provided.</p>
+                                  )}
+                                </div>
+                              </TabPane>
+                            )}
                           </TabContent>
                         </div>
+
                       </div>
                     </Col>
                   </Row>
@@ -443,7 +371,6 @@ function ProductView(props) {
         </Container>
       </div>
 
-      {/* Product Update Modal */}
       {isUpdateModalOpen && (
         <ProductUpdate
           isOpen={isUpdateModalOpen}

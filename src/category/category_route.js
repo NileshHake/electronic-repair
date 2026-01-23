@@ -4,7 +4,7 @@ const controller = require("./category_controller");
 const { verifyToken } = require("../auth/Middleware/authMiddleware");
 
 router.post("/category/store", verifyToken, controller.store);
-router.get("/category/list", verifyToken, controller.index);
+router.get("/category/list",  controller.index);
 router.get("/category/sub/:id", verifyToken, controller.getSubCategories);
 router.get("/category/single/:id", verifyToken, controller.Get);
 router.get("/categories-with-sub",  controller.getCategoriesWithSub);
