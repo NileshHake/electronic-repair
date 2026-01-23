@@ -29,7 +29,6 @@ const StoreFeaturesList = () => {
         (state) => state.StoreFeatureReducer
     );
 
-    console.log(features);
 
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [isUpdateOpen, setIsUpdateOpen] = useState(false);
@@ -39,8 +38,6 @@ const StoreFeaturesList = () => {
     // Fetch store features
     useEffect(() => {
         dispatch(getStoreFeaturesList());
-        console.log(addFeatureResponse);
-
         if (addFeatureResponse) {
             setIsAddOpen(false)
         }

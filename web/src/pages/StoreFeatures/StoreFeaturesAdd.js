@@ -31,7 +31,7 @@ const IconGrid = lazy(() => import("./StoreFeatureIconGrid"));
 
 const StoreFeatureAdd = ({ isOpen, toggle }) => {
   const dispatch = useDispatch();
-  const { addStoreFeatureResponse } = useSelector(
+  const { addFeatureResponse } = useSelector(
     (state) => state.StoreFeatureReducer
   );
 
@@ -71,13 +71,13 @@ const StoreFeatureAdd = ({ isOpen, toggle }) => {
 
   // ================= CLOSE ON SUCCESS =================
   useEffect(() => {
-    if (addStoreFeatureResponse) {
-      toggle();
+    if (addFeatureResponse) {
+     toggle();
       setFeatureData({ title: "", description: "", icon: "" });
       setIconSearch("");
       dispatch(resetAddStoreFeatureResponse());
     }
-  }, [addStoreFeatureResponse, dispatch, toggle]);
+  }, [addFeatureResponse, dispatch, toggle]);
 
   // ================= KEYBOARD SHORTCUT =================
   useEffect(() => {
