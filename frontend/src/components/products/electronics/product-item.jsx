@@ -27,6 +27,7 @@ const ProductItem = ({ product, offer_style = false }) => {
     reviews = [],
     product_mrp,
     product_sale_price,
+    product_on_sale,
     discount = 0,
     status,
     offerDate,
@@ -88,9 +89,17 @@ const ProductItem = ({ product, offer_style = false }) => {
           src={firstImage}
           alt={product_name || "Product Image"}
           width={300}
-          height={300}
-          style={{ width: "100%", height: "auto" }}
+          height={670}
+          style={{ width: "100%", height: "340px" }}
         />
+        {/* OFFER BADGE */}
+        {Number(product_on_sale) === 1 && (
+          <div className="tp-product-badge">
+            <span className="product-hot">
+              Offer {discount ? `-${discount}%` : ""}
+            </span>
+          </div>
+        )}
 
         {status === "out-of-stock" && (
           <div className="tp-product-badge">
@@ -142,17 +151,19 @@ const ProductItem = ({ product, offer_style = false }) => {
           <span className="ms-2">({reviews.length} Review{reviews.length !== 1 ? "s" : ""})</span>
         </div>
 
-        {/* PRICE */}
-        <div className="tp-product-price-wrapper">
-          {discount > 0 ? (
-            <>
-              <span className="tp-product-price old-price">₹{product_mrp}</span>
-              <span className="tp-product-price new-price">₹{product_sale_price}</span>
-            </>
-          ) : (
-            <span className="tp-product-price new-price">₹{product_sale_price}</span>
-          )}
+
+        <div className="tp-product-price-wrapper d-flex justify-content-between align-items-center w-100">
+          {/* MRP – old price */}
+          <span className="tp-product-price old-price text-danger text-decoration-line-through">
+            ₹{Number(product_mrp).toFixed(2)}
+          </span>
+
+          {/* Sale price – new price */}
+          <span className="tp-product-price new-price fw-semibold text-dark   ">
+            ₹{Number(product_sale_price).toFixed(2)}
+          </span>
         </div>
+
 
         {/* OFFER TIMER */}
         {offer_style && offerDate?.endDate && (

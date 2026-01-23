@@ -45,15 +45,14 @@ const DetailsThumbWrapper = ({
         </nav>
 
         {/* Main Image */}
-        <div className="tab-content flex-grow-1">
-          <div className="tab-pane fade show active">
+       
             <div className="tp-product-details-main-thumb position-relative">
               <Image
                 src={`${api.IMG_URL}product_images/${activeImg}`}
                 alt="product"
                 width={imgWidth}
                 height={imgHeight}
-                style={{ objectFit: "contain", width: "100%", height: "100%" }}
+                style={{ objectFit: "contain", width: "300px", height: "400px" }}
               />
 
               {status === "out-of-stock" && (
@@ -74,8 +73,7 @@ const DetailsThumbWrapper = ({
                 </div>
               )}
             </div>
-          </div>
-        </div>
+          
       </div>
  
     </>
