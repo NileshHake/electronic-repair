@@ -23,4 +23,4 @@
     }),
     endpoints: (builder) => ({}),
     tagTypes: ["Products","Coupon","Product","RelatedProducts","UserOrder","UserOrders","ProductType","OfferProducts","PopularProducts","TopRatedProducts","Beading"]
-  });vv
+  });
