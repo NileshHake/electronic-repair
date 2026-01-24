@@ -18,8 +18,7 @@ const CheckoutOrderArea = ({ selectedAddress }) => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-
-  // 🛒 Cart
+ 
   const { data: cartData = {}, isLoading } = useGetCartListQuery();
   const [createOrder] = useCreateOrderMutation();
 
