@@ -17,6 +17,7 @@ import HeaderSearchForm from "@/components/forms/header-search-form";
 import { CartTwo, CategoryMenu, Compare, Menu, Phone, ShippingCar, Wishlist } from "@/svg";
 import RepairButton from "@/svg/RepairButton";
 import RecoveryButton from "@/svg/RecoveryButton";
+import BeadingButton from "@/svg/BeadingButton";
 
 const Header = () => {
   const { wishlist } = useSelector((state) => state.wishlist);
@@ -51,29 +52,29 @@ const Header = () => {
           </div>
 
           {/* header main start */}
-          <div className="tp-header-main tp-header-sticky py-2 border-bottom bg-white p-5">
-            <div className="container-fluid px-4 p-3">
-              <div className="row align-items-center">
+          {/* header main start */}
+          <div className="tp-header-main tp-header-sticky py-2 border-bottom bg-white">
+            <div className="container-fluid px-4">
+              <div className="row align-items-center g-3">
+
+                {/* LOGO */}
                 <div className="col-xl-2 col-lg-2 col-md-4 col-6">
-                  <div className="d-flex align-items-center">
-                    <Link href="/">
-                      <Image src={logo} alt="logo" className="img-fluid" />
-                    </Link>
-                  </div>
+                  <Link href="/" className="d-inline-flex align-items-center">
+                    <Image src={logo} alt="logo" className="img-fluid" />
+                  </Link>
                 </div>
 
                 {/* SEARCH */}
                 <div className="col-xl-4 col-lg-4 d-none d-lg-block">
-                  <div className="ps-4">
-                    <HeaderSearchForm />
-                  </div>
+                  <HeaderSearchForm />
                 </div>
 
                 {/* BUTTONS */}
-                <div className="col-xl-3 col-lg-3 d-none d-lg-block">
-                  <div className="d-flex align-items-center justify-content-center gap-2">
+                <div className="col-xl-3 col-lg-3 d-none d-lg-flex justify-content-center">
+                  <div className="d-flex gap-2 flex-nowrap">
                     <RepairButton />
                     <RecoveryButton />
+                    <BeadingButton />
                   </div>
                 </div>
 
@@ -87,6 +88,7 @@ const Header = () => {
               </div>
             </div>
           </div>
+
 
 
 

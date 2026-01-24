@@ -169,6 +169,10 @@ const order = require("./src/order/order_route");
 app.use("/api", order);
 
 
+const beading = require("./src/beading/beading_routes");
+app.use("/api", beading);
+
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

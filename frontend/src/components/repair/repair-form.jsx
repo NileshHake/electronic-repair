@@ -3,20 +3,9 @@ import { useGetallBrandsQuery } from "@/redux/features/brandApi";
 import { useGetallDeviceTypeQuery } from "@/redux/features/devicetypeApi";
 import React, { useState, useEffect } from "react";
 
-const deviceTypes = [
-    { id: 1, name: "Laptop" },
-    { id: 2, name: "Phone" },
-    { id: 3, name: "Tablet" },
-];
-
-const deviceBrands = [
-    { id: 1, name: "Apple" },
-    { id: 2, name: "Samsung" },
-    { id: 3, name: "Dell" },
-];
-
+ 
 const RepairForm = ({ onSubmit }) => {
-    const { data: brands, isLoading, isError } = useGetallBrandsQuery();
+    const { data: brands = [], isLoading, isError } = useGetallBrandsQuery();
     const { data: deviceTypes = [], } = useGetallDeviceTypeQuery();
 
     const [formData, setFormData] = useState({
