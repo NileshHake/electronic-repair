@@ -1,4 +1,5 @@
 const sequelize = require("../../config/db");
+const AddToCard = require("../add_to_card/add_to_card_model");
 const User = require("../auth/user_model");
 const Customer = require("../Customer/customer_model");
 const CustomerAddress = require("../CustomerAddress/customer_address_model");
@@ -8,58 +9,67 @@ const OrderMaster = require("./order_model_master");
 
 
 /* 🟢 CREATE ORDER */
-const store = async (req, res) => {
-    const transaction = await sequelize.transaction();
-    const customerData = await User.findByPk(req.currentUser.user_id)
-    const customerAddressData = await CustomerAddress.findByPk(req.body.order_master_address_id)
-    try {
-        const {
-            order_items,
-            ...orderMasterData
-        } = req.body;
+    const store = async (req, res) => {
+        const transaction = await sequelize.transaction();
+        const customerData = await User.findByPk(req.currentUser.user_id)
+        const customerAddressData = await CustomerAddress.findByPk(req.body.order_master_address_id)
+        try {
+            const {
+                order_items,
+                ...orderMasterData
+            } = req.body;
 
-        const orderMaster = await OrderMaster.create(
-            {
-                ...orderMasterData,
-                order_master_customer_name: customerData.user_name,
-                order_master_delivery_phone_number: customerAddressData.customer_address_mobile ? customerAddressData.customer_address_mobile : customerData.user_phone_number || "",
-                order_master_user_id: req.currentUser.user_id,
-                order_master_date: new Date(),
-            },
-            { transaction }
-        );
+            const orderMaster = await OrderMaster.create(
+                {
+                    ...orderMasterData,
+                    order_master_customer_name: customerData.user_name,
+                    order_master_delivery_phone_number: customerAddressData.customer_address_mobile ? customerAddressData.customer_address_mobile : customerData.user_phone_number || "",
+                    order_master_user_id: req.currentUser.user_id,
+                    order_master_date: new Date(),
+                },
+                { transaction }
+            );
 
-        if (order_items && order_items.length > 0) {
-            const childData = order_items.map((item) => ({
-                ...item,
-                order_child_master_id: orderMaster.order_master_id,
-            }));
+            if (order_items && order_items.length > 0) {
+                const childData = order_items.map((item) => ({
+                    ...item,
+                    order_child_master_id: orderMaster.order_master_id,
+                }));
 
-            await OrderChild.bulkCreate(childData, { transaction });
+                await OrderChild.bulkCreate(childData, { transaction });
+                const productIds = order_items.map((x) => x.order_child_product_id);
+
+                await AddToCard.destroy({
+                    where: {
+                        add_to_card_user_id: req.currentUser.user_id,
+                        add_to_card_product_id: productIds, // IN (...) automatically
+                    },
+                    transaction,
+                });
+            }
+
+            await transaction.commit();
+            req.io.emit("orderStatusUpdated", {
+                order_master_id: orderMaster.order_master_id,
+                order_master_status: orderMaster.order_master_status ?? 0,
+                type: "NEW_ORDER",
+            });
+
+
+            res.status(201).json({
+                message: "Order created successfully",
+                data: orderMaster,
+            });
+        } catch (error) {
+            await transaction.rollback();
+            console.log(error);
+
+            res.status(500).json({
+                message: "Error creating order",
+                error: error.message,
+            });
         }
-
-        await transaction.commit();
-        req.io.emit("orderStatusUpdated", {
-            order_master_id: orderMaster.order_master_id,
-            order_master_status: orderMaster.order_master_status ?? 0,
-            type: "NEW_ORDER",
-        });
-
-
-        res.status(201).json({
-            message: "Order created successfully",
-            data: orderMaster,
-        });
-    } catch (error) {
-        await transaction.rollback();
-        console.log(error);
-
-        res.status(500).json({
-            message: "Error creating order",
-            error: error.message,
-        });
-    }
-};
+    };
 
 /* 🟡 READ ALL ORDERS */
 const index = async (req, res) => {

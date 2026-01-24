@@ -12,11 +12,11 @@ export const orderApi = apiSlice.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Cart", "Order"],
+      invalidatesTags: [  "Order"],
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success("✅ Order placed successfully!");
+         
         } catch (err) {
           toast.error("❌ Failed to place order!");
         }

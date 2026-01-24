@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { CardElement } from "@stripe/react-stripe-js";
 import { useForm } from "react-hook-form";
-import { useGetCartListQuery } from "@/redux/features/cartApi";
+import { cartApi, useGetCartListQuery } from "@/redux/features/cartApi";
 import { useCreateOrderMutation } from "@/redux/features/orderApi";
 import ErrorMsg from "../common/error-msg";
+import SuccessOrderModal from "./SuccessOrderModal";
+import { useDispatch } from "react-redux";
 
 const CheckoutOrderArea = ({ selectedAddress }) => {
   const [showCard, setShowCard] = useState(false);
   const [isCheckoutSubmit, setIsCheckoutSubmit] = useState(false);
-
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successOrderId, setSuccessOrderId] = useState("");
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -63,7 +67,7 @@ const CheckoutOrderArea = ({ selectedAddress }) => {
 
     // 🔹 FINAL PAYLOAD (BACKEND FORMAT)
     const payload = {
-      order_master_address_id: selectedAddress, 
+      order_master_address_id: selectedAddress,
       order_master_sub_total: subTotal,
       order_master_grand_total: total,
       order_master_gst_amount: TaxTotal,
@@ -75,12 +79,23 @@ const CheckoutOrderArea = ({ selectedAddress }) => {
 
 
     try {
-      await createOrder(payload).unwrap();
+      const res = await createOrder(payload).unwrap();
+
+      // ✅ If backend returns order id like: res.order_id or res.data.order_id
+      const oid = res?.order_id || res?.data?.order_id || res?.order_master_id || "";
+      setSuccessOrderId(oid);
+
+      setSuccessOpen(true);
+
+      // Optional: reset card view
+      setShowCard(false);
+
     } catch (err) {
       console.error("❌ Order error:", err);
     } finally {
       setIsCheckoutSubmit(false);
     }
+
   };
 
   return (
@@ -202,6 +217,15 @@ const CheckoutOrderArea = ({ selectedAddress }) => {
           </button>
         </div>
       </div>
+      {successOpen && <SuccessOrderModal
+        open={successOpen}
+        orderId={successOrderId}
+        onClose={() => {
+          setSuccessOpen(false);
+          dispatch(cartApi.util.invalidateTags(["Cart"]));
+        }}
+      />
+      }
     </form>
   );
 };

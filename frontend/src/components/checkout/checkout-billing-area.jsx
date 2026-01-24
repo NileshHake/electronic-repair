@@ -35,7 +35,7 @@ const CheckoutBillingArea = ({ register, errors }) => {
   const handleStoreAddress = async () => {
     try {
       await storeCustomerAddress(billingData).unwrap();
-      setShowBilling(false); // ✅ CLOSE AFTER SUCCESS
+      setShowBilling(false); 
     } catch (error) {
       console.error(error);
     }

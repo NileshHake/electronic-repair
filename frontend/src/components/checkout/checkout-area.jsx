@@ -7,6 +7,7 @@ import CheckoutBillingArea from "./checkout-billing-area";
 import CheckoutOrderArea from "./checkout-order-area"; 
 import useCheckoutSubmit from "@/hooks/use-checkout-submit";
 import CheckoutAddressList from "./checkout-address-list";
+import { useGetCartListQuery } from "@/redux/features/cartApi";
 
 const CheckoutArea = () => {
   const checkoutData = useCheckoutSubmit();
@@ -16,8 +17,8 @@ const CheckoutArea = () => {
     register,
     errors, 
   } = checkoutData;
-
-  const { cart_products } = useSelector((state) => state.cart);
+  const { data: cartData = {}, isLoading } = useGetCartListQuery();
+  const cart_products = cartData?.items || [];
   const [selectedAddress, setSelectedAddress] = useState(null);
 
   return (
