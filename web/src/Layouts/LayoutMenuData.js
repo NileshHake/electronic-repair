@@ -32,6 +32,7 @@ const Navdata = () => {
   const [isCustomerSales, setIsCustomerSales] = useState(false);
   const [isQuotationBilling, setIsQuotationBilling] = useState(false);
   const [isSupplier, setIsSupplier] = useState(false);
+  const [isBeading, setIsBeading] = useState(false);
 
   const [isLanding, setIsLanding] = useState(false);
 
@@ -61,6 +62,9 @@ const Navdata = () => {
     }
     if (iscurrentState !== "DashboardCustomer") {
       setIsDashboardCustomer(false);
+    }
+    if (iscurrentState !== "Beading") {
+      setIsBeading(false);
     }
     if (iscurrentState !== "Supplier") {
       setIsSupplier(false);
@@ -255,6 +259,19 @@ const Navdata = () => {
         e.preventDefault();
         setIsSupplier(!isSupplier);
         setIscurrentState("Supplier");
+        updateIconSidebar(e);
+      },
+    },
+    {
+      id: "BEADING",
+      label: "Beading",
+      icon: "mdi mdi-diamond-stone",
+      link: "/beading-list", // adjust route if needed
+      stateVariables: isBeading,
+      click: function (e) {
+        e.preventDefault();
+        setIsBeading(!isBeading);
+        setIscurrentState("Beading");
         updateIconSidebar(e);
       },
     },

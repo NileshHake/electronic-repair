@@ -5,8 +5,16 @@ import Footer from '@/layout/footers/footer';
 import Wrapper from '@/layout/wrapper';
 import CommonBreadcrumb from '@/components/breadcrumb/common-breadcrumb'; 
 import RepairArea from '@/components/repair/repair-area';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/router';
 
 const RepairPage = () => {
+     const userInfo = Cookies.get("userInfo");
+    const router = useRouter();
+    if (!userInfo) {
+        router.push("/login");
+        return;
+    }
     return (
         <Wrapper>
             <SEO pageTitle="Repair" />

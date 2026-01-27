@@ -276,6 +276,7 @@ import DispatchOrderList from "../pages/OrderTracking/DispatchOrderList";
 import RejectedOrderList from "../pages/OrderTracking/RejectedOrderList";
 import DeliveredOrderList from "../pages/OrderTracking/DeliveredOrderList";
 import SupplierList from "../pages/Supplier/Supplierlist";
+import BeadingList from "../pages/Beading/Beadinglist";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -305,6 +306,7 @@ const authProtectedRoutes = [
   { path: "/apps-ecommerce-sellers", component: <EcommerceSellers /> },
   { path: "/tax-list", component: <TaxList /> },
   { path: "/category-list", component: <CategoryList /> },
+  { path: "/beading-list", component: <BeadingList /> },
   { path: "/brand-list", component: <BrandList /> },
   { path: "/payment-list", component: <PaymentModeList /> },
   { path: "/status-list", component: <StatusList /> },

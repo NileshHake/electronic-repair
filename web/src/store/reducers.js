@@ -101,6 +101,7 @@ import { SliderReducer } from "./slider";
 import { StoreFeatureReducer } from "./StoreFeatures";
 import { OrderReducer } from "./order";
 import { SupplierReducer } from "./Supplier";
+import { BeadingReducer } from "./Beading";
 
 const rootReducer = combineReducers({
   // public
@@ -133,6 +134,7 @@ const rootReducer = combineReducers({
   BusinessReducer,
   OtpReducer,
   StageRemarkReducer,
+  BeadingReducer,
   RepairReducer,
   roleReducer,
   SliderReducer,

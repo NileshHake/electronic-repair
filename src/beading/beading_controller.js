@@ -1,6 +1,7 @@
 const BeadingRequest = require("./beading_model");
-const { getCreatedBy } = require("../helper/CurrentUser"); 
+const { getCreatedBy } = require("../helper/CurrentUser");
 const { saveImage } = require("../helper/fileUpload");
+const sequelize = require("../../config/db");
 // ✅ STORE
 const store = async (req, res) => {
   try {
@@ -21,12 +22,14 @@ const store = async (req, res) => {
 
     // ✅ convert to string
     const imagesString = beading_images.length > 0 ? beading_images.join(",") : null;
-
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
     const payload = {
       ...req.body,
-      beading_customer_id: req.currentUser.user_id, // ✅ customer id from token
+      beading_customer_id: req.currentUser.user_id,
       beading_created_by: getCreatedBy(req.currentUser),
       beading_request_images: imagesString,
+      expires_at: expiresAt,
       beading_vender_accepted_id: null, // default null
     };
 
@@ -48,12 +51,108 @@ const store = async (req, res) => {
 // ✅ LIST
 const index = async (req, res) => {
   try {
-    const rows = await BeadingRequest.findAll({
-        where: {
-          beading_customer_id: req.currentUser.user_id, // ✅ customer id from token
-        },
-    } );
+    const customerId = req.currentUser.user_id;
+    const rows = await sequelize.query(
+      `
+      SELECT 
+        br.beading_request_id,
+        br.beading_request_title,
+        br.beading_request_description,
+        br.beading_budget_min,
+        br.beading_budget_max,
+        br.beading_location,
+        br.beading_request_images,
+        br.beading_request_status,
+        br.expires_at,
+
+        -- 👤 VENDOR DETAILS
+        u.user_name        AS vendor_name,
+        u.user_email       AS vendor_email,
+        u.user_phone_number AS vendor_phone
+
+      FROM tbl_beading_request br
+      LEFT JOIN tbl_users u
+        ON u.user_id = br.beading_vender_accepted_id
+WHERE br.beading_customer_id = :customerId
+      ORDER BY br.beading_request_id DESC
+      `,
+      {
+        replacements: { customerId },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
     res.status(200).json(rows);
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      message: "Error fetching beading requests",
+      error: error.message,
+    });
+  }
+};
+const globalList = async (req, res) => {
+  try {
+    const page = Number(req.query.page || 1);
+    const limit = Number(req.query.limit || 10);
+    const start_date = req.query.start_date || null;
+    const end_date = req.query.end_date || null;
+
+    const offset = (page - 1) * limit;
+
+    const where = [];
+    const replacements = { limit, offset };
+
+    if (start_date) {
+      where.push(`DATE(br.createdAt) >= :start_date`);
+      replacements.start_date = start_date;
+    }
+
+    if (end_date) {
+      where.push(`DATE(br.createdAt) <= :end_date`);
+      replacements.end_date = end_date;
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+    const rows = await sequelize.query(
+      `
+      SELECT 
+        br.beading_request_id,
+        br.beading_request_title,
+        br.beading_request_description,
+        br.beading_budget_min,
+        br.beading_budget_max,
+        br.beading_location,
+        br.beading_request_images,
+        br.beading_request_status,
+        br.expires_at,
+        br.createdAt,
+
+        u.user_name AS customer_name,
+        u.user_email AS customer_email,
+        u.user_phone_number AS customer_phone
+
+      FROM tbl_beading_request br
+      LEFT JOIN tbl_users u
+        ON u.user_id = br.beading_customer_id
+
+      ${whereSql}
+      ORDER BY br.beading_request_id DESC
+      LIMIT :limit OFFSET :offset
+      `,
+      { type: sequelize.QueryTypes.SELECT, replacements }
+    );
+
+    // ✅ hasMore check
+    const hasMore = rows.length === limit;
+
+    res.status(200).json({
+      rows,
+      page,
+      limit,
+      hasMore,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error fetching beading requests",
@@ -61,6 +160,8 @@ const index = async (req, res) => {
     });
   }
 };
+
+
 
 // ✅ SINGLE
 const Get = async (req, res) => {
@@ -139,10 +240,9 @@ const vendorAccept = async (req, res) => {
     const row = await BeadingRequest.findByPk(beading_request_id);
     if (!row) return res.status(404).json({ message: "Beading request not found" });
 
-    // ✅ vendor id from token
     await row.update({
       beading_vender_accepted_id: req.currentUser.user_id,
-      beading_request_status: 1, // accepted
+      beading_request_status: 1,
     });
 
     res.status(200).json({ message: "Beading request accepted", data: row });
@@ -154,4 +254,4 @@ const vendorAccept = async (req, res) => {
   }
 };
 
-module.exports = { store, index, Get, update, deleted, vendorAccept };
+module.exports = { store, index, Get, update, deleted, vendorAccept, globalList };

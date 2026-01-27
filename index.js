@@ -75,6 +75,11 @@ app.get("/", (req, res) => {
   res.send("🚀 Multi-Business RepairCRM Server Running Successfully!");
 });
 
+const { startBeadingAutoDeleteJob } = require("./src/jobs/beadingAutoDelete");
+
+// ✅ start cron once
+startBeadingAutoDeleteJob();
+
 const userRoutes = require("./src/auth/user_route");
 app.use("/api", userRoutes);
 
@@ -169,7 +174,7 @@ const order = require("./src/order/order_route");
 app.use("/api", order);
 
 
-const beading = require("./src/beading/beading_routes");
+const beading = require("./src/beading/beading_routes"); 
 app.use("/api", beading);
 
 

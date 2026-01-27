@@ -5,7 +5,7 @@ import LayoutSaga from "./layouts/saga";
 import AccountSaga from "./auth/register/saga";
 import AuthSaga from "./auth/login/saga";
 import ForgetSaga from "./auth/forgetpwd/saga";
-import ProfileSaga from "./auth/profile/saga"; 
+import ProfileSaga from "./auth/profile/saga";
 
 //calendar
 import calendarSaga from "./calendar/saga";
@@ -59,7 +59,7 @@ import todos from "./todos/saga";
 //Jobs
 import ApplicationSaga from "./job/saga";
 //API Key
-import APIKeysaga from "./apikey/saga"; 
+import APIKeysaga from "./apikey/saga";
 import { taxSaga } from "../store/Tax/index";
 import { categorySaga } from "./category";
 import { brandSaga } from "./Brand";
@@ -93,6 +93,7 @@ import { sliderSaga } from "./slider";
 import { storeFeatureSaga } from "./StoreFeatures";
 import { orderSaga } from "./order";
 import { supplierSaga } from "./Supplier";
+import { beadingSaga } from "./Beading";
 export default function* rootSaga() {
   yield all([
     //public
@@ -106,6 +107,7 @@ export default function* rootSaga() {
     fork(deviceTypeSaga),
     fork(hardwareConfigurationSaga),
     fork(repairTypeSaga),
+    fork(beadingSaga),
     fork(serviceSaga),
     fork(deviceModelSaga),
     fork(workflowSaga),

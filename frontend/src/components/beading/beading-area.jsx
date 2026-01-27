@@ -1,9 +1,10 @@
 // components/beading/beading-area.jsx
 import React from "react";
 import BeadingForm from "./BeadingForm";
-import BeadingOrders from "./BeadingOrders";
+import BeadingOrders from "./BeadingOrders"; 
 
 const BeadingArea = () => {
+   
     return (
         <div className="container mt-4">
             <div className="row g-4">
@@ -15,11 +16,11 @@ const BeadingArea = () => {
 
                 {/* Right Column: Beading Orders Table */}
                 <div className="col-lg-8 col-md-12 pb-3">
-                   
-                            <p className="text-muted">
-                                <BeadingOrders />
-                            </p>
-                       
+
+                    <p className="text-muted">
+                        <BeadingOrders />
+                    </p>
+
                 </div>
 
             </div>

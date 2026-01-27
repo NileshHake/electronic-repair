@@ -14,7 +14,7 @@ const BeadingForm = () => {
     beading_budget_max: "",
     beading_location: "",
     beading_request_images: [],
-    beading_expires_at: "",
+    
   });
 
   const [previewImages, setPreviewImages] = useState([]);
@@ -68,8 +68,7 @@ const BeadingForm = () => {
     if (!formData.beading_budget_min) return alert("Budget min is required");
     if (!formData.beading_budget_max) return alert("Budget max is required");
     if (!formData.beading_location.trim()) return alert("Location is required");
-    if (!formData.beading_expires_at) return alert("Expires date is required");
-
+    
     const min = Number(formData.beading_budget_min);
     const max = Number(formData.beading_budget_max);
     if (Number.isNaN(min) || Number.isNaN(max)) return alert("Budget must be number");
@@ -82,8 +81,7 @@ const BeadingForm = () => {
     fd.append("beading_budget_min", formData.beading_budget_min);
     fd.append("beading_budget_max", formData.beading_budget_max);
     fd.append("beading_location", formData.beading_location);
-    fd.append("expires_at", formData.beading_expires_at);
-
+     
     // ✅ key must match backend: req.files.beading_images
     formData.beading_request_images.forEach((file) => {
       fd.append("beading_images", file);
@@ -104,7 +102,7 @@ const BeadingForm = () => {
         beading_budget_max: "",
         beading_location: "",
         beading_request_images: [],
-        beading_expires_at: "",
+     
       });
     } catch (err) {
       console.error(err);
@@ -201,19 +199,8 @@ const BeadingForm = () => {
             />
           </div>
 
-          {/* Expires At */}
-          <div>
-            <label className="form-label fw-bold">
-              Expires At <span className="text-danger">*</span>
-            </label>
-            <input
-              type="date"
-              name="beading_expires_at"
-              value={formData.beading_expires_at}
-              onChange={handleChange}
-              className="form-control"
-            />
-          </div>
+           
+          
 
           {/* Images */}
           <div>
