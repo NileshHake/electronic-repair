@@ -75,6 +75,10 @@ const BeadingOrders = () => {
         );
 
     const orders = Array.isArray(data) ? data : [];
+    const sliceText = (text, limit = 60) => {
+        if (!text) return "-";
+        return text.length > limit ? text.slice(0, limit) + "..." : text;
+    };
 
     return (
         <>
@@ -98,7 +102,7 @@ const BeadingOrders = () => {
                                         <th>Location</th>
                                         <th>Status</th>
                                         <th>Expires</th>
-                                        
+
                                         <th className="text-center">View</th>
                                     </tr>
                                 </thead>
@@ -112,12 +116,18 @@ const BeadingOrders = () => {
                                                 <td>{o?.beading_request_id || idx + 1}</td>
 
                                                 <td style={{ minWidth: 180 }}>
-                                                    <div className="fw-bold">{o?.beading_request_title}</div>
-                                                    <div className="text-muted small">
-                                                        {o?.beading_request_description?.slice(0, 60)}
-                                                        {o?.beading_request_description?.length > 60 ? "..." : ""}
+                                                    <div className="fw-bold" title={o?.beading_request_title || ""}>
+                                                        {sliceText(o?.beading_request_title, 15)}
+                                                    </div>
+
+                                                    <div
+                                                        className="text-muted small"
+                                                        title={o?.beading_request_description || ""}
+                                                    >
+                                                        {sliceText(o?.beading_request_description, 20)}
                                                     </div>
                                                 </td>
+
 
                                                 <td>
                                                     ₹{o?.beading_budget_min || 0} - ₹{o?.beading_budget_max || 0}
@@ -135,7 +145,7 @@ const BeadingOrders = () => {
                                                     {o?.expires_at ? new Date(o.expires_at).toLocaleDateString() : "-"}
                                                 </td>
 
-                                            
+
 
                                                 {/* ✅ Eye Button */}
                                                 <td className="text-center">
