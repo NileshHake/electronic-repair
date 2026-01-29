@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import React, { useState } from "react";
 import { Badge } from "reactstrap";
 import OrderViewModal from "./OrderViewModal"; // ✅ path adjust
+import "remixicon/fonts/remixicon.css";
 
 // ✅ status helpers (your logic)
 const getStatusMeta = (s) => {
@@ -50,51 +51,79 @@ const MyOrders = () => {
   return (
     <div className="profile__ticket">
       {order_items.length === 0 ? (
-        <div style={{ height: 210 }} className="d-flex align-items-center justify-content-center">
+        <div
+          style={{ height: 220 }}
+          className="d-flex align-items-center justify-content-center text-muted"
+        >
           <div className="text-center">
-            <i style={{ fontSize: 30 }} className="fa-solid fa-cart-circle-xmark"></i>
-            <p>You have no orders yet!</p>
+            <i
+              style={{ fontSize: 34, opacity: 0.6 }}
+              className="fa-solid fa-cart-circle-xmark mb-2"
+            ></i>
+            <p className="mb-0 fw-semibold">You have no orders yet</p>
           </div>
         </div>
       ) : (
         <div className="table-responsive" style={{ maxHeight: 420, overflowY: "auto" }}>
-          <table className="table align-middle mb-0">
-            <thead className="bg-white sticky-top" style={{ top: 0, zIndex: 1 }}>
-              <tr>
-                <th>Order Id</th>
+          <table className="table align-middle mb-0 table-hover">
+            <thead
+              className="bg-white sticky-top"
+              style={{ top: 0, zIndex: 1, borderBottom: "1px solid #eee" }}
+            >
+              <tr className="text-muted text-uppercase small">
+                <th>Order ID</th>
                 <th>Order Time</th>
-                <th>Status</th>
-                <th>View</th>
+                <th className="text-center">Status</th>
+                <th className="text-center">View</th>
               </tr>
             </thead>
 
             <tbody>
-              {order_items.map((item) => {
+              {order_items.map((item, index) => {
                 const id = item.order_master_id || item._id;
                 const meta = getStatusMeta(item.order_master_status);
 
                 return (
-                  <tr key={id}>
-                    <th>#{String(id).slice(-5)}</th>
-                    <td>{dayjs(item.createdAt || item.order_master_date).format("MMMM D, YYYY")}</td>
+                  <tr
+                    key={id}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#fff" : "#fcfcff",
+                    }}
+                  >
+                    <td className="fw-semibold">#{String(id).slice(-5)}</td>
 
-                    <td>
-                      <div className="p-2 rounded d-flex align-items-center justify-content-between bg-secondary-subtle">
-                        <Badge color={meta.color} className="fs-6" pill>
-                          {meta.text}
-                        </Badge>
-                      </div>
+                    <td className="text-muted">
+                      {dayjs(item.createdAt || item.order_master_date).format(
+                        "MMMM D, YYYY"
+                      )}
                     </td>
 
-                    {/* ✅ Eye icon opens modal */}
-                    <td>
+                    <td className="text-center">
+                      <Badge
+                        color={meta.color}
+                        pill
+                        className="px-3 py-2 fw-semibold"
+                      >
+                        {meta.text}
+                      </Badge>
+                    </td>
+
+                    {/* 👁 Eye Icon */}
+                    <td className="text-center">
                       <button
                         type="button"
-                        className="btn btn-sm btn-outline-dark"
+                        className="btn btn-sm btn-light border rounded-circle"
+                        style={{
+                          width: 36,
+                          height: 36,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
                         onClick={() => openModal(item)}
                         title="View Order"
                       >
-                        <i className="ri-eye-fill"></i>
+                        <i className="ri-eye-line fs-5 text-dark"></i>
                       </button>
                     </td>
                   </tr>
@@ -106,8 +135,13 @@ const MyOrders = () => {
       )}
 
       {/* ✅ Order View Modal */}
-      <OrderViewModal isOpen={isOpen} toggle={closeModal} order={selectedOrder} />
+      <OrderViewModal
+        isOpen={isOpen}
+        toggle={closeModal}
+        order={selectedOrder}
+      />
     </div>
+
   );
 };
 
