@@ -58,6 +58,7 @@ const index = async (req, res) => {
         br.beading_request_id,
         br.beading_request_title,
         br.beading_request_description,
+        br.beading_vendor_details,
         br.beading_budget_min,
         br.beading_budget_max,
         br.beading_location,
@@ -120,6 +121,7 @@ const globalList = async (req, res) => {
       SELECT 
         br.beading_request_id,
         br.beading_request_title,
+        br.beading_vendor_details,
         br.beading_request_description,
         br.beading_budget_min,
         br.beading_budget_max,
@@ -232,7 +234,72 @@ const deleted = async (req, res) => {
   }
 };
 
-// ✅ Vendor accept API (set beading_vender_accepted_id)
+const vendorBeadding = async (req, res) => {
+  try {
+    const { beading_request_id, vendor_beading_amount } = req.body;
+
+    const amount = Number(vendor_beading_amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Invalid vendor_beading_amount" });
+    }
+
+    const row = await BeadingRequest.findByPk(beading_request_id);
+    if (!row) return res.status(404).json({ message: "Beading request not found" });
+
+    const vendorDetails = {
+      vendor_id: req.currentUser.user_id,
+      vendor_name: req.currentUser.user_name,
+      vendor_email: req.currentUser.user_email,
+      vendor_phone: req.currentUser.user_phone_number,
+      vendor_beading_amount: amount,
+      accepted_at: new Date().toISOString(),
+    };
+
+    // ✅ ALWAYS normalize to array
+    const vendorArray = normalizeVendorDetails(row.beading_vendor_details);
+
+    // ✅ update if same vendor already exists
+    const idx = vendorArray.findIndex((v) => Number(v.vendor_id) === Number(vendorDetails.vendor_id));
+    if (idx >= 0) vendorArray[idx] = { ...vendorArray[idx], ...vendorDetails };
+    else vendorArray.push(vendorDetails);
+
+    // ✅ store ONLY ONCE
+    await row.update({
+      beading_vendor_details: JSON.stringify(vendorArray),
+      beading_request_status: 0,
+    });
+
+    return res.status(200).json({
+      message: "Vendor bid saved",
+      data: {
+        beading_request_id: row.beading_request_id,
+        beading_vendor_details: vendorArray, // ✅ return clean array
+      },
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({ message: "Error", error: error.message });
+  }
+};
+const normalizeVendorDetails = (val) => {
+  if (!val) return [];
+
+  try {
+    let parsed = JSON.parse(val);
+
+    // ✅ if it was double-stringified, parse again
+    if (typeof parsed === "string") {
+      parsed = JSON.parse(parsed);
+    }
+
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+};
+
+
 const vendorAccept = async (req, res) => {
   try {
     const { beading_request_id } = req.body;
@@ -254,4 +321,4 @@ const vendorAccept = async (req, res) => {
   }
 };
 
-module.exports = { store, index, Get, update, deleted, vendorAccept, globalList };
+module.exports = { store, index, Get, update, deleted, vendorAccept, globalList, vendorBeadding };

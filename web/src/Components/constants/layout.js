@@ -1,4 +1,4 @@
-const layoutTypes = {
+  const layoutTypes = {
   HORIZONTAL: "horizontal",
   VERTICAL: "vertical",
   TWOCOLUMN: "twocolumn",

@@ -93,9 +93,9 @@ const BeadingList = () => {
                 }
             },
             {
-                root: rootEl, // ✅ MUST be scroll div
+                root: rootEl,
                 threshold: 0.1,
-                rootMargin: "200px", // ✅ load early (smooth)
+                rootMargin: "200px",
             }
         );
 
@@ -117,7 +117,8 @@ const BeadingList = () => {
         dispatch(
             updateBeading({
                 beading_request_id: row.beading_request_id,
-                beading_request_status: 1,
+                vendor_beading_amount: row.vendor_beading_amount,
+
             })
         );
     };
@@ -126,8 +127,7 @@ const BeadingList = () => {
     useEffect(() => {
         if (updateBeadingResponse) {
             setIsDetailsOpen(false);
-            setDetailsData(null);
-            setPage(1); // ✅ triggers api load
+            setDetailsData(null); dispatch(getBeadingList({ page, limit, ...filters }));
             dispatch(resetUpdateBeadingResponse());
         }
     }, [updateBeadingResponse, dispatch]);
@@ -156,66 +156,66 @@ const BeadingList = () => {
                     <Col lg={12}>
                         <Card>
                             {/* ✅ one line header properly */}
-                        <CardHeader className="card-header border-0">
-  <Row className="align-items-end g-2">
-    {/* LEFT: Title */}
-    <Col md="3">
-      <h5 className="mb-0 fw-bold">Beading Orders</h5>
-    </Col>
+                            <CardHeader className="card-header border-0">
+                                <Row className="align-items-end g-2">
+                                    {/* LEFT: Title */}
+                                    <Col md="3">
+                                        <h5 className="mb-0 fw-bold">Beading Orders</h5>
+                                    </Col>
 
-    {/* RIGHT: Filters + Buttons */}
-    <Col md="9" className="ms-auto">
-      <Row className="align-items-end g-2 justify-content-end">
-        <Col md="3">
-          <Label className="form-label fw-bold mb-1">Start Date</Label>
-          <Flatpickr
-            className="form-control"
-            placeholder="Start date"
-            options={{ dateFormat: "Y-m-d" }}
-            value={filters.start_date}
-            onChange={([date]) =>
-              setFilters((p) => ({
-                ...p,
-                start_date: date ? date.toISOString().slice(0, 10) : "",
-              }))
-            }
-          />
-        </Col>
+                                    {/* RIGHT: Filters + Buttons */}
+                                    <Col md="9" className="ms-auto">
+                                        <Row className="align-items-end g-2 justify-content-end">
+                                            <Col md="3">
+                                                <Label className="form-label fw-bold mb-1">Start Date</Label>
+                                                <Flatpickr
+                                                    className="form-control"
+                                                    placeholder="Start date"
+                                                    options={{ dateFormat: "Y-m-d" }}
+                                                    value={filters.start_date}
+                                                    onChange={([date]) =>
+                                                        setFilters((p) => ({
+                                                            ...p,
+                                                            start_date: date ? date.toISOString().slice(0, 10) : "",
+                                                        }))
+                                                    }
+                                                />
+                                            </Col>
 
-        <Col md="3">
-          <Label className="form-label fw-bold mb-1">End Date</Label>
-          <Flatpickr
-            className="form-control"
-            placeholder="End date"
-            options={{ dateFormat: "Y-m-d" }}
-            value={filters.end_date}
-            onChange={([date]) =>
-              setFilters((p) => ({
-                ...p,
-                end_date: date ? date.toISOString().slice(0, 10) : "",
-              }))
-            }
-          />
-        </Col>
+                                            <Col md="3">
+                                                <Label className="form-label fw-bold mb-1">End Date</Label>
+                                                <Flatpickr
+                                                    className="form-control"
+                                                    placeholder="End date"
+                                                    options={{ dateFormat: "Y-m-d" }}
+                                                    value={filters.end_date}
+                                                    onChange={([date]) =>
+                                                        setFilters((p) => ({
+                                                            ...p,
+                                                            end_date: date ? date.toISOString().slice(0, 10) : "",
+                                                        }))
+                                                    }
+                                                />
+                                            </Col>
 
-        {/* Buttons */}
-        <Col md="4" className="d-flex gap-2 justify-content-end">
-          <Button color="success" className="mt-auto" onClick={applyFilter}>
-            Apply
-          </Button>
+                                            {/* Buttons */}
+                                            <Col md="4" className="d-flex gap-2 justify-content-end">
+                                                <Button color="success" className="mt-auto" onClick={applyFilter}>
+                                                    Apply
+                                                </Button>
 
-          <Button color="secondary" className="mt-auto" onClick={clearFilter}>
-            Clear
-          </Button>
+                                                <Button color="secondary" className="mt-auto" onClick={clearFilter}>
+                                                    Clear
+                                                </Button>
 
-          <Button color="primary" className="mt-auto" onClick={refresh}>
-            Refresh
-          </Button>
-        </Col>
-      </Row>
-    </Col>
-  </Row>
-</CardHeader>
+                                                <Button color="primary" className="mt-auto" onClick={refresh}>
+                                                    Refresh
+                                                </Button>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Row>
+                            </CardHeader>
 
 
                             <CardBody className="pt-0">

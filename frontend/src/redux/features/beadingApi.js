@@ -40,44 +40,7 @@ export const beadingApi = apiSlice.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "Beading", id }],
     }),
 
-    // ✅ UPDATE (multipart optional)
-    updateBeadingRequest: builder.mutation({
-      query: (payload) => {
-        const fd = new FormData();
-        fd.append("beading_request_id", payload.beading_request_id);
-
-        if (payload.beading_request_title) fd.append("beading_request_title", payload.beading_request_title);
-        if (payload.beading_request_description) fd.append("beading_request_description", payload.beading_request_description);
-        if (payload.beading_budget_min) fd.append("beading_budget_min", payload.beading_budget_min);
-        if (payload.beading_budget_max) fd.append("beading_budget_max", payload.beading_budget_max);
-        if (payload.beading_location) fd.append("beading_location", payload.beading_location);
-        if (payload.beading_request_status !== undefined) fd.append("beading_request_status", payload.beading_request_status);
-        if (payload.expires_at) fd.append("expires_at", payload.expires_at);
-
-        if (payload.beading_images && payload.beading_images.length > 0) {
-          payload.beading_images.forEach((file) => fd.append("beading_images", file));
-        }
-
-        return {
-          url: "/beading/update",
-          method: "PUT",
-          body: fd,
-        };
-      },
-      invalidatesTags: (result, error, payload) => [
-        { type: "Beading", id: "LIST" },
-        { type: "Beading", id: payload?.beading_request_id },
-      ],
-      async onQueryStarted(arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.info("✏️ Beading request updated!");
-        } catch (err) {
-          toast.error("❌ Failed to update beading request!");
-        }
-      },
-    }),
-
+    
     // ✅ DELETE (proper + optimistic remove)
     deleteBeading: builder.mutation({
       query: (id) => ({
@@ -122,7 +85,7 @@ export const beadingApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success("✅ Request accepted!");
+          toast.success(" Request accepted!");
         } catch (err) {
           toast.error("❌ Failed to accept request!");
         }
@@ -135,7 +98,7 @@ export const {
   useCreateBeadingRequestMutation,
   useGetBeadingListQuery,
   useGetBeadingSingleQuery,
-  useUpdateBeadingRequestMutation,
+  
   useDeleteBeadingMutation,
   useVendorAcceptBeadingMutation,
 } = beadingApi;

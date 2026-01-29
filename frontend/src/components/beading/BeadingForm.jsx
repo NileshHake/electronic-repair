@@ -89,9 +89,7 @@ const BeadingForm = () => {
 
     try {
       const res = await createBeadingRequest(fd).unwrap();
-      toast.success(res?.message || "✅ Beading request created");
-
-      // ✅ reset after success
+     
       previewImages.forEach((u) => URL.revokeObjectURL(u));
       setPreviewImages([]);
 

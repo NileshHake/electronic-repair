@@ -1,5 +1,5 @@
-// BeadingDetailsModal.jsx (Bootstrap + Reactstrap, Responsive, Smooth)
-import React, { useEffect, useMemo } from "react";
+// BeadingDetailsModal.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Badge,
     Button,
@@ -11,8 +11,12 @@ import {
     ModalFooter,
     ModalHeader,
     Row,
+    Input,
+    Label,
+    FormFeedback,
 } from "reactstrap";
 
+/* -------------------- helpers -------------------- */
 const statusText = (s) => {
     const n = Number(s);
     if (n === 0) return "Pending";
@@ -41,13 +45,38 @@ const parseImgs = (imagesString) => {
         .filter(Boolean);
 };
 
-const BeadingDetailsModal = ({ isOpen, onAccept, toggle, data, imgBaseUrl }) => {
+const parseVendorDetails = (vendorDetails) => {
+    if (!vendorDetails) return [];
+    try {
+        const parsed =
+            typeof vendorDetails === "string" ? JSON.parse(vendorDetails) : vendorDetails;
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
+
+/* -------------------- component -------------------- */
+const BeadingDetailsModal = ({
+    isOpen,
+    onAccept,
+    toggle,
+    data,
+    imgBaseUrl,
+    viewerType = "vendor", // "vendor" | "customer"
+}) => {
+    /* ✅ ALL HOOKS MUST BE FIRST (NO early return before hooks) */
+
+    const [amountOpen, setAmountOpen] = useState(false);
+    const [amount, setAmount] = useState("");
+    const [touched, setTouched] = useState(false);
+
     const baseURL = useMemo(() => {
         const u = imgBaseUrl || "";
         return u.endsWith("/") ? u : u + "/";
     }, [imgBaseUrl]);
 
-    // ✅ ESC close
+    // ESC close main modal
     useEffect(() => {
         if (!isOpen) return;
         const onKey = (e) => e.key === "Escape" && toggle?.();
@@ -55,29 +84,96 @@ const BeadingDetailsModal = ({ isOpen, onAccept, toggle, data, imgBaseUrl }) => 
         return () => window.removeEventListener("keydown", onKey);
     }, [isOpen, toggle]);
 
-    if (!data) return null;
+    // reset when main modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            setAmountOpen(false);
+            setAmount("");
+            setTouched(false);
+        }
+    }, [isOpen]);
 
-    const imgs = parseImgs(data?.beading_request_images);
-    const badge = statusColor(data?.beading_request_status);
+    // ✅ derive safe values even when data is null
+    const imgs = useMemo(() => parseImgs(data?.beading_request_images), [data?.beading_request_images]);
+
+    const badge = useMemo(
+        () => statusColor(data?.beading_request_status),
+        [data?.beading_request_status]
+    );
 
     const safeDate = (d) => (d ? new Date(d).toLocaleDateString() : "-");
+
+    const min = useMemo(() => Number(data?.beading_budget_min || 0), [data?.beading_budget_min]);
+    const max = useMemo(() => Number(data?.beading_budget_max || 0), [data?.beading_budget_max]);
+    const vendorBids = useMemo(
+        () => parseVendorDetails(data?.beading_vendor_details),
+        [data?.beading_vendor_details]
+    );
+
+    const vendorBidsSorted = useMemo(() => {
+        const arr = [...vendorBids];
+        arr.sort((a, b) => {
+            const aAmt = Number(a?.vendor_beading_amount ?? a?.vendor_beadding ?? 0);
+            const bAmt = Number(b?.vendor_beading_amount ?? b?.vendor_beadding ?? 0);
+            return aAmt - bAmt;
+        });
+        return arr;
+    }, [vendorBids]);
+
+    const amountNum = Number(amount);
+    const isValid =
+        amount !== "" &&
+        Number.isFinite(amountNum) &&
+        amountNum > 0 &&
+        (max === 0 || (amountNum >= min && amountNum <= max));
+
+    const amountError = () => {
+        if (!touched) return "";
+        if (!amount) return "Please enter your beading amount.";
+        if (!Number.isFinite(amountNum) || amountNum <= 0) return "Amount must be a valid number.";
+        if (max !== 0 && (amountNum < min || amountNum > max))
+            return `Amount should be between ₹${min} and ₹${max}.`;
+        return "";
+    };
+
+    const openAmountModal = () => {
+        setAmountOpen(true);
+        setTouched(false);
+    };
+
+    const closeAmountModal = () => {
+        setAmountOpen(false);
+        setAmount("");
+        setTouched(false);
+    };
 
     const copy = (val) => {
         if (!val) return;
         navigator.clipboard?.writeText(String(val));
     };
 
+    const confirmAccept = () => {
+        setTouched(true);
+        if (!isValid) return;
+
+
+
+        onAccept?.({
+            ...data,
+            vendor_beading_amount: Number(amount),
+        });
+
+        closeAmountModal();
+        toggle?.();
+    };
+
+    /* ✅ NOW you can early return safely */
+    if (!data) return null;
+
     return (
         <>
-            <Modal
-                isOpen={isOpen}
-                toggle={toggle}
-                centered
-                size="lg"
-                backdrop="static"
-                className="bdm-modal"
-            >
-                {/* ✅ Bootstrap style header */}
+            {/* MAIN DETAILS MODAL */}
+            <Modal isOpen={isOpen} toggle={toggle} centered size="lg" backdrop="static" className="bdm-modal">
                 <ModalHeader toggle={toggle} className="bg-light">
                     <div className="w-100 d-flex align-items-start justify-content-between">
                         <div>
@@ -96,7 +192,6 @@ const BeadingDetailsModal = ({ isOpen, onAccept, toggle, data, imgBaseUrl }) => 
                 </ModalHeader>
 
                 <ModalBody className="bg-white">
-                    {/* ✅ Responsive layout with Row/Col */}
                     <Row className="g-3">
                         {/* CUSTOMER */}
                         <Col lg={4} md={5} sm={12}>
@@ -125,23 +220,11 @@ const BeadingDetailsModal = ({ isOpen, onAccept, toggle, data, imgBaseUrl }) => 
                                     </div>
 
                                     <div className="d-flex flex-wrap gap-2">
-                                        <Button
-                                            size="sm"
-                                            color="dark"
-                                            outline
-                                            onClick={() => copy(data?.customer_phone)}
-                                            disabled={!data?.customer_phone}
-                                        >
+                                        <Button size="sm" color="dark" outline onClick={() => copy(data?.customer_phone)} disabled={!data?.customer_phone}>
                                             <i className="ri-file-copy-line me-1"></i> Phone
                                         </Button>
 
-                                        <Button
-                                            size="sm"
-                                            color="dark"
-                                            outline
-                                            onClick={() => copy(data?.customer_email)}
-                                            disabled={!data?.customer_email}
-                                        >
+                                        <Button size="sm" color="dark" outline onClick={() => copy(data?.customer_email)} disabled={!data?.customer_email}>
                                             <i className="ri-file-copy-line me-1"></i> Email
                                         </Button>
                                     </div>
@@ -178,9 +261,7 @@ const BeadingDetailsModal = ({ isOpen, onAccept, toggle, data, imgBaseUrl }) => 
                             <Card className="border shadow-sm rounded-3">
                                 <CardBody>
                                     <div className="text-muted small">Budget</div>
-                                    <div className="fw-bold fs-6 mt-1">
-                                        ₹{data?.beading_budget_min || 0} - ₹{data?.beading_budget_max || 0}
-                                    </div>
+                                    <div className="fw-bold fs-6 mt-1">₹{min} - ₹{max}</div>
                                 </CardBody>
                             </Card>
                         </Col>
@@ -203,7 +284,56 @@ const BeadingDetailsModal = ({ isOpen, onAccept, toggle, data, imgBaseUrl }) => 
                             </Card>
                         </Col>
 
-                        {/* IMAGES */}
+                        {/* ✅ VENDOR OFFERS (Customer view) */}
+
+                        <Col xs={12}>
+                            <Card className="border shadow-sm rounded-3">
+                                <CardBody>
+                                    <div className="d-flex align-items-center justify-content-between mb-2">
+                                        <div className="fw-bold">Vendor Beading Offers</div>
+                                        <div className="text-muted small">{vendorBidsSorted.length} offers</div>
+                                    </div>
+
+                                    {vendorBidsSorted.length === 0 ? (
+                                        <div className="text-muted">No vendor offers yet.</div>
+                                    ) : (
+                                        <div className="table-responsive" style={{ maxHeight: 220, overflowY: "auto" }}>
+                                            <table className="table table-sm align-middle mb-0">
+                                                <thead className="table-light sticky-top" style={{ top: 0, zIndex: 1 }}>
+                                                    <tr className="text-muted small text-uppercase">
+                                                        <th style={{ width: 40 }}>#</th>
+                                                        <th>Vendor</th>
+                                                        <th>Phone</th>
+                                                        <th>Email</th>
+                                                        <th className="text-end">Amount (₹)</th>
+                                                        <th className="text-end">Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {vendorBidsSorted.map((v, idx) => {
+                                                        const amt = v?.vendor_beading_amount ?? v?.vendor_beadding ?? 0;
+                                                        const dt = v?.accepted_at ? new Date(v.accepted_at).toLocaleString() : "-";
+                                                        return (
+                                                            <tr key={idx}>
+                                                                <td>{idx + 1}</td>
+                                                                <td className="fw-semibold">{v?.vendor_name || "-"}</td>
+                                                                <td>{v?.vendor_phone || "-"}</td>
+                                                                <td className="text-truncate" style={{ maxWidth: 180 }}>
+                                                                    {v?.vendor_email || "-"}
+                                                                </td>
+                                                                <td className="text-end fw-bold">₹ {Number(amt || 0).toFixed(0)}</td>
+                                                                <td className="text-end text-muted small">{dt}</td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </CardBody>
+                            </Card>
+                        </Col>
+
                         <Col xs={12}>
                             <Card className="border shadow-sm rounded-3">
                                 <CardBody>
@@ -243,16 +373,11 @@ const BeadingDetailsModal = ({ isOpen, onAccept, toggle, data, imgBaseUrl }) => 
                         </Col>
                     </Row>
                 </ModalBody>
+
                 <ModalFooter className="bg-light p-3 d-flex justify-content-between">
                     <div>
-                        {Number(data?.beading_request_status) === 0 && (
-                            <Button
-                                color="success"
-                                onClick={() => {
-                                    onAccept?.(data);   // ✅ CALL updateBeading
-                                    toggle();           // optional: close modal
-                                }}
-                            >
+                        {viewerType === "vendor" && Number(data?.beading_request_status) === 0 && (
+                            <Button color="success" onClick={openAmountModal}>
                                 <i className="ri-check-line me-1"></i>
                                 Accept Request
                             </Button>
@@ -263,15 +388,59 @@ const BeadingDetailsModal = ({ isOpen, onAccept, toggle, data, imgBaseUrl }) => 
                         Close
                     </Button>
                 </ModalFooter>
-
             </Modal>
 
+            {/* ✅ AMOUNT MODAL (Vendor) */}
+            <Modal isOpen={amountOpen} toggle={closeAmountModal} centered backdrop="static">
+                <ModalHeader toggle={closeAmountModal} className="bg-light p-2">
+                    Your Beading Amount
+                </ModalHeader>
+
+                <ModalBody>
+                    <div className="text-muted small mb-2">
+                        Enter your amount for this request. Budget range:{" "}
+                        <span className="fw-semibold">₹{min} - ₹{max}</span>
+                    </div>
+
+                    <Label className="fw-semibold mb-1">Amount (₹)</Label>
+                    <Input
+                        value={amount}
+                        type="number"
+                        placeholder="e.g. 1500"
+                        onChange={(e) => setAmount(e.target.value)}
+                        onBlur={() => setTouched(true)}
+                        invalid={!!amountError()}
+                    />
+                    {!!amountError() && <FormFeedback>{amountError()}</FormFeedback>}
+
+                    <div className="d-flex gap-2 mt-3">
+                        <Button color="secondary" outline onClick={() => setAmount(String(min || ""))} disabled={!min}>
+                            Use Min
+                        </Button>
+                        <Button color="secondary" outline onClick={() => setAmount(String(max || ""))} disabled={!max}>
+                            Use Max
+                        </Button>
+                    </div>
+                </ModalBody>
+
+                <ModalFooter className="bg-light p-2">
+                    <Button color="success" onClick={confirmAccept}>
+                        Confirm & Accept
+                    </Button>
+                    <Button color="danger" onClick={closeAmountModal}>
+                        Cancel
+                    </Button>
+                </ModalFooter>
+            </Modal>
 
             <style>{`
         .bdm-modal .modal-content{
           border:0;
           border-radius: 14px;
           overflow:hidden;
+        }
+        .bdm-modal .table tbody tr:hover{
+          background:#f8f9ff;
         }
         .bdm-imgwrap{
           position:relative;
@@ -312,7 +481,7 @@ const BeadingDetailsModal = ({ isOpen, onAccept, toggle, data, imgBaseUrl }) => 
         .bdm-imgwrap:hover .bdm-imglabel{
           opacity:1;
           transform: translateY(0);
-        }
+        }   
       `}</style>
         </>
     );

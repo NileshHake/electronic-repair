@@ -12,5 +12,6 @@ router.delete("/beading/delete/:id", verifyToken, controller.deleted);
 
 // ✅ vendor accept
 router.put("/beading/vendor-accept", verifyToken, controller.vendorAccept);
+router.put("/beading/vendor-beadding", verifyToken, controller.vendorBeadding);
 
 module.exports = router;

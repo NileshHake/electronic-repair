@@ -132,7 +132,7 @@ const buildQuery = (params = {}) => {
 const getBeadingListApi = (params) =>
   api.get(`/beading/global-list${buildQuery(params)}`);
 
-const updateBeadingApi = (data) => api.put("/beading/vendor-accept", data);
+const updateBeadingApi = (data) => api.put("/beading/vendor-beadding", data);
 
 // ================== SAGAS ==================
 
