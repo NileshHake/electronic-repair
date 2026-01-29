@@ -59,6 +59,7 @@ const index = async (req, res) => {
         br.beading_request_title,
         br.beading_request_description,
         br.beading_vendor_details,
+        br.beading_vender_accepted_id,
         br.beading_budget_min,
         br.beading_budget_max,
         br.beading_location,
@@ -302,13 +303,13 @@ const normalizeVendorDetails = (val) => {
 
 const vendorAccept = async (req, res) => {
   try {
-    const { beading_request_id } = req.body;
+    const { beading_request_id, beading_vender_accepted_id } = req.body;
 
     const row = await BeadingRequest.findByPk(beading_request_id);
     if (!row) return res.status(404).json({ message: "Beading request not found" });
 
     await row.update({
-      beading_vender_accepted_id: req.currentUser.user_id,
+      beading_vender_accepted_id: beading_vender_accepted_id,
       beading_request_status: 1,
     });
 

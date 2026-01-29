@@ -63,7 +63,7 @@ export const beadingApi = apiSlice.injectEndpoints({
 
         try {
           await queryFulfilled;
-          toast.success("✅ Beading request deleted!");
+          toast.success("  Beading request deleted!");
         } catch (err) {
           patch.undo();
           toast.error("❌ Failed to delete request!");

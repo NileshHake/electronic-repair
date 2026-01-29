@@ -181,20 +181,26 @@ const BeadingDetailsModal = ({
 
   const handleConfirmAccept = async () => {
     try {
-      const payload = { beading_request_id: data?.beading_request_id };
+      const payload = {
+        beading_request_id: data?.beading_request_id,
+        beading_vender_accepted_id: selectedVendor?.vendor_id,
+      };
+
       await vendorAcceptBeading(payload).unwrap();
 
       closeConfirm();
-      onClose?.(); // ✅ close main modal
+      onClose?.(); // close main modal
     } catch (err) {
       console.error("Accept failed:", err);
-      // optional:
       // toast.error(err?.data?.message || "Accept failed");
     }
   };
 
+
   /* ✅ NOW early return is safe */
   if (!open || !data) return null;
+  const hasAcceptedVendor = Boolean(data?.beading_vender_accepted_id);
+  console.log(data);
 
   return (
     <>
@@ -235,7 +241,63 @@ const BeadingDetailsModal = ({
         {/* BODY */}
         <ModalBody className="bdm-body">
           <div className="row g-3">
-            <div className="col-lg-12 col-md-7 col-12">
+            {hasAcceptedVendor && (
+              <div className="col-lg-3 col-md-5 col-12">
+                <div className="card h-100 border shadow-sm rounded-3">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <div className="fw-bold">Vendor</div>
+                      <i className="ri-store-2-line text-muted"></i>
+                    </div>
+
+                    <div className="mb-2">
+                      <div className="text-muted small">Name</div>
+                      <div className="fw-semibold">{data?.vendor_name || "-"}</div>
+                    </div>
+
+                    <div className="mb-2">
+                      <div className="text-muted small">Email</div>
+                      <div
+                        className="fw-semibold text-truncate"
+                        title={data?.vendor_email || ""}
+                      >
+                        {data?.vendor_email || "-"}
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <div className="text-muted small">Phone</div>
+                      <div className="fw-semibold">{data?.vendor_phone || "-"}</div>
+                    </div>
+
+                    <div className="d-flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        color="dark"
+                        outline
+                        onClick={() => copy(data?.vendor_phone)}
+                        disabled={!data?.vendor_phone}
+                      >
+                        <i className="ri-file-copy-line me-1"></i> Phone
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        color="dark"
+                        outline
+                        onClick={() => copy(data?.vendor_email)}
+                        disabled={!data?.vendor_email}
+                      >
+                        <i className="ri-file-copy-line me-1"></i> Email
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className={`col-12 ${hasAcceptedVendor ? "col-lg-9 col-md-7" : "col-lg-12 col-md-12"
+              }`}>
               <div className="card border-0 shadow-sm h-100">
                 <div className="card-body">
                   <div className="d-flex align-items-center justify-content-between mb-2">
