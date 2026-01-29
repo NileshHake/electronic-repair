@@ -12,6 +12,7 @@ router.post ("/order/child-list",   controller.indexchild);
 
 // 🔵 READ SINGLE
 router.get("/order/single/:id", verifyToken, controller.Get);
+router.get("/orders/user-list", verifyToken, controller.userOrders);
 
 // 🟠 UPDATE
 router.put("/order/update", verifyToken, controller.update);

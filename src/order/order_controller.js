@@ -9,67 +9,67 @@ const OrderMaster = require("./order_model_master");
 
 
 /* 🟢 CREATE ORDER */
-    const store = async (req, res) => {
-        const transaction = await sequelize.transaction();
-        const customerData = await User.findByPk(req.currentUser.user_id)
-        const customerAddressData = await CustomerAddress.findByPk(req.body.order_master_address_id)
-        try {
-            const {
-                order_items,
-                ...orderMasterData
-            } = req.body;
+const store = async (req, res) => {
+    const transaction = await sequelize.transaction();
+    const customerData = await User.findByPk(req.currentUser.user_id)
+    const customerAddressData = await CustomerAddress.findByPk(req.body.order_master_address_id)
+    try {
+        const {
+            order_items,
+            ...orderMasterData
+        } = req.body;
 
-            const orderMaster = await OrderMaster.create(
-                {
-                    ...orderMasterData,
-                    order_master_customer_name: customerData.user_name,
-                    order_master_delivery_phone_number: customerAddressData.customer_address_mobile ? customerAddressData.customer_address_mobile : customerData.user_phone_number || "",
-                    order_master_user_id: req.currentUser.user_id,
-                    order_master_date: new Date(),
+        const orderMaster = await OrderMaster.create(
+            {
+                ...orderMasterData,
+                order_master_customer_name: customerData.user_name,
+                order_master_delivery_phone_number: customerAddressData.customer_address_mobile ? customerAddressData.customer_address_mobile : customerData.user_phone_number || "",
+                order_master_user_id: req.currentUser.user_id,
+                order_master_date: new Date(),
+            },
+            { transaction }
+        );
+
+        if (order_items && order_items.length > 0) {
+            const childData = order_items.map((item) => ({
+                ...item,
+                order_child_master_id: orderMaster.order_master_id,
+            }));
+
+            await OrderChild.bulkCreate(childData, { transaction });
+            const productIds = order_items.map((x) => x.order_child_product_id);
+
+            await AddToCard.destroy({
+                where: {
+                    add_to_card_user_id: req.currentUser.user_id,
+                    add_to_card_product_id: productIds, // IN (...) automatically
                 },
-                { transaction }
-            );
-
-            if (order_items && order_items.length > 0) {
-                const childData = order_items.map((item) => ({
-                    ...item,
-                    order_child_master_id: orderMaster.order_master_id,
-                }));
-
-                await OrderChild.bulkCreate(childData, { transaction });
-                const productIds = order_items.map((x) => x.order_child_product_id);
-
-                await AddToCard.destroy({
-                    where: {
-                        add_to_card_user_id: req.currentUser.user_id,
-                        add_to_card_product_id: productIds, // IN (...) automatically
-                    },
-                    transaction,
-                });
-            }
-
-            await transaction.commit();
-            req.io.emit("orderStatusUpdated", {
-                order_master_id: orderMaster.order_master_id,
-                order_master_status: orderMaster.order_master_status ?? 0,
-                type: "NEW_ORDER",
-            });
-
-
-            res.status(201).json({
-                message: "Order created successfully",
-                data: orderMaster,
-            });
-        } catch (error) {
-            await transaction.rollback();
-            console.log(error);
-
-            res.status(500).json({
-                message: "Error creating order",
-                error: error.message,
+                transaction,
             });
         }
-    };
+
+        await transaction.commit();
+        req.io.emit("orderStatusUpdated", {
+            order_master_id: orderMaster.order_master_id,
+            order_master_status: orderMaster.order_master_status ?? 0,
+            type: "NEW_ORDER",
+        });
+
+
+        res.status(201).json({
+            message: "Order created successfully",
+            data: orderMaster,
+        });
+    } catch (error) {
+        await transaction.rollback();
+        console.log(error);
+
+        res.status(500).json({
+            message: "Error creating order",
+            error: error.message,
+        });
+    }
+};
 
 /* 🟡 READ ALL ORDERS */
 const index = async (req, res) => {
@@ -115,6 +115,7 @@ const indexchild = async (req, res) => {
     try {
         const { order_id } = req.body;
 
+        console.log("Oerder ID ", order_id);
 
         if (!order_id) {
             return res.status(400).json({
@@ -138,6 +139,7 @@ const indexchild = async (req, res) => {
                 type: sequelize.QueryTypes.SELECT,
             }
         );
+        console.log("orderItems", orderItems);
 
         return res.status(200).json(orderItems);
     } catch (error) {
@@ -320,6 +322,46 @@ const deleted = async (req, res) => {
         });
     }
 };
+const userOrders = async (req, res) => {
+    try {
+
+        const userId = req.currentUser.user_id;
+
+        const orders = await sequelize.query(
+            `
+      SELECT 
+        om.*,
+        u.user_name,
+        ca.customer_address_city,
+        ca.customer_address_pincode,
+        ca.customer_address_description
+      FROM tbl_order_master AS om
+      LEFT JOIN tbl_users AS u 
+        ON om.order_master_user_id = u.user_id
+      LEFT JOIN tbl_customer_addresses AS ca
+        ON om.order_master_address_id = ca.customer_address_id
+      WHERE  
+          om.order_master_user_id = :userId
+      ORDER BY om.order_master_id DESC
+      `,
+            {
+                replacements: {
+
+                    userId,
+                },
+                type: sequelize.QueryTypes.SELECT,
+            }
+        );
+
+        res.status(200).json(orders);
+    } catch (error) {
+        console.error("Order index error:", error);
+        res.status(500).json({
+            message: "Error fetching orders",
+            error: error.message,
+        });
+    }
+};
 
 module.exports = {
     store,
@@ -329,4 +371,5 @@ module.exports = {
     Masterupdate,
     deleted,
     indexchild,
+    userOrders,
 };

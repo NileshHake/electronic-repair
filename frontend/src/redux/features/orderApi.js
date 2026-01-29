@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 export const orderApi = apiSlice.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-
     // 🟢 CREATE ORDER
     createOrder: builder.mutation({
       query: (payload) => ({
@@ -12,21 +11,14 @@ export const orderApi = apiSlice.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: [  "Order"],
+      invalidatesTags: ["Order"],
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
-         
         } catch (err) {
           toast.error("❌ Failed to place order!");
         }
       },
-    }),
-
-    // 🟡 GET ALL ORDERS
-    getOrderList: builder.query({
-      query: () => "/order/list",
-      providesTags: ["Order"],
     }),
 
     // 🔵 GET SINGLE ORDER
@@ -35,22 +27,20 @@ export const orderApi = apiSlice.injectEndpoints({
       providesTags: ["Order"],
     }),
 
-    // 🟠 UPDATE ORDER
-    updateOrder: builder.mutation({
+    // 🔵 GET USER ORDER LIST
+    getUserOrderList: builder.query({
+      query: () => "/orders/user-list",
+      providesTags: ["Order"],
+    }),
+
+    // 🔵 GET ORDER CHILD LIST (POST but still QUERY)
+    getOrderChildList: builder.query({
       query: (payload) => ({
-        url: "/order/update",
-        method: "PUT",
-        body: payload,
+        url: "/order/child-list",
+        method: "POST",
+        body: payload, // { order_id }
       }),
-      invalidatesTags: ["Order"],
-      async onQueryStarted(arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("✏️ Order updated successfully!");
-        } catch (err) {
-          toast.error("❌ Failed to update order!");
-        }
-      },
+      providesTags: ["Order"],
     }),
 
     // 🔴 DELETE ORDER
@@ -74,8 +64,8 @@ export const orderApi = apiSlice.injectEndpoints({
 
 export const {
   useCreateOrderMutation,
-  useGetOrderListQuery,
+  useGetUserOrderListQuery,
   useGetSingleOrderQuery,
-  useUpdateOrderMutation,
+  useGetOrderChildListQuery,   // ✅ query hook
   useDeleteOrderMutation,
 } = orderApi;
