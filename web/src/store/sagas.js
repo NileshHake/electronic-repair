@@ -94,6 +94,7 @@ import { storeFeatureSaga } from "./StoreFeatures";
 import { orderSaga } from "./order";
 import { supplierSaga } from "./Supplier";
 import { beadingSaga } from "./Beading";
+import { requestsSaga } from "./Requests";
 export default function* rootSaga() {
   yield all([
     //public
@@ -107,6 +108,7 @@ export default function* rootSaga() {
     fork(deviceTypeSaga),
     fork(hardwareConfigurationSaga),
     fork(repairTypeSaga),
+    fork(requestsSaga),
     fork(beadingSaga),
     fork(serviceSaga),
     fork(deviceModelSaga),

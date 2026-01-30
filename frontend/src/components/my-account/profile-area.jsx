@@ -48,7 +48,6 @@ const ProfileArea = ({orderData}) => {
                     >
                       <ChangePassword />
                     </div>
-
                     <div
                       className="tab-pane fade"
                       id="nav-order"

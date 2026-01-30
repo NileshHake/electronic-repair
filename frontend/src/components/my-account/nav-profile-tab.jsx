@@ -39,7 +39,7 @@ const NavProfileTab = ({ orderData }) => {
           </div>
         </div>
       </div>
-      <div className="profile__main-info">
+      {/* <div className="profile__main-info">
         <div className="row gx-3">
           <div className="col-md-3 col-sm-6">
             <div className="profile__main-info-item">
@@ -90,7 +90,7 @@ const NavProfileTab = ({ orderData }) => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

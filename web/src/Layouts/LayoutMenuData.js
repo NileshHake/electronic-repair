@@ -33,6 +33,7 @@ const Navdata = () => {
   const [isQuotationBilling, setIsQuotationBilling] = useState(false);
   const [isSupplier, setIsSupplier] = useState(false);
   const [isBeading, setIsBeading] = useState(false);
+  const [isReqToSupplier, setIsReqToSupplier] = useState(false);
 
   const [isLanding, setIsLanding] = useState(false);
 
@@ -65,6 +66,9 @@ const Navdata = () => {
     }
     if (iscurrentState !== "Beading") {
       setIsBeading(false);
+    }
+    if (iscurrentState !== "RequestToSupplier") {
+      setIsReqToSupplier(false);
     }
     if (iscurrentState !== "Supplier") {
       setIsSupplier(false);
@@ -272,6 +276,19 @@ const Navdata = () => {
         e.preventDefault();
         setIsBeading(!isBeading);
         setIscurrentState("Beading");
+        updateIconSidebar(e);
+      },
+    },
+    {
+      id: "REQ_TO_SUPPLIER",
+      label: user.user_type == 7 ? "Requests" : "Request to Supplier",
+      icon: "mdi mdi-message-reply-text",
+      link: "/req-to-supplier-list",
+      stateVariables: isReqToSupplier,
+      click: function (e) {
+        e.preventDefault();
+        setIsReqToSupplier(!isReqToSupplier);
+        setIscurrentState("RequestToSupplier");
         updateIconSidebar(e);
       },
     },

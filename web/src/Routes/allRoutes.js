@@ -277,6 +277,7 @@ import RejectedOrderList from "../pages/OrderTracking/RejectedOrderList";
 import DeliveredOrderList from "../pages/OrderTracking/DeliveredOrderList";
 import SupplierList from "../pages/Supplier/Supplierlist";
 import BeadingList from "../pages/Beading/Beadinglist";
+import ReqToSupplierList from "../pages/Requests/ReqToSupplierList";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -307,6 +308,7 @@ const authProtectedRoutes = [
   { path: "/tax-list", component: <TaxList /> },
   { path: "/category-list", component: <CategoryList /> },
   { path: "/beading-list", component: <BeadingList /> },
+  { path: "/req-to-supplier-list", component: <ReqToSupplierList /> },
   { path: "/brand-list", component: <BrandList /> },
   { path: "/payment-list", component: <PaymentModeList /> },
   { path: "/status-list", component: <StatusList /> },

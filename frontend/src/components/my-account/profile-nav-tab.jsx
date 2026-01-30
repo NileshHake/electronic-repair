@@ -44,11 +44,7 @@ const ProfileNavTab = () => {
           title="My Orders"
           icon="fa-light fa-clipboard-list-check"
         />
-        <SingleNav
-          id="password"
-          title="Change Password"
-          icon="fa-regular fa-lock"
-        />
+         
       </div>
     </nav>
   );

@@ -38,36 +38,7 @@ const createSuperAdmin = async () => {
         permission_path: 1,
         permission_category: "DASHBOARD",
       },
-      {
-        permission_name: "Dashboard",
-        permission_path: 1,
-        permission_category: "DASHBOARDCUSTOMER",
-      }, {
-        permission_name: "List",
-        permission_path: 1,
-        permission_category: "REPAIRINGCUSTOMER",
-      },
-      {
-        permission_name: "Create",
-        permission_path: 2,
-        permission_category: "REPAIRINGCUSTOMER",
-      },
-      {
-        permission_name: "Update",
-        permission_path: 3,
-        permission_category: "REPAIRINGCUSTOMER",
-      },
-      {
-        permission_name: "Delete",
-        permission_path: 4,
-        permission_category: "REPAIRINGCUSTOMER",
-      },
 
-      {
-        permission_name: "Sale",
-        permission_path: 1,
-        permission_category: "CUSTOMERSALES",
-      },
 
       {
         permission_name: "List",
@@ -168,6 +139,31 @@ const createSuperAdmin = async () => {
         permission_name: "Delete",
         permission_path: 4,
         permission_category: "PRODUCT",
+      },
+      {
+        permission_name: "List",
+        permission_path: 1,
+        permission_category: "BEADING",
+      },
+      {
+        permission_name: "List",
+        permission_path: 1,
+        permission_category: "REQ_TO_SUPPLIER",
+      },
+      {
+        permission_name: "Create",
+        permission_path: 2,
+        permission_category: "REQ_TO_SUPPLIER",
+      },
+      {
+        permission_name: "Update",
+        permission_path: 3,
+        permission_category: "REQ_TO_SUPPLIER",
+      },
+      {
+        permission_name: "Delete",
+        permission_path: 4,
+        permission_category: "REQ_TO_SUPPLIER",
       },
       {
         permission_name: "List",
@@ -194,13 +190,11 @@ const createSuperAdmin = async () => {
         permission_path: 1,
         permission_category: "USERMANAGEMENT",
       },
-
       {
         permission_name: "Users",
         permission_path: 2,
         permission_category: "USERMANAGEMENT",
       },
-
       {
         permission_name: "Technicians",
         permission_path: 3,
@@ -328,17 +322,7 @@ const createSuperAdmin = async () => {
       },
     ];
     await Permission.bulkCreate(staticpermissions);
-    const SuperAdminpermissionsLists = await Permission.findAll({
-      where: {
-        permission_category: {
-          [Op.notIn]: [
-            "DASHBOARDCUSTOMER",
-            "REPAIRINGCUSTOMER",
-            "CUSTOMERSALES",
-          ],
-        },
-      },
-    });
+    const SuperAdminpermissionsLists = await Permission.findAll();
 
     await Role.create({
       role_name: "Super Admin",
@@ -356,9 +340,7 @@ const createSuperAdmin = async () => {
         permission_category: {
           [Op.notIn]: [
             "BUSINESS",
-            "DASHBOARDCUSTOMER",
-            "REPAIRINGCUSTOMER",
-            "CUSTOMERSALES",
+
           ],
         },
       },
@@ -375,11 +357,11 @@ const createSuperAdmin = async () => {
         rhp_permission_id: permission.permission_id,
       });
     }
-   
+
     const supplierPermissions = await Permission.findAll({
       where: {
         permission_category: {
-          [Op.in]: ["DASHBOARD", "PRODUCT"],
+          [Op.in]: ["DASHBOARD", "PRODUCT" ,"REQ_TO_SUPPLIER"],
         },
       },
     });

@@ -200,8 +200,7 @@ const BeadingDetailsModal = ({
   /* ✅ NOW early return is safe */
   if (!open || !data) return null;
   const hasAcceptedVendor = Boolean(data?.beading_vender_accepted_id);
-  console.log(data);
-
+ 
   return (
     <>
 

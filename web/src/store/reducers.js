@@ -102,6 +102,7 @@ import { StoreFeatureReducer } from "./StoreFeatures";
 import { OrderReducer } from "./order";
 import { SupplierReducer } from "./Supplier";
 import { BeadingReducer } from "./Beading";
+import { RequestsReducer } from "./Requests";
 
 const rootReducer = combineReducers({
   // public
@@ -121,6 +122,7 @@ const rootReducer = combineReducers({
   Crm,
   Invoice,
   TaxReducer,
+  RequestsReducer,
   OrderReducer,
   CustomerReducer,
   SourceReducer,
