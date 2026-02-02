@@ -6,33 +6,33 @@ const e = require("express");
 
 /* 🟢 CREATE */
 const store = async (req, res) => {
-  try {
-    const request = await Requests.create({
-      ...req.body,
-      requests_created_business_id:  req.currentUser.user_id,
-      requests_created_by: getCreatedBy(req.currentUser),
-    });
+    try {
+        const request = await Requests.create({
+            ...req.body,
+            requests_created_business_id: req.currentUser.user_id,
+            requests_created_by: getCreatedBy(req.currentUser),
+        });
 
-    res
-      .status(201)
-      .json({ message: "Request created successfully", data: request });
-  } catch (error) {
-    console.log("Cerate request error  ",error);
-    res
-      .status(500)
-      .json({ message: "Error creating request", error: error.message });
-  }
+        res
+            .status(201)
+            .json({ message: "Request created successfully", data: request });
+    } catch (error) {
+        console.log("Cerate request error  ", error);
+        res
+            .status(500)
+            .json({ message: "Error creating request", error: error.message });
+    }
 };
 
 /* 🟡 READ ALL */
 const index = async (req, res) => {
-  try {
-    const { page = 1, limit = 10, start_date, end_date } = req.body;
+    try {
+        const { page = 1, limit = 10, start_date, end_date } = req.body;
 
-    const offset = (page - 1) * limit;
+        const offset = (page - 1) * limit;
 
-    // ✅ base sql
-    let sql = `
+        // ✅ base sql
+        let sql = `
       SELECT 
         r.requests_id,
         r.requests_created_business_id,
@@ -64,151 +64,154 @@ const index = async (req, res) => {
       WHERE 1 = 1
     `;
 
-    // ✅ replacements object
-    const replacements = {
-      limit: Number(limit),
-      offset: Number(offset),
-    };
+        // ✅ replacements object
+        const replacements = {
+            limit: Number(limit),
+            offset: Number(offset),
+        };
 
-    // ✅ date filters
-    if (start_date) {
-      sql += ` AND DATE(r.createdAt) >= :start_date`;
-      replacements.start_date = start_date;
-    }
+        // ✅ date filters
+        if (start_date) {
+            sql += ` AND DATE(r.createdAt) >= :start_date`;
+            replacements.start_date = start_date;
+        }
 
-    if (end_date) {
-      sql += ` AND DATE(r.createdAt) <= :end_date`;
-      replacements.end_date = end_date;
-    }
+        if (end_date) {
+            sql += ` AND DATE(r.createdAt) <= :end_date`;
+            replacements.end_date = end_date;
+        }
 
-    // ✅ role-based filtering
-    if (req.currentUser.user_type == 7) {
-      // SUPPLIER
-      sql += ` AND r.requests_created_supplier_id = :user_id`;
-      replacements.user_id = req.currentUser.user_id;
-    } 
-    else if (
-      req.currentUser.user_type == 3 ||
-      req.currentUser.user_type == 4
-    ) {
-      // EMPLOYEE / DELIVERY
-      sql += ` AND r.requests_created_business_id = :user_id`;
-      replacements.user_id = req.currentUser.user_created_by;
-    } 
-    else {
-      // ADMIN / BUSINESS
-      sql += ` AND r.requests_created_business_id = :user_id`;
-      replacements.user_id = req.currentUser.user_id;
-    }
+        // ✅ role-based filtering
+        if (req.currentUser.user_type != 1) {
 
-    // ✅ order + pagination
-    sql += `
+            if (req.currentUser.user_type == 7) {
+                // SUPPLIER
+                sql += ` AND r.requests_created_supplier_id = :user_id`;
+                replacements.user_id = req.currentUser.user_id;
+            }
+            else if (
+                req.currentUser.user_type == 3 ||
+                req.currentUser.user_type == 4
+            ) {
+                // EMPLOYEE / DELIVERY
+                sql += ` AND r.requests_created_business_id = :user_id`;
+                replacements.user_id = req.currentUser.user_created_by;
+            }
+            else {
+                // ADMIN / BUSINESS
+                sql += ` AND r.requests_created_business_id = :user_id`;
+                replacements.user_id = req.currentUser.user_id;
+            }
+        }
+
+        // ✅ order + pagination
+        sql += `
       ORDER BY r.requests_id DESC
       LIMIT :limit OFFSET :offset
     `;
 
-    // ✅ execute query
-    const rows = await sequelize.query(sql, {
-      replacements,
-      type: QueryTypes.SELECT,
-    });
+        // ✅ execute query
+        const rows = await sequelize.query(sql, {
+            replacements,
+            type: QueryTypes.SELECT,
+        });
 
-    res.status(200).json(rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Error fetching requests",
-      error: error.message,
-    });
-  }
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error fetching requests",
+            error: error.message,
+        });
+    }
 };
 
 
 /* 🔵 READ SINGLE */
 const Get = async (req, res) => {
-  try {
-    const request = await Requests.findByPk(req.params.id);
-    if (!request)
-      return res.status(404).json({ message: "Request not found" });
+    try {
+        const request = await Requests.findByPk(req.params.id);
+        if (!request)
+            return res.status(404).json({ message: "Request not found" });
 
-    res.status(200).json(request);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching request", error: error.message });
-  }
+        res.status(200).json(request);
+    } catch (error) {
+        res
+            .status(500)
+            .json({ message: "Error fetching request", error: error.message });
+    }
 };
 
 /* 🟠 UPDATE */
 const update = async (req, res) => {
-  try {
-    const request = await Requests.findByPk(req.body.requests_id);
-    if (!request)
-      return res.status(404).json({ message: "Request not found" });
+    try {
+        const request = await Requests.findByPk(req.body.requests_id);
+        if (!request)
+            return res.status(404).json({ message: "Request not found" });
 
-    await request.update(req.body);
-    res
-      .status(200)
-      .json({ message: "Request updated successfully", data: request });
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ message: "Error updating request", error: error.message });
-  }
+        await request.update(req.body);
+        res
+            .status(200)
+            .json({ message: "Request updated successfully", data: request });
+    } catch (error) {
+        console.log(error);
+        res
+            .status(500)
+            .json({ message: "Error updating request", error: error.message });
+    }
 };
 const statusupdate = async (req, res) => {
-  try {
-    const { requests_id } = req.body;
+    try {
+        const { requests_id } = req.body;
 
-    const request = await Requests.findByPk(requests_id);
-    if (!request) {
-      return res.status(404).json({ message: "Request not found" });
+        const request = await Requests.findByPk(requests_id);
+        if (!request) {
+            return res.status(404).json({ message: "Request not found" });
+        }
+
+        await request.update({
+            request_status: 1, // ✅ Accepted
+        });
+
+        return res.status(200).json({
+            message: "Request status updated successfully",
+            data: request,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Error updating request status",
+            error: error.message,
+        });
     }
-
-    await request.update({
-      request_status: 1, // ✅ Accepted
-    });
-
-    return res.status(200).json({
-      message: "Request status updated successfully",
-      data: request,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Error updating request status",
-      error: error.message,
-    });
-  }
 };
 
 
 /* 🔴 DELETE */
 const deleted = async (req, res) => {
-  try {
-    console.log(req.params.id);
-    
-    const deleted = await Requests.destroy({
-      where: { requests_id: req.params.id },
-    });
+    try {
+        console.log(req.params.id);
 
-    if (!deleted)
-      return res.status(404).json({ message: "Request not found" });
+        const deleted = await Requests.destroy({
+            where: { requests_id: req.params.id },
+        });
 
-    res.status(200).json({ message: "Request deleted successfully" });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error deleting request", error: error.message });
-  }
+        if (!deleted)
+            return res.status(404).json({ message: "Request not found" });
+
+        res.status(200).json({ message: "Request deleted successfully" });
+    } catch (error) {
+        res
+            .status(500)
+            .json({ message: "Error deleting request", error: error.message });
+    }
 };
 
 module.exports = {
-  store,
-  index,
-  Get,
-  update,
-  statusupdate,
-  deleted,
+    store,
+    index,
+    Get,
+    update,
+    statusupdate,
+    deleted,
 };

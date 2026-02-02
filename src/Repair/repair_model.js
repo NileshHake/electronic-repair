@@ -51,6 +51,10 @@ const Repair = sequelize.define("tbl_repair", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  repair_video: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   repair_workflow_id: {
     type: DataTypes.INTEGER,
     allowNull: true,

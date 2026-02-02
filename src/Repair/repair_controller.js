@@ -35,11 +35,10 @@ const store = async (req, res) => {
       repair_delivery_and_pickup_to,
     } = req.body;
 
+    /* ✅ MULTIPLE IMAGES */
     let repair_images = [];
-
     if (req.files && req.files["repair_image[]"]) {
       const images = req.files["repair_image[]"];
-
       const fileArray = Array.isArray(images) ? images : [images];
 
       for (const file of fileArray) {
@@ -48,8 +47,25 @@ const store = async (req, res) => {
       }
     }
 
+    /* ✅ SINGLE VIDEO */
+    let repair_video = null;
+
+    if (req.files && req.files["repair_video"]) {
+      const videoFile = req.files["repair_video"]; // single file
+      // if you want to allow even if multiple sent mistakenly:
+      const v = Array.isArray(videoFile) ? videoFile[0] : videoFile;
+
+      // ✅ you can reuse saveImage if it supports any file,
+      // else create saveFile / saveVideo (recommended)
+      const savedVideo = await saveImage(v, "repair_videos");
+      repair_video = savedVideo;
+    }
+
     const repairData = {
-      repair_customer_id :req.currentUser.user_type == 6 ?req.currentUser.user_id : repair_customer_id,
+      repair_customer_id: req.currentUser.user_type == 6
+        ? req.currentUser.user_id
+        : repair_customer_id,
+
       repair_product_id,
       repair_problem_description,
       repair_estimated_cost,
@@ -74,7 +90,12 @@ const store = async (req, res) => {
       repair_expected_delivery_date,
       repair_assigned_technician_to,
       repair_delivery_and_pickup_to,
+
       repair_image: JSON.stringify(repair_images),
+
+      // ✅ NEW FIELD
+      repair_video: repair_video, // store filename
+
       repair_created_by: getCreatedBy(req.currentUser),
     };
 
@@ -92,6 +113,7 @@ const store = async (req, res) => {
     });
   }
 };
+;
 
 const index = async (req, res) => {
   try {

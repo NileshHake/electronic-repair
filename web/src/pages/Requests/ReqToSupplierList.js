@@ -344,6 +344,7 @@ const ReqToSupplierList = () => {
                                                             <th style={{ width: "10%" }}>Request ID</th>
                                                             <th style={{ width: "15%" }}>{user.user_type == 7 ? "Vendor" : "Supplier"}</th>
                                                             <th style={{ width: "25%" }}>Message</th>
+                                                            {user.user_type == 1 && <th style={{ width: "25%" }}>Vendor </th>}
                                                             <th style={{ width: "25%" }}>Reply</th>
                                                             <th style={{ width: "10%" }}>Status</th>
                                                             <th style={{ width: "10%" }} className="text-end">
@@ -370,7 +371,13 @@ const ReqToSupplierList = () => {
                                                                         </div>
                                                                     </td>
 
-                                                                    <td>
+                                                                    {user.user_type == 1 && <td title={req?.business_name || ""}>
+                                                                        <div className="fw-bold">
+                                                                            {req?.business_name}
+                                                                        </div>
+                                                                    </td>
+
+                                                                    }                                                                    <td>
                                                                         <div
                                                                             className="text-muted"
                                                                             title={req?.request_message || ""}
