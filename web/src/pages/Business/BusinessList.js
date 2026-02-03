@@ -13,8 +13,9 @@ import { ToastContainer } from "react-toastify";
 
 import DeleteModal from "../../Components/Common/DeleteModal";
 import BusinessAdd from "./BusinessAdd";
-import BusinessUpdate from "./BusinessUpdate";import { deleteBusiness, getBusinessesList } from "../../store/Business";
- 
+import BusinessUpdate from "./BusinessUpdate"; import { deleteBusiness, getBusinessesList } from "../../store/Business";
+import BusinessViewModal from "./BusinessViewModal";
+
 
 const BusinessList = () => {
   document.title = "Business List";
@@ -28,6 +29,7 @@ const BusinessList = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [deleteModal, setDeleteModal] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
 
   // ✅ Fetch Businesses
   useEffect(() => {
@@ -73,7 +75,7 @@ const BusinessList = () => {
   return (
     <div className="page-content">
       <Container fluid>
-         <Row>
+        <Row>
           <Col lg={12}>
             <Card>
               <CardHeader className="card-header border-0">
@@ -98,7 +100,7 @@ const BusinessList = () => {
                         <th style={{ width: "20%" }}>Name</th>
                         <th style={{ width: "25%" }}>Email</th>
                         <th style={{ width: "15%" }}>Phone</th>
-                        <th style={{ width: "15%" }}>Role</th>
+
                         <th style={{ width: "20%" }}>Actions</th>
                       </tr>
                     </thead>
@@ -109,11 +111,23 @@ const BusinessList = () => {
                             <td>{index + 1}</td>
                             <td>{business.user_name}</td>
                             <td>{business.user_email}</td>
-                            <td>{business.user_phone_number}</td>
                             <td>{business.user_role_name || "—"}</td>
 
                             <td>
                               <ul className="list-inline hstack gap-2 mb-0">
+                                <li className="list-inline-item">
+                                  <button
+                                    className="text-primary border-0 bg-transparent"
+                                    onClick={() => {
+                                      setSelectedBusiness(business);
+                                      setIsViewOpen(true);
+                                    }}
+                                    title="View"
+                                  >
+                                    <i className="ri-eye-fill fs-16"></i>
+                                  </button>
+                                </li>
+
                                 <li className="list-inline-item">
                                   <button
                                     className="text-primary border-0 bg-transparent"
@@ -162,6 +176,13 @@ const BusinessList = () => {
           isOpen={isUpdateOpen}
           toggle={handleModalClose}
           businessDataToEdit={selectedBusiness}
+        />
+      )}
+      {isViewOpen && (
+        <BusinessViewModal
+          isOpen={isViewOpen}
+          toggle={() => setIsViewOpen(false)}
+          business={selectedBusiness}
         />
       )}
 
