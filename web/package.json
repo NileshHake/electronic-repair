@@ -1,6 +1,5 @@
 {
-  "name": "material-velzon-react",
-  "type": "module",
+  "name": "material-velzon-react", 
   "version": "0.1.0",
   "private": true,
   "dependencies": {
