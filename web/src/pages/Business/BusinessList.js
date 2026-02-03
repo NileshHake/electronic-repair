@@ -111,7 +111,7 @@ const BusinessList = () => {
                             <td>{index + 1}</td>
                             <td>{business.user_name}</td>
                             <td>{business.user_email}</td>
-                            <td>{business.user_role_name || "—"}</td>
+                            <td>{business.user_phone_number || "—"}</td>
 
                             <td>
                               <ul className="list-inline hstack gap-2 mb-0">

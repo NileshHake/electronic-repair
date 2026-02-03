@@ -145,7 +145,7 @@ const BasicInfoTab = ({
             value={
               brands
                 .map((b) => ({ value: b.brand_id, label: b.brand_name }))
-                .find((opt) => opt.value === businessData.supplier_brand_id) || null
+                .find((opt) => opt.value == businessData.supplier_brand_id) || null
             }
             onChange={(opt) =>
               setBusinessData((prev) => ({ ...prev, supplier_brand_id: opt?.value || "" }))
@@ -156,12 +156,12 @@ const BasicInfoTab = ({
         </Col>
       )}
       {/* PC / CCTV Switch */}
-      <Col lg={4}>
+      {!status && <Col lg={4}>
         <Label>
           Service Type <span className="text-danger">*</span>
         </Label>
 
-        <div className="d-flex gap-4 mt-2">
+        <div className="d-flex gap-4 mt-2 justify-content-between p-3">
           <div className="form-check form-switch">
             <Input
               className="form-check-input"
@@ -192,7 +192,7 @@ const BasicInfoTab = ({
         {errors.user_cctv_or_pc && (
           <span className="text-danger small">{errors.user_cctv_or_pc}</span>
         )}
-      </Col>
+      </Col>}
 
 
 

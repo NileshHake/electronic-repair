@@ -10,7 +10,7 @@ import {
   Table,
   Badge,
 } from "reactstrap";
-import { api } from "../../config"; // adjust path if needed
+import { api } from "../../config";
 
 const getServiceText = (val) => {
   const n = Number(val);
@@ -20,7 +20,11 @@ const getServiceText = (val) => {
   return "-";
 };
 
-const BusinessViewModal = ({ isOpen, toggle, business }) => {
+const BusinessViewModal = ({ isOpen, toggle, business, status }) => {
+  const isSupplier = !!status; // ✅ status true => Supplier
+
+  const titleText = isSupplier ? "Supplier" : "Business";
+
   const profileUrl = useMemo(() => {
     if (!business?.user_profile) return "";
     return `${api.IMG_URL}user_profile/${business.user_profile}`;
@@ -31,7 +35,8 @@ const BusinessViewModal = ({ isOpen, toggle, business }) => {
   return (
     <Modal isOpen={isOpen} toggle={toggle} centered size="lg">
       <ModalHeader toggle={toggle}>
-        Business Details - <span className="ms-1">{business?.user_name || "-"}</span>
+        {titleText} Details -{" "}
+        <span className="ms-1">{business?.user_name || "-"}</span>
       </ModalHeader>
 
       <ModalBody>
@@ -58,11 +63,16 @@ const BusinessViewModal = ({ isOpen, toggle, business }) => {
 
             <div className="mt-2 d-flex flex-wrap gap-2">
               <Badge color="primary" pill>
-                Type: {Number(business?.user_type) === 2 ? "Business" : business?.user_type}
+                Type: {titleText}
               </Badge>
-              <Badge color="info" pill>
-                Service: {getServiceText(business?.user_cctv_or_pc)}
-              </Badge>
+
+              {/* ✅ Service badge only for Business */}
+              {!isSupplier && (
+                <Badge color="info" pill>
+                  Service: {getServiceText(business?.user_cctv_or_pc)}
+                </Badge>
+              )}
+
               {Number(business?.status) === 1 && (
                 <Badge color="success" pill>
                   Active
@@ -79,18 +89,37 @@ const BusinessViewModal = ({ isOpen, toggle, business }) => {
               <th style={{ width: "35%" }}>Phone</th>
               <td>{business?.user_phone_number || "-"}</td>
             </tr>
+
             <tr>
               <th>GST Number</th>
               <td>{business?.user_gst_number || "-"}</td>
             </tr>
+
             <tr>
               <th>UPI ID</th>
               <td>{business?.user_upi_id || "-"}</td>
             </tr>
 
+            {/* ✅ Brand only for Supplier */}
+            {isSupplier && (
+              <tr>
+                <th>Brand</th>
+                <td>{business?.brand_name || business?.supplier_brand_name || "-"}</td>
+              </tr>
+            )}
+
+            {/* ✅ Service row only for Business (optional, since badge already shows) */}
+            {!isSupplier && (
+              <tr>
+                <th>Service</th>
+                <td>{getServiceText(business?.user_cctv_or_pc)}</td>
+              </tr>
+            )}
+
             <tr className="table-light">
               <th colSpan="2">Bank Details</th>
             </tr>
+
             <tr>
               <th>Bank Name</th>
               <td>{business?.user_bank_name || "-"}</td>

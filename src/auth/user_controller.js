@@ -8,6 +8,7 @@ const { saveImage, deleteImage } = require("../helper/fileUpload");
 const {
   createDefaultWorkflow,
 } = require("../CreateData/create_data_for_business");
+const sequelize = require("../../config/db");
 
 const googleCustomerLogin = async (req, res) => {
   try {
@@ -176,18 +177,29 @@ const Businessindex = async (req, res) => {
  */
 const Supplierindex = async (req, res) => {
   try {
-    const users = await User.findAll({
-      where: {
-        user_type: 7,
-      },
-    });
-    res.status(200).json(users);
+    const suppliers = await sequelize.query(
+      `
+      SELECT 
+        u.*,
+        b.brand_name
+      FROM tbl_users u
+      LEFT JOIN tbl_brands b 
+        ON b.brand_id = u.supplier_brand_id
+      WHERE u.user_type = 7
+      ORDER BY u.user_id DESC
+      `,
+      { type: sequelize.QueryTypes.SELECT }
+    );
+
+    return res.status(200).json(suppliers);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching users", error: error.message });
+    return res.status(500).json({
+      message: "Error fetching suppliers",
+      error: error.message,
+    });
   }
 };
+
 const Customerindex = async (req, res) => {
   try {
     const users = await User.findAll({

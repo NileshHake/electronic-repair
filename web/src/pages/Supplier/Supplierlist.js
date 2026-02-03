@@ -20,6 +20,7 @@ import {
 } from "../../store/Supplier";
 import BusinessAdd from "../Business/BusinessAdd";
 import BusinessUpdate from "../Business/BusinessUpdate";
+import BusinessViewModal from "../Business/BusinessViewModal";
 
 const SupplierList = () => {
   document.title = "Supplier List";
@@ -33,6 +34,7 @@ const SupplierList = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [deleteModal, setDeleteModal] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
 
   // ✅ Fetch Suppliers
   useEffect(() => {
@@ -43,8 +45,11 @@ const SupplierList = () => {
   const handleModalClose = () => {
     setIsAddOpen(false);
     setIsUpdateOpen(false);
+    setIsViewOpen(false);
+    setSelectedSupplier(null);
     dispatch(getSuppliersList());
   };
+
 
   // ✅ Delete Supplier
   const onClickDelete = (supplier) => {
@@ -102,8 +107,7 @@ const SupplierList = () => {
                         <th style={{ width: "5%" }}>#</th>
                         <th style={{ width: "20%" }}>Name</th>
                         <th style={{ width: "25%" }}>Email</th>
-                        <th style={{ width: "15%" }}>Phone</th>
-                        <th style={{ width: "15%" }}>Role</th>
+                        <th style={{ width: "15%" }}>Phone</th> 
                         <th style={{ width: "20%" }}>Actions</th>
                       </tr>
                     </thead>
@@ -114,11 +118,23 @@ const SupplierList = () => {
                             <td>{index + 1}</td>
                             <td>{supplier.user_name}</td>
                             <td>{supplier.user_email}</td>
-                            <td>{supplier.user_phone_number}</td>
-                            <td>{supplier.user_role_name || "Supplier"}</td>
+                            <td>{supplier.user_phone_number}</td> 
 
                             <td>
                               <ul className="list-inline hstack gap-2 mb-0">
+                                <li className="list-inline-item">
+                                  <button
+                                    className="text-primary border-0 bg-transparent"
+                                    onClick={() => {
+                                      setSelectedSupplier(supplier);
+                                      setIsViewOpen(true);
+                                    }}
+                                    title="View"
+                                  >
+                                    <i className="ri-eye-fill fs-16"></i>
+                                  </button>
+                                </li>
+
                                 <li className="list-inline-item">
                                   <button
                                     className="text-primary border-0 bg-transparent"
@@ -170,6 +186,14 @@ const SupplierList = () => {
           toggle={handleModalClose}
           businessDataToEdit={selectedSupplier}
           status={true}
+        />
+      )}
+      {isViewOpen && (
+        <BusinessViewModal
+          isOpen={isViewOpen}
+          toggle={() => setIsViewOpen(false)}
+          business={selectedSupplier}
+          status={true}   // optional if you want label Supplier inside view
         />
       )}
 
