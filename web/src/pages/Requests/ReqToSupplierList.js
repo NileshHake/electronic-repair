@@ -20,6 +20,7 @@ import ReqToSupplierUpdate from "./ReqToSupplierUpdate";
 import DeleteModal from "../../Components/Common/DeleteModal";
 import { getSuppliersList } from "../../store/Supplier";
 import AuthUser from "../../helpers/AuthType/AuthUser";
+import { formatDateTime } from "../../helpers/date_and_time_format";
 
 const ReqToSupplierList = () => {
     document.title = "Supplier Requests";
@@ -343,8 +344,9 @@ const ReqToSupplierList = () => {
                                                             <th style={{ width: "5%" }}>#</th>
                                                             <th style={{ width: "10%" }}>Request ID</th>
                                                             <th style={{ width: "15%" }}>{user.user_type == 7 ? "Vendor" : "Supplier"}</th>
-                                                            <th style={{ width: "25%" }}>Message</th>
+                                                            <th style={{ width: "25%" }}>Date</th> 
                                                             {user.user_type == 1 && <th style={{ width: "25%" }}>Vendor </th>}
+                                                            <th style={{ width: "25%" }}>Message</th>
                                                             <th style={{ width: "25%" }}>Reply</th>
                                                             <th style={{ width: "10%" }}>Status</th>
                                                             <th style={{ width: "10%" }} className="text-end">
@@ -369,6 +371,9 @@ const ReqToSupplierList = () => {
                                                                         <div className="fw-bold">
                                                                             {user.user_type == 7 ? req?.business_name : req?.supplier_name}
                                                                         </div>
+                                                                    </td>
+                                                                    <td  >
+                                                                        {formatDateTime(req?.createdAt)}
                                                                     </td>
 
                                                                     {user.user_type == 1 && <td title={req?.business_name || ""}>

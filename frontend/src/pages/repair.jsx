@@ -1,30 +1,41 @@
-import React from 'react';
-import SEO from '@/components/seo';
-import HeaderTwo from '@/layout/headers/header-2';
-import Footer from '@/layout/footers/footer';
-import Wrapper from '@/layout/wrapper';
-import CommonBreadcrumb from '@/components/breadcrumb/common-breadcrumb'; 
-import RepairArea from '@/components/repair/repair-area';
-import Cookies from 'js-cookie';
-import { useRouter } from 'next/router';
+import React, { useEffect, useState } from "react";
+import SEO from "@/components/seo";
+import HeaderTwo from "@/layout/headers/header-2";
+import Footer from "@/layout/footers/footer";
+import Wrapper from "@/layout/wrapper";
+import CommonBreadcrumb from "@/components/breadcrumb/common-breadcrumb";
+import RepairArea from "@/components/repair/repair-area";
+import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
 const RepairPage = () => {
-     const userInfo = Cookies.get("userInfo");
-    const router = useRouter();
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // ✅ runs only in browser
+    const userInfo = Cookies.get("userInfo");
+
     if (!userInfo) {
-        router.push("/login");
-        return;
+      router.replace("/login"); // replace is better than push for auth redirect
+      return;
     }
-    return (
-        <Wrapper>
-            <SEO pageTitle="Repair" />
-            <HeaderTwo style_2={true} />
-            <CommonBreadcrumb title="Add Repair Order
-" center={true} subtitle="Repair" />
-            <RepairArea />
-            <Footer primary_style={true} />
-        </Wrapper>
-    );
+
+    setReady(true);
+  }, [router]);
+
+  // ✅ while checking cookie, show nothing (or loader)
+  if (!ready) return null;
+
+  return (
+    <Wrapper>
+      <SEO pageTitle="Repair" />
+      <HeaderTwo style_2={true} />
+      <CommonBreadcrumb title="Add Repair Order" center={true} subtitle="Repair" />
+      <RepairArea />
+      <Footer primary_style={true} />
+    </Wrapper>
+  );
 };
 
 export default RepairPage;

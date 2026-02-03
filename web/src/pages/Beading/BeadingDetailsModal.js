@@ -314,7 +314,10 @@ const BeadingDetailsModal = ({
                                                         const amt = v?.vendor_beading_amount ?? v?.vendor_beadding ?? 0;
                                                         const dt = v?.accepted_at ? new Date(v.accepted_at).toLocaleString() : "-";
                                                         return (
+
+
                                                             <tr key={idx}>
+                                                                {console.log(v)}
                                                                 <td>{idx + 1}</td>
                                                                 <td className="fw-semibold">{v?.vendor_name || "-"}</td>
                                                                 <td>{v?.vendor_phone || "-"}</td>

@@ -72,3 +72,4 @@ const FeatureAreaTwo = () => {
 };
 
 export default FeatureAreaTwo;
+export const feature_data = [];

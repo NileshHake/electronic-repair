@@ -339,7 +339,7 @@ const createSuperAdmin = async () => {
       where: {
         permission_category: {
           [Op.notIn]: [
-            "BUSINESS",
+            "BUSINESS","SUPPLIER",
 
           ],
         },
@@ -361,7 +361,7 @@ const createSuperAdmin = async () => {
     const supplierPermissions = await Permission.findAll({
       where: {
         permission_category: {
-          [Op.in]: ["DASHBOARD", "PRODUCT" ,"REQ_TO_SUPPLIER"],
+          [Op.in]: ["DASHBOARD", "PRODUCT" ,"REQ_TO_SUPPLIER" ,],
         },
       },
     });

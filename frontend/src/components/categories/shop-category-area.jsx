@@ -1,11 +1,11 @@
 import React from "react";
 import ErrorMsg from "../common/error-msg";
-import { useGetShowCategoryQuery } from "@/redux/features/categoryApi";
+import { useGetCategoriesWithSubQuery } from "@/redux/features/categoryApi";
 import { useRouter } from "next/router";
 import ShopCategoryLoader from "../loader/shop/shop-category-loader";
 
 const ShopCategoryArea = () => {
-  const { data: categories, isLoading, isError } = useGetShowCategoryQuery();
+  const { data: categories, isLoading, isError } = useGetCategoriesWithSubQuery();
   const router = useRouter();
   // handle category route
   const handleCategoryRoute = (title) => {
