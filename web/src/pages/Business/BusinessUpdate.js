@@ -91,6 +91,7 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit, status }) => {
         user_address_block: businessDataToEdit.user_address_block || "",
         user_address_district: businessDataToEdit.user_address_district || "",
         user_address_state: businessDataToEdit.user_address_state || "",
+        user_cctv_or_pc: businessDataToEdit.user_cctv_or_pc || "",
         user_address_description:
           businessDataToEdit.user_address_description || "",
         user_terms_and_conditions:
@@ -118,25 +119,7 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit, status }) => {
       const updatedData = { ...prev, [name]: value };
 
       // If any address-related field changes, update CKEditor content
-      if (
-        [
-          "user_address_city",
-          "user_address_block",
-          "user_address_district",
-          "user_address_state",
-          "user_address_pincode",
-        ].includes(name)
-      ) {
-        updatedData.user_address_description = `
-        <p><strong>Village:</strong> ${updatedData.user_address_city || ""}</p>
-        <p><strong>Block:</strong> ${updatedData.user_address_block || ""}</p>
-        <p><strong>District:</strong> ${updatedData.user_address_district || ""
-          }</p>
-        <p><strong>State:</strong> ${updatedData.user_address_state || ""}</p>
-        <p><strong>Pincode:</strong> ${updatedData.user_address_pincode || ""
-          }</p>
-      `;
-      }
+
 
       return updatedData;
     });
@@ -163,6 +146,9 @@ const BusinessUpdate = ({ isOpen, toggle, businessDataToEdit, status }) => {
       newErrors.user_email = "Email is required";
     else if (!businessData.user_password.trim())
       newErrors.user_password = "Password is required";
+    else if (businessData.user_cctv_or_pc == 0) {
+      newErrors.user_cctv_or_pc = "Please select at least one service: PC or CCTV";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

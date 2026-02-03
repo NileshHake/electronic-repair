@@ -47,7 +47,24 @@ const BasicInfoTab = ({
       }));
     }
   }, [businessData.user_ifsc_code, setBusinessData]);
+  const isPC = Number(businessData?.user_cctv_or_pc) === 1 || Number(businessData?.user_cctv_or_pc) === 3;
+  const isCCTV = Number(businessData?.user_cctv_or_pc) === 2 || Number(businessData?.user_cctv_or_pc) === 3;
 
+  // ✅ update field based on 2 switches
+  const handleServiceSwitch = (type, checked) => {
+    const nextPC = type === "pc" ? checked : isPC;
+    const nextCCTV = type === "cctv" ? checked : isCCTV;
+
+    let value = "";
+    if (nextPC && nextCCTV) value = 3;
+    else if (nextPC) value = 1;
+    else if (nextCCTV) value = 2;
+
+    setBusinessData((prev) => ({
+      ...prev,
+      user_cctv_or_pc: value,
+    }));
+  };
   return (
     <Row className="gy-3">
       {/* Basic Info */}
@@ -138,6 +155,45 @@ const BasicInfoTab = ({
           />
         </Col>
       )}
+      {/* PC / CCTV Switch */}
+      <Col lg={4}>
+        <Label>
+          Service Type <span className="text-danger">*</span>
+        </Label>
+
+        <div className="d-flex gap-4 mt-2">
+          <div className="form-check form-switch">
+            <Input
+              className="form-check-input"
+              type="switch"
+              id="pcSwitch"
+              checked={isPC}
+              onChange={(e) => handleServiceSwitch("pc", e.target.checked)}
+            />
+            <Label className="form-check-label" htmlFor="pcSwitch">
+              PC
+            </Label>
+          </div>
+
+          <div className="form-check form-switch">
+            <Input
+              className="form-check-input"
+              type="switch"
+              id="cctvSwitch"
+              checked={isCCTV}
+              onChange={(e) => handleServiceSwitch("cctv", e.target.checked)}
+            />
+            <Label className="form-check-label" htmlFor="cctvSwitch">
+              CCTV
+            </Label>
+          </div>
+        </div>
+
+        {errors.user_cctv_or_pc && (
+          <span className="text-danger small">{errors.user_cctv_or_pc}</span>
+        )}
+      </Col>
+
 
 
 

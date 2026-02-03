@@ -38,8 +38,11 @@ const createSuperAdmin = async () => {
         permission_path: 1,
         permission_category: "DASHBOARD",
       },
-
-
+      {
+        permission_name: "Inquiry",
+        permission_path: 1,
+        permission_category: "INQUIRY",
+      },
       {
         permission_name: "List",
         permission_path: 1,
@@ -339,7 +342,7 @@ const createSuperAdmin = async () => {
       where: {
         permission_category: {
           [Op.notIn]: [
-            "BUSINESS","SUPPLIER",
+            "BUSINESS", "SUPPLIER", "PRODUCT", "SETTINGS"
 
           ],
         },
@@ -361,7 +364,7 @@ const createSuperAdmin = async () => {
     const supplierPermissions = await Permission.findAll({
       where: {
         permission_category: {
-          [Op.in]: ["DASHBOARD", "PRODUCT" ,"REQ_TO_SUPPLIER" ,],
+          [Op.in]: ["DASHBOARD", "PRODUCT", "REQ_TO_SUPPLIER",],
         },
       },
     });

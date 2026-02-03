@@ -34,6 +34,7 @@ const Navdata = () => {
   const [isSupplier, setIsSupplier] = useState(false);
   const [isBeading, setIsBeading] = useState(false);
   const [isReqToSupplier, setIsReqToSupplier] = useState(false);
+  const [isInquiry, setIsInquiry] = useState(false);
 
   const [isLanding, setIsLanding] = useState(false);
 
@@ -87,6 +88,10 @@ const Navdata = () => {
     if (iscurrentState !== "QuotationBilling") {
       setIsQuotationBilling(false);
     }
+    if (iscurrentState !== "Inquiry") {
+      setIsInquiry(false);
+    }
+
     if (iscurrentState !== "Products") {
       setIsProducts(false);
     }
@@ -253,6 +258,7 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
+
     {
       id: "SUPPLIER",
       label: "Supplier",
@@ -266,6 +272,21 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
+    {
+      id: "INQUIRY",
+      label: "Inquiry",
+      icon: "mdi mdi-comment-question-outline",
+      link: "/inquiry-list",
+      stateVariables: isInquiry,
+      click: function (e) {
+        e.preventDefault();
+        setIsInquiry(!isInquiry);
+        setIscurrentState("Inquiry");
+        updateIconSidebar(e);
+        history("/inquiry-list");
+      },
+    },
+
     {
       id: "BEADING",
       label: "Beading",

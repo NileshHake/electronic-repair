@@ -62,6 +62,7 @@ const BusinessAdd = ({ isOpen, toggle, status }) => {
     user_address_description: "",
     user_terms_and_conditions: "",
     user_type: 2,
+    user_cctv_or_pc: 1,
     supplier_brand_id: 0,
     shop_lat: "",
     shop_lng: "",
@@ -108,6 +109,9 @@ const BusinessAdd = ({ isOpen, toggle, status }) => {
       newErrors.user_email = "Email required";
     else if (!businessData.user_password.trim())
       newErrors.user_password = "Password required";
+    else if (businessData.user_cctv_or_pc == 0) {
+      newErrors.user_cctv_or_pc = "Please select at least one service: PC or CCTV";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -116,7 +120,7 @@ const BusinessAdd = ({ isOpen, toggle, status }) => {
   const handleAddBusiness = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+ 
     dispatch(addBusiness(businessData));
   };
 
@@ -175,7 +179,7 @@ const BusinessAdd = ({ isOpen, toggle, status }) => {
                     {status == 1 ? "Supplier" : "Business"} Address
                   </NavLink>
                 </NavItem>
-                {!status   && <NavItem>
+                {!status && <NavItem>
                   <NavLink
                     className={classnames({ active: activeTab === "4" })}
                     onClick={() => toggleTab("4")}

@@ -119,6 +119,11 @@ const User = sequelize.define("tbl_user", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  user_cctv_or_pc: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
   user_status: {
     type: DataTypes.TINYINT,
     allowNull: false,
