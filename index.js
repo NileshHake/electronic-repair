@@ -59,7 +59,6 @@ sequelize
     console.log("✅ Database connected successfully");
     return sequelize.sync({
       alter: false
-
     });
   })
   .then(() => {
@@ -174,12 +173,12 @@ const order = require("./src/order/order_route");
 app.use("/api", order);
 
 
-const beading = require("./src/beading/beading_routes"); 
+const beading = require("./src/beading/beading_routes");
 app.use("/api", beading);
 
 
 
-const request = require("./src/Requests/requests_routes"); 
+const request = require("./src/Requests/requests_routes");
 app.use("/api", request);
 
 

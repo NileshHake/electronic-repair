@@ -17,6 +17,7 @@ const RepairPage = () => {
     const userInfo = Cookies.get("userInfo");
 
     if (!userInfo) {
+        
       router.replace("/login"); // replace is better than push for auth redirect
       return;
     }

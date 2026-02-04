@@ -15,7 +15,7 @@ export const repairApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success("✅ Repair stored successfully!");
+          toast.success(" Repair stored successfully!");
         } catch (err) {
           toast.error("❌ Failed to store repair!");
         }

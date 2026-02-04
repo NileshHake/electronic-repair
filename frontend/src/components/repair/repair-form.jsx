@@ -15,9 +15,12 @@ const RepairForm = () => {
     repair_device_brand_id: "",
     repair_device_password: "",
     repair_problem_description: "",
+    repair_workflow_id: 1,
+    repair_workflow_stage_id: 1,
+    repair_received_date: new Date(),
     repair_images: [], // multiple images
     repair_video: null, // one video
-    repair_created_by: "", // vendor id
+    repair_created_by: 1, // vendor id
   });
 
   const [previewImages, setPreviewImages] = useState([]);
@@ -93,6 +96,9 @@ const RepairForm = () => {
       fd.append("repair_device_password", formData.repair_device_password || "");
       fd.append("repair_problem_description", formData.repair_problem_description);
       fd.append("repair_created_by", formData.repair_created_by);
+      fd.append("repair_received_date", formData.repair_received_date);
+      fd.append("repair_workflow_id", formData.repair_workflow_id);
+      fd.append("repair_workflow_stage_id", formData.repair_workflow_stage_id);
 
       // ✅ multiple images (send as repair_images[])
       formData.repair_images.forEach((file) => {

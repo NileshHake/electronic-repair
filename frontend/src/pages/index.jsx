@@ -31,7 +31,7 @@ export default function Home() {
       <ProductBanner/>
        <NewArrivals/> 
       {/* <ProductSmArea/> */}
-      <BlogArea/>
+      {/* <BlogArea/> */}
       {/* <InstagramArea/>
       <CtaArea/> */}
       <Footer/>
