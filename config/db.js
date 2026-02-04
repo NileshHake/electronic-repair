@@ -1,30 +1,35 @@
-const { Sequelize } = require('sequelize');
+const { Sequelize } = require("sequelize");
 
-require('dotenv').config({
-  path: process.env.DOCKER ? '.env.docker' : '.env.local'
+// ✅ Load correct env file
+require("dotenv").config({
+  path: process.env.DOCKER ? ".env.docker" : ".env.local",
 });
 
-// const sequelize = new Sequelize(
-//   process.env.DB_NAME,
-//   process.env.DB_USER,
-//   process.env.DB_PASSWORD,
-//   {
-//     host: process.env.DB_HOST,
-//     port: process.env.DB_PORT,
-//     dialect: 'mysql',
-//   }
-// );
+// ✅ Sequelize using ENV (NO hardcode)
 const sequelize = new Sequelize(
-  "repaircrm_db",   // DB name
-  "root",           // MySQL user
-  "",               // MySQL password (empty)
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: "localhost",
-    port: 3306,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 3306,
     dialect: "mysql",
-    logging: false, // true karoge to SQL logs dikhenge
+    logging: false, // production clean logs
   }
 );
 
-
 module.exports = sequelize;
+
+// const sequelize = new Sequelize(
+//    "repaircrm_db",
+//    "root",
+//   "",
+//   {
+//     host: "localhost",
+//     port: 3306,
+//     dialect: 'mysql',
+//   }
+// );
+
+
+// module.exports = sequelize;
