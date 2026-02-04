@@ -58,7 +58,7 @@ sequelize
   .then(() => {
     console.log("✅ Database connected successfully");
     return sequelize.sync({
-      alter: false
+      alter: true
     });
   })
   .then(() => {
