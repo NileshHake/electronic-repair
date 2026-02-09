@@ -169,19 +169,19 @@ const ProductList = () => {
                                     <td>₹{item.product_purchase_price}</td>
                                     <td>₹{item.product_sale_price}</td>
                                     <td>₹{item.product_mrp}</td>
-                                   <td>
-  {item.product_status === 1 && (
-    <span className="badge bg-warning text-dark">New</span>
-  )}
+                                    <td>
+                                      {item.product_status === 1 && (
+                                        <span className="badge bg-warning text-dark">New</span>
+                                      )}
 
-  {item.product_status === 2 && (
-    <span className="badge bg-success">Accepted</span>
-  )}
+                                      {item.product_status === 2 && (
+                                        <span className="badge bg-success">Accepted</span>
+                                      )}
 
-  {item.product_status === 3 && (
-    <span className="badge bg-danger">Rejected</span>
-  )}
-</td>
+                                      {item.product_status === 3 && (
+                                        <span className="badge bg-danger">Rejected</span>
+                                      )}
+                                    </td>
 
                                     <td className="text-center">
                                       <ul className="list-inline hstack   mb-0">
@@ -209,7 +209,7 @@ const ProductList = () => {
                                             </button>
                                           </li>
                                         )}
-                                        {canDelete && (
+                                        {index >= 10 &&canDelete && (
                                           <li className="list-inline-item">
                                             <button
                                               onClick={() =>

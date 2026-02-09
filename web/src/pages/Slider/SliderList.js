@@ -93,9 +93,9 @@ const SliderList = () => {
                     </div>
 
                     {/* Button */}
-                    <Button onClick={() => setIsOpen(true)} color="success">
+                    {/* <Button onClick={() => setIsOpen(true)} color="success">
                       + Add Slider
-                    </Button>
+                    </Button> */}
                   </Col>
 
                 </Row>
@@ -191,14 +191,7 @@ const SliderList = () => {
                                   </button>
                                 </li>
 
-                                <li className="list-inline-item">
-                                  <button
-                                    onClick={() => onClickDelete(slider)}
-                                    className="text-danger border-0 bg-transparent"
-                                  >
-                                    <i className="ri-delete-bin-5-fill fs-16"></i>
-                                  </button>
-                                </li>
+                                
                               </ul>
                             </td>
                           </tr>
@@ -273,14 +266,14 @@ const SliderList = () => {
                                     </button>
                                   </li>
 
-                                  <li className="list-inline-item">
+                                  {/* <li className="list-inline-item">
                                     <button
                                       onClick={() => onClickDelete(slider)}
                                       className="text-danger border-0 bg-transparent"
                                     >
                                       <i className="ri-delete-bin-5-fill fs-16"></i>
                                     </button>
-                                  </li>
+                                  </li> */}
                                 </ul>
                               </td>
                             </tr>

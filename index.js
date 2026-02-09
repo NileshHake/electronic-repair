@@ -55,16 +55,14 @@ app.use((req, res, next) => {
 
 sequelize
   .authenticate()
-  .then(() => {
+  .then(async () => {
     console.log("✅ Database connected successfully");
-    return sequelize.sync({
-      alter: true
-    });
-  })
-  .then(() => {
+
+    await sequelize.sync({ alter: false });
     console.log("🔁 Models synchronized with database (force: true)");
 
-    require("./src/CreateData/create_data");
+    const { findingAlready } = require("./src/CreateData/create_data");
+    await findingAlready(); // ✅ call function here
   })
   .catch((err) => {
     console.error("❌ Database connection or sync failed:", err);

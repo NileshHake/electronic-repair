@@ -1,3 +1,4 @@
+const { QueryTypes } = require("sequelize");
 const sequelize = require("../../config/db");
 const { getCreatedBy } = require("../helper/CurrentUser");
 const { saveImage, deleteImage } = require("../helper/fileUpload");
@@ -436,25 +437,11 @@ const filterProducts = async (req, res) => {
   }
 };
 
+
+
 const SearchProducts = async (req, res) => {
   try {
     const { search } = req.body;
-
-    // ✅ Base condition (ALWAYS applied)
-    let whereCondition = `
-      WHERE pro.product_status = 2
-    `;
-
-    // ✅ Search condition
-    if (search) {
-      whereCondition += `
-        AND (
-          LOWER(pro.product_name) LIKE LOWER(:search)
-          OR LOWER(cat.category_name) LIKE LOWER(:search)
-          OR LOWER(br.brand_name) LIKE LOWER(:search)
-        )
-      `;
-    }
 
     const products = await sequelize.query(
       `
@@ -466,33 +453,38 @@ const SearchProducts = async (req, res) => {
         cat.category_id,
         cat.category_name
       FROM tbl_products pro
-      INNER JOIN tbl_categories cat
-        ON pro.product_category = cat.category_id
-      INNER JOIN tbl_brands br
-        ON pro.product_brand = br.brand_id
-      ${whereCondition}
+      LEFT JOIN tbl_brands br 
+        ON br.brand_id = pro.product_brand
+      LEFT JOIN tbl_categories cat 
+        ON cat.category_id = pro.product_category
+      WHERE pro.product_status = 2
+        AND CHAR_LENGTH(TRIM(:search)) >= 3
+        AND (
+          LOWER(TRIM(pro.product_name)) COLLATE utf8mb4_general_ci
+            LIKE CONCAT('%', LOWER(TRIM(:search)), '%') COLLATE utf8mb4_general_ci
+          OR LOWER(TRIM(COALESCE(br.brand_name, ''))) COLLATE utf8mb4_general_ci
+            LIKE CONCAT('%', LOWER(TRIM(:search)), '%') COLLATE utf8mb4_general_ci
+          OR LOWER(TRIM(COALESCE(cat.category_name, ''))) COLLATE utf8mb4_general_ci
+            LIKE CONCAT('%', LOWER(TRIM(:search)), '%') COLLATE utf8mb4_general_ci
+        )
       ORDER BY pro.product_id DESC
       LIMIT 20
       `,
       {
-        replacements: search ? { search: `%${search}%` } : {},
-        type: sequelize.QueryTypes.SELECT,
+        replacements: { search },
+        type: QueryTypes.SELECT,
       }
-    );
+    ); 
 
-    return res.status(200).json({
-      success: true,
-      data: products,
-    });
-
+    return res.status(200).json({ success: true, data: products });
   } catch (error) {
     console.error("Search Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Search failed",
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
 
 
 

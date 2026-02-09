@@ -21,13 +21,13 @@ const HeaderSearchForm = () => {
   // 🔹 On select item → navigate to shop with category + brand
   const handleChange = (selected) => {
     if (selected.length > 0) {
-       
+
 
       const product = selected[0];
       setSearchText(product.product_name);
 
-    // ✅ Navigate to /shop with params
-       
+      // ✅ Navigate to /shop with params
+
 
       router.push({
         pathname: "/shop",
@@ -38,6 +38,7 @@ const HeaderSearchForm = () => {
       });
     }
   };
+console.log("data",data);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -58,6 +59,9 @@ const HeaderSearchForm = () => {
             onChange={handleChange}
             placeholder="Search for Products..."
             clearButton
+            maxResults={50}     
+            paginate={false}
+            filterBy={() => true}   
             inputProps={{
               style: {
                 border: "none",
@@ -66,13 +70,17 @@ const HeaderSearchForm = () => {
               },
             }}
             renderMenuItemChildren={(option) => (
-              <div key={option.product_id}>
-                <strong>{option.product_name}</strong>
-                <div style={{ fontSize: "12px", color: "#888" }}>
-                  {option.brand_name} · {option.category_name}
+              <div key={option.product_id} style={{ lineHeight: 1.2 }}>
+                <div className="fw-semibold">{option.product_name}</div>
+
+                <div style={{ fontSize: 12, color: "#666" }}>
+                  Brand: {option.brand_name || "-"} | Category: {option.category_name || "-"}
                 </div>
+
+               
               </div>
             )}
+
           />
         </div>
 

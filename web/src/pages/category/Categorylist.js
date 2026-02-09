@@ -98,107 +98,110 @@ const CategoryList = () => {
                 </Row>
               </CardHeader>
 
-         <CardBody className="pt-0">
-  <div className="table-responsive">
-    <table className="table align-middle table-hover mb-0">
-      <thead className="table-light text-uppercase text-muted">
-        <tr>
-          <th style={{ width: "5%" }}>#</th>
-          <th style={{ width: "10%" }} className="text-center">
-            Image
-          </th>
-          <th style={{ width: "30%" }}>Category Name</th>
-          <th style={{ width: "25%" }} className="text-center">
-            Sub Category
-          </th>
-          <th style={{ width: "15%" }} className="text-center">
-            Actions
-          </th>
-        </tr>
-      </thead>
+              <CardBody className="pt-0">
+                <div className="table-responsive">
+                  <table className="table align-middle table-hover mb-0">
+                    <thead className="table-light text-uppercase text-muted">
+                      <tr>
+                        <th style={{ width: "5%" }}>#</th>
+                        <th style={{ width: "10%" }} className="text-center">
+                          Image
+                        </th>
+                        <th style={{ width: "30%" }}>Category Name</th>
+                        <th style={{ width: "25%" }} className="text-center">
+                          Sub Category
+                        </th>
+                        <th style={{ width: "15%" }} className="text-center">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
 
-      <tbody>
-        {categories && categories.length > 0 ? (
-          categories.map((cat, index) => (
-            <tr key={cat.category_id}>
-              <td>{index + 1}</td>
+                    <tbody>
+                      {categories && categories.length > 0 ? (
+                        categories.map((cat, index) => (
+                          <tr key={cat.category_id}>
+                            <td>{index + 1}</td>
 
-              {/* Image */}
-              <td className="text-center">
-                {cat.category_img ? (
-                  <img
-                    src={`${api.IMG_URL}category_img/${cat.category_img}`}
-                    alt="category"
-                    className="category-img"
-                  width="115px" height="115px"
-                  />
-                ) : (
-                  <D_img width="45px" height="45px" />
-                )}
-              </td>
+                            {/* Image */}
+                            <td className="text-center">
+                              {cat.category_img ? (
+                                <img
+                                  src={`${api.IMG_URL}category_img/${cat.category_img}`}
+                                  alt="category"
+                                  className="category-img"
+                                  width="115px" height="115px"
+                                />
+                              ) : (
+                                <D_img width="45px" height="45px" />
+                              )}
+                            </td>
 
-              {/* Category Name */}
-              <td className="fw-semibold">{cat.category_name}</td>
+                            {/* Category Name */}
+                            <td className="fw-semibold">{cat.category_name}</td>
 
-              {/* Sub Category Button */}
-              <td className="text-center">
-                <Button
-                  size="sm"
-                  color="info"
-                  onClick={() =>
-                    navigate(`/sub-category-list/${cat.category_id}`)
-                  }
-                >
-                  View Sub Category
-                </Button>
-              </td>
+                            {/* Sub Category Button */}
+                            <td className="text-center">
+                              <Button
+                                size="sm"
+                                color="info"
+                                onClick={() =>
+                                  navigate(`/sub-category-list/${cat.category_id}`)
+                                }
+                              >
+                                View Sub Category
+                              </Button>
+                            </td>
 
-              {/* Actions */}
-              <td className="text-center">
-                <ul className="list-inline hstack gap-2 mb-0 justify-content-center">
-                  <li className="list-inline-item">
-                    <button
-                      className="text-primary border-0 bg-transparent"
-                      onClick={() => {
-                        setCategoryData(cat);
-                        setIsUpdateOpen(true);
-                      }}
-                    >
-                      <i className="ri-pencil-fill fs-16"></i>
-                    </button>
-                  </li>
+                            {/* Actions */}
+                            <td className="text-center">
+                              <ul className="list-inline hstack gap-2 mb-0 justify-content-center">
+                                <li className="list-inline-item">
+                                  <button
+                                    className="text-primary border-0 bg-transparent"
+                                    onClick={() => {
+                                      setCategoryData(cat);
+                                      setIsUpdateOpen(true);
+                                    }}
+                                  >
+                                    <i className="ri-pencil-fill fs-16"></i>
+                                  </button>
+                                </li>
 
-                  <li className="list-inline-item">
-                    <button
-                      onClick={() => onClickDelete(cat)}
-                      className="text-danger border-0 bg-transparent"
-                    >
-                      <i className="ri-delete-bin-5-fill fs-16"></i>
-                    </button>
-                  </li>
-                </ul>
-              </td>
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="5" className="text-center py-5">
-              <lord-icon
-                src="https://cdn.lordicon.com/msoeawqm.json"
-                trigger="loop"
-                colors="primary:#405189,secondary:#0ab39c"
-                style={{ width: "72px", height: "72px" }}
-              ></lord-icon>
-              <div className="mt-4">
-                <h5>Sorry! No Result Found</h5>
-              </div>
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-</CardBody>
+                                {index >= 12 && (
+                                  <li className="list-inline-item">
+                                    <button
+                                      onClick={() => onClickDelete(cat)}
+                                      className="text-danger border-0 bg-transparent"
+                                    >
+                                      <i className="ri-delete-bin-5-fill fs-16"></i>
+                                    </button>
+                                  </li>
+                                )}
+
+                              </ul>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="text-center py-5">
+                            <lord-icon
+                              src="https://cdn.lordicon.com/msoeawqm.json"
+                              trigger="loop"
+                              colors="primary:#405189,secondary:#0ab39c"
+                              style={{ width: "72px", height: "72px" }}
+                            ></lord-icon>
+                            <div className="mt-4">
+                              <h5>Sorry! No Result Found</h5>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardBody>
 
             </Card>
           </Col>

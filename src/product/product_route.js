@@ -13,7 +13,7 @@ router.post("/filter-products", controller.filterProducts);
 router.post("/search-products", controller.SearchProducts); 
 router.post("/trending-product-filter", controller.filterstrendingproduct);
 
-router.get("/product/single/:id", verifyToken, controller.Get);
+router.get("/product/single/:id",   controller.Get);
 router.put("/product/update", verifyToken, controller.update);
 router.delete("/product/delete/:id", verifyToken, controller.deleted);
 

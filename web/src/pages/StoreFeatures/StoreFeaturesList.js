@@ -72,11 +72,11 @@ const StoreFeaturesList = () => {
                                     <div className="col-sm">
                                         <h5 className="mb-0 fw-bold">Store Features</h5>
                                     </div>
-                                    <div className="col-sm-auto">
+                                    {/* <div className="col-sm-auto">
                                         <Button color="success" onClick={() => setIsAddOpen(true)}>
                                             + Add Feature
                                         </Button>
-                                    </div>
+                                    </div> */}
                                 </Row>
                             </CardHeader>
 
@@ -127,14 +127,14 @@ const StoreFeaturesList = () => {
                                                                         <i className="ri-pencil-fill fs-16"></i>
                                                                     </button>
                                                                 </li>
-                                                                <li className="list-inline-item">
+                                                                {/* <li className="list-inline-item">
                                                                     <button
                                                                         onClick={() => onClickDelete(feature)}
                                                                         className="text-danger border-0 bg-transparent"
                                                                     >
                                                                         <i className="ri-delete-bin-5-fill fs-16"></i>
                                                                     </button>
-                                                                </li>
+                                                                </li> */}
                                                             </ul>
                                                         </td>
                                                     </tr>
