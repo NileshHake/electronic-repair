@@ -20,7 +20,6 @@ const store = async (req, res) => {
       product_color, product_material, product_weight,
       product_status,
       product_on_sale,
-      product_discount,
       product_on_free_delivery,
       product_reject_message,
       product_delivery_charge,
@@ -39,6 +38,21 @@ const store = async (req, res) => {
       }
     }
 
+    /* ------------------ DISCOUNT LOGIC ------------------ */
+    const mrp = Number(product_mrp) || 0;
+    const sale = Number(product_sale_price) || 0;
+
+    let product_discount_amount = 0;
+    let product_discount_percent = 0;
+
+    if (mrp > 0 && sale >= 0 && sale <= mrp) {
+      product_discount_amount = Number((mrp - sale).toFixed(2));
+      product_discount_percent = Number(
+        ((product_discount_amount / mrp) * 100).toFixed(2)
+      );
+    }
+
+
     const productData = await Product.create({
       product_name,
       product_tax,
@@ -47,18 +61,25 @@ const store = async (req, res) => {
       product_description,
       product_usage_type: product_usage_type || "sale",
       product_category,
-      product_color, product_material, product_weight,
+      product_color,
+      product_material,
+      product_weight,
       product_image: JSON.stringify(product_images),
+
       product_purchase_price,
-      product_sale_price,
       product_mrp,
+      product_sale_price,
+
+      product_discount_amount,
+      product_discount_percent,
+
       product_status,
       product_on_sale,
-      product_discount,
       product_on_free_delivery,
       product_reject_message,
       product_delivery_charge,
     });
+
 
     res.status(201).json({
       message: "✅ Product created successfully",
@@ -474,7 +495,7 @@ const SearchProducts = async (req, res) => {
         replacements: { search },
         type: QueryTypes.SELECT,
       }
-    ); 
+    );
 
     return res.status(200).json({ success: true, data: products });
   } catch (error) {
@@ -520,7 +541,19 @@ const update = async (req, res) => {
         newImages.push(savedName);
       }
     }
+    /* ------------------ DISCOUNT LOGIC ------------------ */
+    const mrp = Number(req.body.product_mrp) || 0;
+    const sale = Number(req.bodyproduct_sale_price) || 0;
 
+    let product_discount_amount = 0;
+    let product_discount_percent = 0;
+
+    if (mrp > 0 && sale >= 0 && sale <= mrp) {
+      product_discount_amount = Number((mrp - sale).toFixed(2));
+      product_discount_percent = Number(
+        ((product_discount_amount / mrp) * 100).toFixed(2)
+      );
+    }
     await product.update({
       ...req.body,
       product_image: JSON.stringify(newImages),

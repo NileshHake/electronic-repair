@@ -68,8 +68,12 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.BOOLEAN,
     allowNull: true,
   },
-  product_discount: {
-    type: DataTypes.STRING,
+  product_discount_amount: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  product_discount_percent: {
+    type: DataTypes.DECIMAL(5, 2),
     allowNull: true,
   },
   product_on_free_delivery: {

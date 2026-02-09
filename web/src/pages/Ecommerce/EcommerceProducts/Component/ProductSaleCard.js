@@ -42,7 +42,7 @@ const ProductSaleCard = ({ product, onViewDetails }) => {
             add_to_card_product_sale_price: product.product_sale_price,
             add_to_card_product_mrp: product.product_mrp,
             add_to_card_product_name: product.product_name,
-            add_to_card_product_discount: product.product_dis
+            add_to_card_product_discount_amount: product.product_dis
         }
         dispatch(addToCart(addtocarddata));
     }

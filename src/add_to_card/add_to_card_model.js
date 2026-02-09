@@ -37,7 +37,7 @@ const AddToCard = sequelize.define(
             type: DataTypes.DECIMAL(10, 2),
             defaultValue: 0,
         },
-        add_to_card_product_discount: {
+        add_to_card_product_discount_amount: {
             type: DataTypes.DECIMAL(10, 2),
             defaultValue: 0,
         },
@@ -48,7 +48,7 @@ const AddToCard = sequelize.define(
 
 
 
-        add_to_card_product_discount: {
+        add_to_card_product_discount_amount: {
             type: DataTypes.DECIMAL(10, 2),
             defaultValue: 0,
         },

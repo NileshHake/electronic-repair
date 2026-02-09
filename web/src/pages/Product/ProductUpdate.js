@@ -187,7 +187,7 @@ const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
       dispatch(resetAddTaxResponse());
     }
     const mrp = Number(productData.product_mrp);
-    const discount = Number(productData.product_discount);
+    const discount = Number(productData.product_discount_amount);
 
     if (
       productData.product_on_sale === 1 &&
@@ -203,7 +203,7 @@ const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
       }));
     }
   }, [addCategoryResponse, addTaxResponse, dispatch, toggle, productData.product_mrp,
-    productData.product_discount,
+    productData.product_discount_amount,
     productData.product_on_sale,]);
   return (
     <Modal size="xl" isOpen={isOpen} centered toggle={() => toggle()}>
@@ -460,7 +460,7 @@ const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
                               handleInputChange("product_on_sale", isSale);
 
                               // reset discount when OFF
-                              if (isSale === 0) handleInputChange("product_discount", 0);
+                              if (isSale === 0) handleInputChange("product_discount_amount", 0);
                             }}
                           />
                         </div>
@@ -473,12 +473,12 @@ const ProductUpdate = ({ isOpen, toggle, isProductData }) => {
                           min={0}
                           max={100}
                           className="form-control mt-2"
-                          value={productData.product_discount || ""}
+                          value={productData.product_discount_amount || ""}
                           placeholder="Enter discount %"
                           onChange={(e) => {
                             let discount = Number(e.target.value);
                             if (discount > 100) discount = 100;
-                            handleInputChange("product_discount", discount);
+                            handleInputChange("product_discount_amount", discount);
                           }}
                         />
                       )}

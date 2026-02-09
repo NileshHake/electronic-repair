@@ -170,7 +170,7 @@ const EcommerceAddProduct = (props) => {
       rating: 4.5,
       manufacturer_name: "",
       manufacturer_brand: "",
-      product_discount: "",
+      product_discount_amount: "",
       meta_title: "",
       meta_keyword: "",
       product_tags: "",
@@ -184,7 +184,7 @@ const EcommerceAddProduct = (props) => {
       status: Yup.string().required("Please Enter a Product status"),
       manufacturer_name: Yup.string().required("Please Enter a Manufacturer Name"),
       manufacturer_brand: Yup.string().required("Please Enter a Manufacturer Brand"),
-      product_discount: Yup.string().required("Please Enter a Product Discount"),
+      product_discount_amount: Yup.string().required("Please Enter a Product Discount"),
       meta_title: Yup.string().required("Please Enter a Meta Title"),
       meta_keyword: Yup.string().required("Please Enter a Meta Keyword"),
       product_tags: Yup.string().required("Please Enter a Product Tags"),
@@ -526,16 +526,16 @@ const EcommerceAddProduct = (props) => {
                                 className="form-control"
                                 id="product-Discount-input"
                                 placeholder="Enter discount"
-                                name="product_discount"
-                                aria-label="product_discount"
+                                name="product_discount_amount"
+                                aria-label="product_discount_amount"
                                 aria-describedby="product-orders-addon"
-                                value={validation.values.product_discount || ""}
+                                value={validation.values.product_discount_amount || ""}
                                 onBlur={validation.handleBlur}
                                 onChange={validation.handleChange}
-                                invalid={validation.errors.product_discount && validation.touched.product_discount ? true : false}
+                                invalid={validation.errors.product_discount_amount && validation.touched.product_discount_amount ? true : false}
                               />
-                              {validation.errors.product_discount && validation.touched.product_discount ? (
-                                <FormFeedback type="invalid">{validation.errors.product_discount}</FormFeedback>
+                              {validation.errors.product_discount_amount && validation.touched.product_discount_amount ? (
+                                <FormFeedback type="invalid">{validation.errors.product_discount_amount}</FormFeedback>
                               ) : null}
                             </div>
                           </div>
