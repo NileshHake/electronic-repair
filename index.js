@@ -175,6 +175,14 @@ const beading = require("./src/beading/beading_routes");
 app.use("/api", beading);
 
 
+const generation = require("./src/Generation/generation_routes");
+app.use("/api", generation);
+
+
+const ram = require("./src/Ram/ram_routes");
+app.use("/api", ram);
+
+
 
 const request = require("./src/Requests/requests_routes");
 app.use("/api", request);

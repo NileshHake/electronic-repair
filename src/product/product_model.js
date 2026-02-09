@@ -84,6 +84,10 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  product_cpu_gen_series: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   product_reject_message: {
     type: DataTypes.STRING,
     allowNull: true,

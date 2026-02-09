@@ -21,6 +21,7 @@ const store = async (req, res) => {
       product_status,
       product_on_sale,
       product_on_free_delivery,
+      product_cpu_gen_series,
       product_reject_message,
       product_delivery_charge,
     } = req.body;
@@ -76,6 +77,7 @@ const store = async (req, res) => {
       product_status,
       product_on_sale,
       product_on_free_delivery,
+      product_cpu_gen_series,
       product_reject_message,
       product_delivery_charge,
     });

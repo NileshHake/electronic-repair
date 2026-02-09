@@ -639,6 +639,37 @@ const Navdata = () => {
             },
           ]
           : []),
+...(permissions.find(
+  (p) =>
+    p.permission_category === "SETTINGS" &&
+    p.permission_path === "17" // Generation permission
+)
+  ? [
+      {
+        id: "generation",
+        label: "Generation",
+        icon: "mdi mdi-chip",
+        link: "/generation-list",
+        parentId: "SETTINGS",
+      },
+    ]
+  : []),
+
+...(permissions.find(
+  (p) =>
+    p.permission_category === "SETTINGS" &&
+    p.permission_path === "18" // RAM permission
+)
+  ? [
+      {
+        id: "ram",
+        label: "RAM",
+        icon: "mdi mdi-memory",
+        link: "/ram-list",
+        parentId: "SETTINGS",
+      },
+    ]
+  : []),
 
         ...(permissions.find(
           (p) =>

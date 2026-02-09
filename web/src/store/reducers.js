@@ -103,6 +103,8 @@ import { OrderReducer } from "./order";
 import { SupplierReducer } from "./Supplier";
 import { BeadingReducer } from "./Beading";
 import { RequestsReducer } from "./Requests";
+import { GenerationReducer } from "./Generation";
+import { RamReducer } from "./Ram";
 
 const rootReducer = combineReducers({
   // public
@@ -132,7 +134,9 @@ const rootReducer = combineReducers({
   DeviceColorReducer,
   DeviceModelReducer,
   StoreFeatureReducer,
+  GenerationReducer,
   ServiceTypeReducer,
+  RamReducer,
   BusinessReducer,
   OtpReducer,
   StageRemarkReducer,

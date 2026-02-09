@@ -7,6 +7,8 @@ import ProductTabs from "./component/ProductTabs";
 import CategoryAdd from "../category/CategoryAdd";
 import TaxAdd from "../Tax/TaxAdd";
 import BrandAdd from "../Brand/BrandAdd";
+import RamAdd from "../Ram/RamAdd";
+import GenerationAdd from "../Generation/GenerationAdd";
 
 
 const ProductAdd = ({ isOpen, toggle }) => {
@@ -63,6 +65,26 @@ const ProductAdd = ({ isOpen, toggle }) => {
           toggle={() => lookups.ui.setIsBrandOpen(false)}
         />
       )}
+      {lookups.ui.isGenerationOpen && (
+  <GenerationAdd
+    isOpen={lookups.ui.isGenerationOpen}
+    toggle={() => {
+      lookups.ui.setIsGenerationOpen(false);
+      lookups.refetch(); // ✅ refresh list after add
+    }}
+  />
+)}
+
+{lookups.ui.isRamOpen && (
+  <RamAdd
+    isOpen={lookups.ui.isRamOpen}
+    toggle={() => {
+      lookups.ui.setIsRamOpen(false);
+      lookups.refetch(); // ✅ refresh list after add
+    }}
+  />
+)}
+
     </Modal>
   );
 };

@@ -278,6 +278,8 @@ import DeliveredOrderList from "../pages/OrderTracking/DeliveredOrderList";
 import SupplierList from "../pages/Supplier/Supplierlist";
 import BeadingList from "../pages/Beading/Beadinglist";
 import ReqToSupplierList from "../pages/Requests/ReqToSupplierList";
+import GenerationList from "../pages/Generation/GenerationList";
+import RamList from "../pages/Ram/Ramlist";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -342,6 +344,9 @@ const authProtectedRoutes = [
   { path: "/order-dispatch", component: <DispatchOrderList /> },
   { path: "/order-rejected", component: <RejectedOrderList /> },
   { path: "/order-delivered", component: <DeliveredOrderList /> },
+  // SETTINGS routes
+  { path: "/generation-list", component: <GenerationList /> },
+  { path: "/ram-list", component: <RamList /> },
 
   { path: "/store-feature-list", component: <StoreFeaturesList /> },
   { path: "/quotation-billing", component: <QuotationAndBillingList /> },

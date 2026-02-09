@@ -21,6 +21,8 @@ const Product = require("../product/product_model");
 const Category = require("../category/category_model");
 const Slider = require("../slider/slider_model");
 const StoreFeature = require("../store_features/store_feature_model");
+const Generations = require("../Generation/generation_model");
+const Ram = require("../Ram/ram_model");
 
 const createSuperAdmin = async () => {
   const t = await sequelize.transaction();
@@ -116,6 +118,8 @@ const createSuperAdmin = async () => {
       { permission_name: "Services Type", permission_path: 14, permission_category: "SETTINGS" },
       { permission_name: "Storage Location", permission_path: 15, permission_category: "SETTINGS" },
       { permission_name: "Device Color", permission_path: 16, permission_category: "SETTINGS" },
+      { permission_name: "Generation", permission_path: 17, permission_category: "SETTINGS" },
+      { permission_name: "Ram", permission_path: 18, permission_category: "SETTINGS" },
     ];
 
     await Permission.bulkCreate(staticpermissions, { transaction: t, ignoreDuplicates: true });
@@ -600,6 +604,155 @@ const createSuperAdmin = async () => {
       ,
       {
         ignoreDuplicates: true // optional (needs unique index on title)
+      }
+    );
+    await Generations.bulkCreate(
+      [
+        // 🔵 INTEL (brand = 1)
+        {
+          generations_name: "1st Gen (Nehalem)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "2nd Gen (Sandy Bridge)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "3rd Gen (Ivy Bridge)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "4th Gen (Haswell)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "5th Gen (Broadwell)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "6th Gen (Skylake)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "7th Gen (Kaby Lake)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "8th Gen (Coffee Lake)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "9th Gen (Coffee Lake Refresh)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "10th Gen (Comet Lake)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "11th Gen (Rocket Lake)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "12th Gen (Alder Lake)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "13th Gen (Raptor Lake)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "14th Gen (Raptor Lake Refresh)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "15th Gen (Next Gen)",
+          generations_brand: 1,
+          generations_created_by: 1,
+        },
+
+        // 🔴 AMD (brand = 2)
+        {
+          generations_name: "Ryzen 1000 (Zen 1)",
+          generations_brand: 2,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "Ryzen 2000 (Zen+)",
+          generations_brand: 2,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "Ryzen 3000 (Zen 2)",
+          generations_brand: 2,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "Ryzen 4000 (OEM)",
+          generations_brand: 2,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "Ryzen 5000 (Zen 3)",
+          generations_brand: 2,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "Ryzen 6000 (Laptop)",
+          generations_brand: 2,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "Ryzen 7000 (Zen 4)",
+          generations_brand: 2,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "Ryzen 8000G (Desktop APU)",
+          generations_brand: 2,
+          generations_created_by: 1,
+        },
+        {
+          generations_name: "Ryzen 9000 (Zen 5)",
+          generations_brand: 2,
+          generations_created_by: 1,
+        },
+      ],
+      {
+        ignoreDuplicates: true, // ✅ requires unique index (brand + value)
+      }
+    );
+    await Ram.bulkCreate(
+      [
+        {
+          ram_name: "DDR3",
+          ram_created_by: 1,
+        },
+        {
+          ram_name: "DDR4",
+          ram_created_by: 1,
+        },
+        {
+          ram_name: "DDR5",
+          ram_created_by: 1,
+        },
+      ],
+      {
+        ignoreDuplicates: true, // optional (add unique index on ram_name)
       }
     );
     return true;

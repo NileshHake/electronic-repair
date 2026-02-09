@@ -24,8 +24,11 @@ export const useProductForm = ({ toggle }) => {
         product_description: "",
         product_image: [],
         product_on_sale: 0,
+        product_motherboard_socket: "",
         product_discount_amount: "",
         product_on_free_delivery: 0,
+        product_cpu_gen_series: 0,
+        product_motherboard_socket: "",
         product_delivery_charge: "",
     });
 
@@ -35,7 +38,7 @@ export const useProductForm = ({ toggle }) => {
         setProductData((prev) => ({ ...prev, [key]: value }));
     };
 
-    
+
     // ✅ success close
     useEffect(() => {
         if (addProductResponse === true) {
@@ -83,7 +86,7 @@ export const useProductForm = ({ toggle }) => {
             return;
         }
 
-        setErrorMessage({}); 
+        setErrorMessage({});
 
         dispatch(addProduct(productData)); // (keep same as your API)
     };
