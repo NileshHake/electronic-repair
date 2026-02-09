@@ -130,14 +130,15 @@ const GenerationList = () => {
                                   </button>
                                 </li>
 
-                                <li className="list-inline-item">
+                              
+                              { index >= 20 &&   <li className="list-inline-item">
                                   <button
                                     onClick={() => onClickDelete(gen)}
                                     className="text-danger border-0 bg-transparent"
                                   >
                                     <i className="ri-delete-bin-5-fill fs-16"></i>
                                   </button>
-                                </li>
+                                </li>}
                               </ul>
                             </td>
                           </tr>
