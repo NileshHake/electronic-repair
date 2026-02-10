@@ -248,46 +248,19 @@ function* getAdminProductListSaga({ payload }) {
 
 function* addProductSaga({ payload }) {
   try {
-    let response;
-
-    // If payload contains file(s), send multipart/form-data
-    if (payload.product_image && payload.product_image.length > 0) {
-      const formData = new FormData();
-
-      const fields = [
-        "product_name",
-        "product_tax",
-        "product_brand",
-        "product_created_by",
-        "product_category",
-        "product_purchase_price",
-        "product_sale_price",
-        "product_mrp",
-        "product_status",
-      ];
-
-      fields.forEach((key) => formData.append(key, payload[key] || ""));
-
-      payload.product_image.forEach((file) => {
-        formData.append("product_img", file);
-      });
-
-
-      response = yield call(addProductApi, formData);
-    } else {
-
-      response = yield call(api.create, `/product/store`, payload);
-    }
+    // ✅ payload can be FormData OR normal object
+    const response = yield call(addProductApi, payload);
 
     yield put(productApiResponseSuccess(ADD_PRODUCT, response));
     yield call(getProductListSaga);
-    toast.success("  Product added successfully!");
+    toast.success("Product added successfully!");
   } catch (error) {
     console.error("❌ Error in addProductSaga:", error);
     yield put(productApiResponseError(ADD_PRODUCT, error));
     toast.error("Failed to add product!");
   }
 }
+
 
 function* updateProductSaga({ payload }) {
   try {

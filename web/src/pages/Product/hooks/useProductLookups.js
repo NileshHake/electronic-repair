@@ -16,7 +16,7 @@ export const useProductLookups = () => {
     isCategoryOpen: false,
     isTaxOpen: false,
     isBrandOpen: false,
-    isGenerationOpen: false, // ✅ add
+    isGenerationOpen: false, // add✅ 
     isRamOpen: false,        // ✅ add
 
     setIsCategoryOpen: () => {},

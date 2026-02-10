@@ -6,42 +6,23 @@ const Product = require("./product_model");
 
 const store = async (req, res) => {
   try {
-    let {
-      product_name,
-      product_tax,
-      product_brand,
-      product_usage_type,
-      product_created_by,
-      product_category,
-      product_description,
-      product_purchase_price,
-      product_sale_price,
-      product_mrp,
-      product_color, product_material, product_weight,
-      product_status,
-      product_on_sale,
-      product_on_free_delivery,
-      product_cpu_gen_series,
-      product_reject_message,
-      product_delivery_charge,
-    } = req.body;
+    let newImages = [];
 
-    let product_images = [];
-    product_created_by = getCreatedBy(req.currentUser);
-    if (req.files && req.files.product_img) {
-      const files = Array.isArray(req.files.product_img)
-        ? req.files.product_img
-        : [req.files.product_img];
+    // ✅ handle images (same key as your update)
+    if (req.files && req.files["product_image[]"]) {
+      const files = Array.isArray(req.files["product_image[]"])
+        ? req.files["product_image[]"]
+        : [req.files["product_image[]"]];
 
       for (const file of files) {
-        const savedPath = await saveImage(file, "product_images");
-        product_images.push(savedPath);
+        const savedName = await saveImage(file, "product_images");
+        newImages.push(savedName);
       }
     }
 
     /* ------------------ DISCOUNT LOGIC ------------------ */
-    const mrp = Number(product_mrp) || 0;
-    const sale = Number(product_sale_price) || 0;
+    const mrp = Number(req.body.product_mrp) || 0;
+    const sale = Number(req.body.product_sale_price) || 0; // ✅ FIX
 
     let product_discount_amount = 0;
     let product_discount_percent = 0;
@@ -53,48 +34,32 @@ const store = async (req, res) => {
       );
     }
 
+    // ✅ created_by from token
+    const product_created_by = getCreatedBy(req.currentUser);
 
+    // ✅ create record
     const productData = await Product.create({
-      product_name,
-      product_tax,
-      product_brand,
+      ...req.body,
       product_created_by,
-      product_description,
-      product_usage_type: product_usage_type || "sale",
-      product_category,
-      product_color,
-      product_material,
-      product_weight,
-      product_image: JSON.stringify(product_images),
-
-      product_purchase_price,
-      product_mrp,
-      product_sale_price,
-
+      product_image: JSON.stringify(newImages),
       product_discount_amount,
       product_discount_percent,
-
-      product_status,
-      product_on_sale,
-      product_on_free_delivery,
-      product_cpu_gen_series,
-      product_reject_message,
-      product_delivery_charge,
     });
 
-
-    res.status(201).json({
+    return res.status(201).json({
       message: "✅ Product created successfully",
       data: productData,
     });
   } catch (error) {
     console.error("❌ Error creating product:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error creating product",
       error: error.message,
     });
   }
 };
+
+
 
 const index = async (req, res) => {
   try {

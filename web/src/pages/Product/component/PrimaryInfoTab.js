@@ -8,23 +8,87 @@ import SelectWithAdd from "./SelectWithAdd";
 
 const PrimaryInfoTab = ({ form, lookups }) => {
     const { productData, setField, errorMessage } = form;
-    const { categories, brands, taxes, generations, rams } = lookups.data;
+    const {
+        categories = [],
+        brands = [],
+        taxes = [],
+        generations = [],
+        rams = [],
+    } = lookups?.data || {};
 
+
+
+    // ✅ helper: works if SelectWithAdd returns number OR option object
+    const getVal = (opt) => opt?.value ?? opt ?? "";
+
+    // ✅ helper for multi: works if returns array of numbers OR array of option objects
+    const getMultiVals = (arr) => {
+        if (!Array.isArray(arr)) return [];
+        return arr.map((x) => x?.value ?? x).filter(Boolean);
+    };
 
     const usageOptions = [
         { value: "sale", label: "Only Sale" },
         { value: "repair", label: "Only Repair" },
         { value: "both", label: "Sale & Repair Both" },
     ];
+
     const selectedCategoryId = Number(productData.product_category);
+    const selectedBrandId = Number(productData.product_brand);
+    const supportBrandId = Number(productData.product_support_brand_id);
+
     const filteredBrands = !selectedCategoryId
         ? brands
         : selectedCategoryId === 1
             ? brands.slice(0, 2)
             : brands;
 
+    // ✅ options
+    const categoryOptions = categories.map((c) => ({
+        value: c.category_id,
+        label: c.category_name,
+    }));
 
-    const selectedBrandId = Number(productData.product_brand);
+    const brandOptions = filteredBrands.map((b) => ({
+        value: b.brand_id,
+        label: b.brand_name,
+    }));
+
+    const taxOptions = taxes.map((t) => ({
+        value: t.tax_id,
+        label: t.tax_name,
+    }));
+
+    const ramOptions = rams.map((r) => ({
+        value: r.ram_id,
+        label: r.ram_name,
+    }));
+
+    const supportBrandOptions = [
+        { value: 1, label: "Intel" },
+        { value: 2, label: "AMD" },
+    ];
+
+    // ✅ show rules
+    const showSupportGen = selectedCategoryId === 2;
+    const showMainGen =
+        (selectedBrandId === 1 || selectedBrandId === 2) && selectedCategoryId !== 2;
+
+    const mainGenOptions = generations
+        .filter((g) => Number(g.generations_brand) === Number(selectedBrandId))
+        .map((g) => ({ value: g.generations_id, label: g.generations_name }));
+
+    const supportGenOptions = generations
+        .filter((g) => Number(g.generations_brand) === Number(supportBrandId))
+        .map((g) => ({ value: g.generations_id, label: g.generations_name }));
+    const findOption = (opts, id) =>
+        opts.find((o) => String(o.value) === String(id)) || null;
+
+    const findMultiOptions = (opts, ids) => {
+        if (!Array.isArray(ids)) return [];
+        const set = new Set(ids.map(String));
+        return opts.filter((o) => set.has(String(o.value)));
+    };
 
     return (
         <Row className="ps-3 pe-3">
@@ -48,14 +112,22 @@ const PrimaryInfoTab = ({ form, lookups }) => {
             <Col lg={4} className="mt-2">
                 <SelectWithAdd
                     status={true}
+                    isMulti={false}
                     label="Select Category"
                     placeholder="Select Category"
-                    options={categories.map((c) => ({
-                        value: c.category_id,
-                        label: c.category_name,
-                    }))}
+                    options={categoryOptions}
+                    value={findOption(categoryOptions, productData.product_category)}
                     onAddClick={() => lookups.ui.setIsCategoryOpen(true)}
-                    onChange={(val) => setField("product_category", val)}
+                    onChange={(opt) => {
+                        const v = getVal(opt);
+                        setField("product_category", v);
+
+                        // reset dependents
+                        setField("product_brand", "");
+                        setField("product_generation_id", "");
+                        setField("product_support_brand_id", "");
+                        setField("product_support_generations", []);
+                    }}
                 />
             </Col>
 
@@ -63,61 +135,98 @@ const PrimaryInfoTab = ({ form, lookups }) => {
             <Col lg={4} className="mt-2">
                 <SelectWithAdd
                     status={true}
+                    isMulti={false}
                     label="Select Brand"
                     placeholder="Select Brand"
-                    options={filteredBrands.map((b) => ({
-                        value: b.brand_id,
-                        label: b.brand_name,
-                    }))}
+                    options={brandOptions}
+                    value={findOption(brandOptions, productData.product_brand)}
                     onAddClick={() => lookups.ui.setIsBrandOpen(true)}
-                    onChange={(val) => setField("product_brand", val)}
+                    onChange={(opt) => {
+                        const v = getVal(opt);
+                        setField("product_brand", v);
+                        setField("product_generation_id", "");
+                    }}
                 />
             </Col>
-            {/* Generation (from API) */}
-            {(selectedBrandId === 1 || selectedBrandId === 2) && (
+
+            {/* ✅ Support Brand + Support Generations (Category=2) */}
+            {showSupportGen && (
+                <>
+                    <Col lg={4} className="mt-4">
+                        <SelectWithAdd
+                            status={false}
+                            label="Select Support Brand"
+                            placeholder="Select Support Brand"
+                            options={supportBrandOptions}
+                            value={findOption(supportBrandOptions, productData.product_support_brand_id)}
+                            onChange={(opt) => {
+                                const v = getVal(opt);
+                                setField("product_support_brand_id", v);
+                                setField("product_support_generations", []);
+                            }}
+                        />
+                    </Col>
+
+                    <Col lg={4} className="mt-2">
+                        <SelectWithAdd
+                            status={true}
+                            isMulti={true}
+                            label="Select Support Generations"
+                            placeholder="Select Generations"
+                            options={supportGenOptions}
+                            value={findMultiOptions(supportGenOptions, productData.product_support_generations)}
+                            onAddClick={() => lookups.ui.setIsGenerationOpen(true)}
+                            onChange={(selected) => {
+                                const ids = getMultiVals(selected);
+                                setField("product_support_generations", ids);
+                            }}
+                        />
+                    </Col>
+                    {/* RAM */}
+                    <Col lg={4} className="mt-2">
+                        <SelectWithAdd
+                            status={true}
+                            isMulti={false}
+                            label="Select RAM"
+                            placeholder="Select RAM"
+                            value={findOption(ramOptions, productData.product_ram_id)}
+                            options={ramOptions}
+                            onAddClick={() => lookups.ui.setIsRamOpen(true)}
+                            onChange={(opt) => setField("product_ram_id", getVal(opt))}
+                        />
+                    </Col>
+                </>
+            )}
+
+            {/* ✅ Main Generation (Intel/AMD) */}
+            {showMainGen && (
                 <Col lg={4} className="mt-2">
                     <SelectWithAdd
                         status={true}
+                        isMulti={false}
                         label="Select Generation / Series"
                         placeholder="Select Generation"
-                        options={generations
-                            .filter((g) => Number(g.generations_brand) === Number(selectedBrandId))
-                            .map((g) => ({
-                                value: g.generations_id,
-                                label: g.generations_name,
-                            }))}
+                        options={mainGenOptions}
                         onAddClick={() => lookups.ui.setIsGenerationOpen(true)}
-                        onChange={(opt) => setField("product_generation_id", opt?.value || "")}
+                        value={findOption(mainGenOptions, productData.product_generation_id)}
+                        onChange={(opt) => setField("product_generation_id", getVal(opt))}
                     />
                 </Col>
             )}
-{/* RAM (from API) */}
-<Col lg={4} className="mt-2">
-  <SelectWithAdd
-    status={true}
-    label="Select RAM"
-    placeholder="Select RAM"
-    options={rams.map((r) => ({
-      value: r.ram_id,
-      label: r.ram_name,
-    }))}
-    onAddClick={() => lookups.ui.setIsRamOpen(true)}
-    onChange={(opt) => setField("product_ram_id", opt?.value || "")}
-  />
-</Col>
+
+
 
             {/* Tax */}
             <Col lg={4} className="mt-2">
                 <SelectWithAdd
                     status={true}
+                    isMulti={false}
                     label="Select Tax %"
                     placeholder="Select Tax %"
-                    options={taxes.map((t) => ({
-                        value: t.tax_id,
-                        label: t.tax_name,
-                    }))}
+                    options={taxOptions}
+                    value={findOption(taxOptions, productData.product_tax)}
                     onAddClick={() => lookups.ui.setIsTaxOpen(true)}
-                    onChange={(val) => setField("product_tax", val)}
+                    onChange={(opt) => setField("product_tax", getVal(opt))}
                 />
             </Col>
 
@@ -165,13 +274,10 @@ const PrimaryInfoTab = ({ form, lookups }) => {
                 />
             </Col>
 
-            {/* Product On Sale + Discount */}
+            {/* ✅ Product On Sale + Discount */}
             <Col lg={4} className="mt-2">
                 <div className="d-flex align-items-center justify-content-between">
-                    <Label className="form-label fw-bold mb-0">
-                        Product On Sale
-                    </Label>
-
+                    <Label className="form-label fw-bold mb-0">Product On Sale</Label>
                     <div className="form-check form-switch me-3">
                         <Input
                             type="switch"
@@ -180,18 +286,14 @@ const PrimaryInfoTab = ({ form, lookups }) => {
                             onChange={(e) => {
                                 const isSale = e.target.checked ? 1 : 0;
                                 setField("product_on_sale", isSale);
-
-                                // reset discount when OFF
                                 if (isSale === 0) setField("product_discount_amount", 0);
                             }}
                         />
                     </div>
                 </div>
-
-
             </Col>
 
-            {/* Free Delivery + Charge */}
+            {/* ✅ Free Delivery + Charge */}
             <Col lg={4} className="mt-2">
                 <div className="d-flex align-items-center justify-content-between">
                     <Label className="form-label fw-bold mb-0">
@@ -206,8 +308,6 @@ const PrimaryInfoTab = ({ form, lookups }) => {
                             onChange={(e) => {
                                 const isCharge = e.target.checked ? 1 : 0;
                                 setField("product_on_free_delivery", isCharge);
-
-                                // reset charge when OFF
                                 if (isCharge === 0) setField("product_delivery_charge", 0);
                             }}
                         />
@@ -226,7 +326,7 @@ const PrimaryInfoTab = ({ form, lookups }) => {
                 )}
             </Col>
 
-            {/* Prices Table */}
+            {/* ✅ Prices Table */}
             <Col lg={12}>
                 <div className="table-responsive table-card mt-4 p-3">
                     <table className="table text-center align-middle">

@@ -88,6 +88,22 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  product_generation_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  product_ram_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  product_support_generations: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  product_support_brand_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   product_reject_message: {
     type: DataTypes.STRING,
     allowNull: true,

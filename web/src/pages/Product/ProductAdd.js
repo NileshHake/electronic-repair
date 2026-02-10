@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Modal, ModalHeader, ModalFooter, Card, Button } from "reactstrap";
 
 import { useProductForm } from "./hooks/useProductForm";
@@ -9,13 +9,23 @@ import TaxAdd from "../Tax/TaxAdd";
 import BrandAdd from "../Brand/BrandAdd";
 import RamAdd from "../Ram/RamAdd";
 import GenerationAdd from "../Generation/GenerationAdd";
+import { useDispatch, useSelector } from "react-redux";
+import { resetAddProductResponse, resetUpdateProductResponse } from "../../store/product";
 
 
 const ProductAdd = ({ isOpen, toggle }) => {
   const lookups = useProductLookups();
   const form = useProductForm({ toggle });
+  const dispatch = useDispatch();
+  const { addProductResponse } = useSelector((state) => state.ProductReducer);
 
-
+  useEffect(() => {
+    if (addProductResponse) {
+      toggle(); // ✅ close modal
+      dispatch(resetAddProductResponse()); // ✅ reset flag
+    }
+  }, [addProductResponse, dispatch, toggle]);
+  
   return (
     <Modal size="xl" isOpen={isOpen} centered toggle={toggle}>
       <ModalHeader toggle={toggle} className="modal-title ms-2">
@@ -66,24 +76,24 @@ const ProductAdd = ({ isOpen, toggle }) => {
         />
       )}
       {lookups.ui.isGenerationOpen && (
-  <GenerationAdd
-    isOpen={lookups.ui.isGenerationOpen}
-    toggle={() => {
-      lookups.ui.setIsGenerationOpen(false);
-      lookups.refetch(); // ✅ refresh list after add
-    }}
-  />
-)}
+        <GenerationAdd
+          isOpen={lookups.ui.isGenerationOpen}
+          toggle={() => {
+            lookups.ui.setIsGenerationOpen(false);
+            lookups.refetch(); // ✅ refresh list after add
+          }}
+        />
+      )}
 
-{lookups.ui.isRamOpen && (
-  <RamAdd
-    isOpen={lookups.ui.isRamOpen}
-    toggle={() => {
-      lookups.ui.setIsRamOpen(false);
-      lookups.refetch(); // ✅ refresh list after add
-    }}
-  />
-)}
+      {lookups.ui.isRamOpen && (
+        <RamAdd
+          isOpen={lookups.ui.isRamOpen}
+          toggle={() => {
+            lookups.ui.setIsRamOpen(false);
+            lookups.refetch(); // ✅ refresh list after add
+          }}
+        />
+      )}
 
     </Modal>
   );
