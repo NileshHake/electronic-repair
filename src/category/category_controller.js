@@ -35,7 +35,7 @@ const index = async (req, res) => {
   try {
     const categories = await Category.findAll({
       where: {
-         
+
         category_main_id: {
           [Op.or]: [0, null],
         },
@@ -72,20 +72,22 @@ const getCategoriesWithSub = async (req, res) => {
     // 1️⃣ Main categories with product count
     const mainCategories = await sequelize.query(
       `
-      SELECT 
-        c.*,
-        COUNT(p.product_id) AS product_count
-      FROM tbl_categories AS c
-      LEFT JOIN tbl_products AS p 
-        ON p.product_category = c.category_id
-      WHERE c.category_main_id IS NULL
-      GROUP BY c.category_id
-      ORDER BY c.category_id DESC
-      `,
+  SELECT 
+    c.*,
+    COUNT(p.product_id) AS product_count
+  FROM tbl_categories AS c
+  LEFT JOIN tbl_products AS p 
+    ON p.product_category = c.category_id
+   AND p.product_status = 2   -- ✅ count only status = 2
+  WHERE c.category_main_id IS NULL
+  GROUP BY c.category_id
+  ORDER BY c.category_id ASC
+  `,
       {
         type: sequelize.QueryTypes.SELECT,
       }
     );
+
 
     // 2️⃣ Attach subcategories
     const categoriesWithChildren = await Promise.all(

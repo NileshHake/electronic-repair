@@ -29,7 +29,7 @@ const index = async (req, res) => {
       where: {
         hardware_configuration_created_by: getCreatedBy(req.currentUser),
       },
-      order: [["hardware_configuration_id", "DESC"]],
+      order: [["hardware_configuration_id", "ASC"]],
     });
 
     res.status(200).json(hardwareList);

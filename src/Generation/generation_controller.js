@@ -27,7 +27,7 @@ const index = async (req, res) => {
       where: {
         generations_created_by: getCreatedBy(req.currentUser),
       },
-      order: [["generations_id", "DESC"]],
+      order: [["generations_id", "ASC"]],
     });
 
     res.status(200).json(generations);

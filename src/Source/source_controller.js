@@ -27,7 +27,7 @@ const index = async (req, res) => {
       where: {
         source_created_by: getCreatedBy(req.currentUser),
       },
-      order: [["source_id", "DESC"]],
+      order: [["source_id", "ASC"]],
     });
     res.status(200).json(sources);
   } catch (error) {

@@ -222,7 +222,7 @@ const index = async (req, res) => {
         LEFT JOIN tbl_hardware_configurations AS hw
           ON r.repair_device_hardware_configuration_id = hw.hardware_configuration_id
         ${whereSQL}
-        ORDER BY r.repair_id DESC;
+        ORDER BY r.repair_id ASC;
       `;
 
       const repairs = await sequelize.query(sql, {
@@ -368,7 +368,7 @@ const index = async (req, res) => {
       LEFT JOIN tbl_hardware_configurations AS hw
         ON r.repair_device_hardware_configuration_id = hw.hardware_configuration_id
       ${whereSQL}
-      ORDER BY r.repair_id DESC;
+      ORDER BY r.repair_id ASC;
     `;
 
     const repairs = await sequelize.query(sql, {

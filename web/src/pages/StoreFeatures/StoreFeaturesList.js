@@ -110,7 +110,7 @@ const StoreFeaturesList = () => {
                                                         {/* TITLE */}
                                                         <td>{feature.title}</td>
 
-                                                        {/* DESCRIPTION */}
+                                                        {/* ASCRIPTION */}
                                                         <td>{feature.description}</td>
 
                                                         {/* ACTIONS */}

@@ -88,7 +88,7 @@ const index = async (req, res) => {
         ON b.product_tax = t.tax_id
 
       WHERE a.add_to_card_user_id = :userId
-      ORDER BY a.add_to_card_id DESC
+      ORDER BY a.add_to_card_id ASC
       `,
       {
         replacements: { userId },

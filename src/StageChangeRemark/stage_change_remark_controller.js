@@ -90,7 +90,7 @@ const index = async (req, res) => {
       where: {
         stage_remark_created_by: getCreatedBy(req.currentUser),
       },
-      order: [["stage_remark_id", "DESC"]],
+      order: [["stage_remark_id", "ASC"]],
     });
     res.status(200).json(stageRemarks);
   } catch (error) {
@@ -128,7 +128,7 @@ const Get = async (req, res) => {
       LEFT JOIN tbl_users AS u
         ON sr.stage_remark_change_by_id = u.user_id
       WHERE sr.stage_remark_repair_id = :id
-      ORDER BY sr.stage_remark_id DESC;
+      ORDER BY sr.stage_remark_id ASC;
       `,
       {
         replacements: { id },

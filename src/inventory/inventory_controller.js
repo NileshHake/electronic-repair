@@ -43,7 +43,7 @@ const store = async (req, res) => {
 const index = async (req, res) => {
   try {
     const items = await InventoryItem.findAll({
-      order: [["inventory_item_id", "DESC"]],
+      order: [["inventory_item_id", "ASC"]],
     });
 
     return res.json(items);

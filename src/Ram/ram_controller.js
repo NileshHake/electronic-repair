@@ -24,7 +24,7 @@ const index = async (req, res) => {
   try {
     const rams = await Ram.findAll({
       where: { ram_created_by: getCreatedBy(req.currentUser) },
-      order: [["ram_id", "DESC"]],
+      order: [["ram_id", "ASC"]],
     });
 
     res.status(200).json(rams);

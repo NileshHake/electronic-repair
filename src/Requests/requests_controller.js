@@ -106,7 +106,7 @@ const index = async (req, res) => {
 
         // ✅ order + pagination
         sql += `
-      ORDER BY r.requests_id DESC
+      ORDER BY r.requests_id ASC
       LIMIT :limit OFFSET :offset
     `;
 

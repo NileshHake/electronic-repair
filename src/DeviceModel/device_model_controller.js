@@ -23,7 +23,7 @@ const index = async (req, res) => {
       where: {
         device_model_created_by: getCreatedBy(req.currentUser),
       },
-      order: [["device_model_id", "DESC"]],
+      order: [["device_model_id", "ASC"]],
     });
 
     res.status(200).json(deviceModels);

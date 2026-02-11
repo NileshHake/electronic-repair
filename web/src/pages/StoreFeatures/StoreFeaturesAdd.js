@@ -119,7 +119,7 @@ const StoreFeatureAdd = ({ isOpen, toggle }) => {
                 <small className="text-danger">{errors.title}</small>
               </Col>
 
-              {/* DESCRIPTION */}
+              {/* ASCRIPTION */}
               <Col md={12}>
                 <Label className="fw-bold">
                   Description <span className="text-danger">*</span>

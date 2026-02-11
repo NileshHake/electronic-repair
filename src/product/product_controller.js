@@ -76,7 +76,7 @@ const index = async (req, res) => {
       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
       WHERE pro.product_created_by = :created_by
-      ORDER BY pro.product_id DESC
+      ORDER BY pro.product_id ASC
       `,
       {
         replacements: { created_by: getCreatedBy(req.currentUser) },
@@ -151,7 +151,7 @@ const AdminProductList = async (req, res) => {
       LEFT JOIN tbl_brands AS br 
         ON pro.product_brand = br.brand_id
       ${whereCondition}
-      ORDER BY pro.product_id DESC
+      ORDER BY pro.product_id ASC
       `,
       {
         replacements,
@@ -189,7 +189,7 @@ const LatestProduct = async (req, res) => {
       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
        WHERE pro.product_status = 2
-      ORDER BY pro.product_id DESC
+      ORDER BY pro.product_id ASC
       LIMIT 8
       `,
       {
@@ -244,7 +244,7 @@ const RepairandSaleProduct = async (req, res) => {
       replacements.product_name = `%${product_name}%`;
     }
 
-    query += ` ORDER BY pro.product_id DESC`;
+    query += ` ORDER BY pro.product_id ASC`;
 
     const products = await sequelize.query(query, {
       replacements,
@@ -293,7 +293,7 @@ const filterstrendingproduct = async (req, res) => {
       LEFT JOIN tbl_categories AS cat ON pro.product_category = cat.category_id
       LEFT JOIN tbl_brands AS br ON pro.product_brand = br.brand_id
       WHERE pro.product_status = 2
-      ORDER BY pro.createdAt DESC
+      ORDER BY pro.createdAt ASC
       LIMIT 8
     `;
 
@@ -361,11 +361,11 @@ const filterProducts = async (req, res) => {
       whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
 
     // ✅ SORT LOGIC
-    let orderBy = "pro.product_id DESC";
+    let orderBy = "pro.product_id ASC";
     if (sort === "low_to_high") orderBy = "pro.product_sale_price ASC";
-    else if (sort === "high_to_low") orderBy = "pro.product_sale_price DESC";
-    else if (sort === "new") orderBy = "pro.createdAt DESC";
-    else if (sort === "sale") orderBy = "pro.product_on_sale DESC";
+    else if (sort === "high_to_low") orderBy = "pro.product_sale_price ASC";
+    else if (sort === "new") orderBy = "pro.createdAt ASC";
+    else if (sort === "sale") orderBy = "pro.product_on_sale ASC";
 
     // 🔹 TOTAL COUNT
     const totalResult = await sequelize.query(
@@ -455,7 +455,7 @@ const SearchProducts = async (req, res) => {
           OR LOWER(TRIM(COALESCE(cat.category_name, ''))) COLLATE utf8mb4_general_ci
             LIKE CONCAT('%', LOWER(TRIM(:search)), '%') COLLATE utf8mb4_general_ci
         )
-      ORDER BY pro.product_id DESC
+      ORDER BY pro.product_id ASC
       LIMIT 20
       `,
       {
@@ -471,6 +471,59 @@ const SearchProducts = async (req, res) => {
   }
 };
 
+const filterProductsForQuotation 
+ = async (req, res) => {
+  try {
+    const { category_id } = req.body;
+
+    const whereConditions = [];
+    const replacements = {};
+
+    // ✅ ALWAYS show only active products
+    whereConditions.push("pro.product_status = 2");
+
+    // ✅ ONLY MAIN CATEGORY (NO sub-category logic)
+    if (category_id) {
+      whereConditions.push("pro.product_category = :category_id");
+      replacements.category_id = Number(category_id);
+    }
+
+    const whereClause = `WHERE ${whereConditions.join(" AND ")}`;
+
+    const products = await sequelize.query(
+      `
+      SELECT 
+        pro.*,
+        cat.category_name,
+        br.brand_name
+      FROM tbl_products AS pro
+      LEFT JOIN tbl_categories AS cat 
+        ON pro.product_category = cat.category_id
+      LEFT JOIN tbl_brands AS br 
+        ON pro.product_brand = br.brand_id
+      ${whereClause}
+      ORDER BY pro.product_id DESC
+      `,
+      {
+        replacements,
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      totalRecords: products.length,
+      data: products,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching products",
+      error: error.message,
+    });
+  }
+};
 
 
 
@@ -566,6 +619,7 @@ const deleted = async (req, res) => {
 module.exports = {
   store,
   AdminProductList,
+  filterProductsForQuotation ,
   SearchProducts,
   index,
   Get,

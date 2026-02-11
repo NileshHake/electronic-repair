@@ -76,7 +76,7 @@ const index = async (req, res) => {
       LEFT JOIN tbl_users u
         ON u.user_id = br.beading_vender_accepted_id
 WHERE br.beading_customer_id = :customerId
-      ORDER BY br.beading_request_id DESC
+      ORDER BY br.beading_request_id ASC
       `,
       {
         replacements: { customerId },
@@ -141,7 +141,7 @@ const globalList = async (req, res) => {
         ON u.user_id = br.beading_customer_id
 
       ${whereSql}
-      ORDER BY br.beading_request_id DESC
+      ORDER BY br.beading_request_id ASC
       LIMIT :limit OFFSET :offset
       `,
       { type: sequelize.QueryTypes.SELECT, replacements }

@@ -231,7 +231,7 @@ const RepairDetailsLayout = ({
         </Card>
       </Col>
 
-      {/* RIGHT COLUMN – ASSIGNMENT / HARDWARE / DEVICE / PROBLEMS / DESCRIPTION */}
+      {/* RIGHT COLUMN – ASSIGNMENT / HARDWARE / DEVICE / PROBLEMS / ASCRIPTION */}
       <Col xxl={9}>
         <Row className="g-3">
           {/* Assignment + Hardware */}

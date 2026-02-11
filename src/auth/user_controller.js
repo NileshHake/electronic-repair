@@ -186,7 +186,7 @@ const Supplierindex = async (req, res) => {
       LEFT JOIN tbl_brands b 
         ON b.brand_id = u.supplier_brand_id
       WHERE u.user_type = 7
-      ORDER BY u.user_id DESC
+      ORDER BY u.user_id ASC
       `,
       { type: sequelize.QueryTypes.SELECT }
     );

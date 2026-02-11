@@ -94,7 +94,7 @@ const index = async (req, res) => {
             LEFT JOIN tbl_customer_addresses AS ca
                 ON om.order_master_address_id = ca.customer_address_id
             WHERE om.order_master_status = :order_status
-            ORDER BY om.order_master_id DESC
+            ORDER BY om.order_master_id ASC
             LIMIT ${limit} OFFSET ${offset}
             `,
             {
@@ -132,7 +132,7 @@ const indexchild = async (req, res) => {
             LEFT JOIN tbl_products AS pro
                 ON oc.order_child_product_id = pro.product_id
             WHERE oc.order_child_master_id = :order_id
-            ORDER BY oc.order_child_id DESC
+            ORDER BY oc.order_child_id ASC
             `,
             {
                 replacements: { order_id },
@@ -342,7 +342,7 @@ const userOrders = async (req, res) => {
         ON om.order_master_address_id = ca.customer_address_id
       WHERE  
           om.order_master_user_id = :userId
-      ORDER BY om.order_master_id DESC
+      ORDER BY om.order_master_id ASC
       `,
             {
                 replacements: {

@@ -116,7 +116,7 @@ exports.getQuotationAndBills = async (req, res) => {
     LEFT JOIN tbl_users AS u 
         ON m.quotation_and_billing_master_customer_id = u.user_id
     WHERE m.quotation_and_billing_master_created_by = :createdBy
-    ORDER BY m.quotation_and_billing_master_id DESC
+    ORDER BY m.quotation_and_billing_master_id ASC
   `,
             {
                 type: sequelize.QueryTypes.SELECT,

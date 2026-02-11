@@ -214,7 +214,18 @@ const PrimaryInfoTab = ({ form, lookups }) => {
                 </Col>
             )}
 
-
+            {selectedCategoryId == 4 && <Col lg={4} className="mt-2">
+                <SelectWithAdd
+                    status={true}
+                    isMulti={false}
+                    label="Select RAM"
+                    placeholder="Select RAM"
+                    value={findOption(ramOptions, productData.product_ram_id)}
+                    options={ramOptions}
+                    onAddClick={() => lookups.ui.setIsRamOpen(true)}
+                    onChange={(opt) => setField("product_ram_id", getVal(opt))}
+                />
+            </Col>}
 
             {/* Tax */}
             <Col lg={4} className="mt-2">
