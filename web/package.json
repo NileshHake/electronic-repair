@@ -1,5 +1,5 @@
 {
-  "name": "material-velzon-react", 
+  "name": "material-velzon-react",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -97,8 +97,8 @@
     "yup": "^1.2.0"
   },
   "scripts": {
-    "start": "set NODE_OPTIONS=--max_old_space_size=4096 && craco start",
-    "build": "craco build",
+    "start": "cross-env NODE_OPTIONS=--max_old_space_size=4096 craco start",
+    "build": "cross-env DISABLE_ESLINT_PLUGIN=true NODE_OPTIONS=--max_old_space_size=4096 craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
     "lint": "eslint .",
