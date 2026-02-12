@@ -62,22 +62,7 @@ const store = async (req, res) => {
 };
 
 /* 🧾 PDF INVOICE */
-const money = (v) => {
-  const n = Number(v || 0);
-  return Number.isFinite(n) ? n.toLocaleString("en-IN") : "0";
-};
-
-const safe = (v) => (v === null || v === undefined || v === "" ? "-" : String(v));
-
-const drawLine = (doc, y) => {
-  doc
-    .strokeColor("#e5e7eb")
-    .lineWidth(1)
-    .moveTo(40, y)
-    .lineTo(555, y)
-    .stroke();
-};
-
+ 
 const quotationInvoicePdf = async (req, res) => {
   try {
     const { id } = req.params;
@@ -92,13 +77,12 @@ const quotationInvoicePdf = async (req, res) => {
       order: [["quotation_item_id", "ASC"]],
     });
 
-    // ✅ fetch business & customer info (optional but attractive)
     const [business, customer] = await Promise.all([
       quotation.business_id ? User.findByPk(quotation.business_id) : null,
       quotation.customer_id ? User.findByPk(quotation.customer_id) : null,
     ]);
 
-    // ✅ PDF headers (download)
+    // ✅ PDF headers
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename=Quotation-${id}.pdf`);
 
@@ -107,87 +91,64 @@ const quotationInvoicePdf = async (req, res) => {
 
     // ====== HEADER ======
     doc
-      .fontSize(20)
       .fillColor("#111827")
-      .text("QUOTATION INVOICE", 40, 40, { align: "left" });
+      .fontSize(24)
+      .text("QUOTATION", 40, 40);
 
+    // Header Meta Data (Right Aligned)
+    const topAlign = 45;
     doc
       .fontSize(10)
       .fillColor("#6b7280")
-      .text(`Quotation No: ${safe(quotation.quotation_no)}`, 40, 70)
-      .text(`Quotation ID: ${safe(quotation.quotation_id)}`, 40, 85)
-      .text(`Create Date: ${safe(quotation.create_date)}`, 40, 100)
-      .text(`Expire Date: ${safe(quotation.expire_date)}`, 40, 115);
+      .text(`No: ${safe(quotation.quotation_no)}`, 400, topAlign, { align: "right" })
+      .text(`Date: ${safe(quotation.create_date)}`, 400, topAlign + 15, { align: "right" })
+      .text(`Expires: ${safe(quotation.expire_date)}`, 400, topAlign + 30, { align: "right" });
 
-    // right side total box
-    doc
-      .roundedRect(380, 65, 175, 70, 8)
-      .fillAndStroke("#f9fafb", "#e5e7eb");
+    drawLine(doc, 100);
 
-    doc
-      .fillColor("#6b7280")
-      .fontSize(10)
-      .text("Grand Total", 390, 75);
-
-    doc
-      .fillColor("#111827")
-      .fontSize(18)
-      .text(`${money(quotation.grand_total)}`, 390, 92);
-
-    drawLine(doc, 150);
-
-    // ====== BUSINESS & CUSTOMER ======
-    doc.fillColor("#111827").fontSize(12).text("Billed From", 40, 165);
-    doc.fillColor("#111827").fontSize(12).text("Billed To", 320, 165);
-
-    doc.fillColor("#374151").fontSize(10);
-    // Business block
-    doc
-      .text(`${safe(business?.user_name)}`, 40, 185)
-      .text(`Email: ${safe(business?.user_email)}`, 40, 200)
-      .text(`Phone: ${safe(business?.user_phone_number)}`, 40, 215);
-
-    // Customer block
-    doc
-      .text(`${safe(customer?.user_name)}`, 320, 185)
-      .text(`Email: ${safe(customer?.user_email)}`, 320, 200)
-      .text(`Phone: ${safe(customer?.user_phone_number)}`, 320, 215);
-
-    drawLine(doc, 245);
+    // ====== BILLING SECTION ======
+    const billingTop = 130;
+    
+    // Billed From (Business)
+    doc.fillColor("#111827").fontSize(10).font("Helvetica-Bold").text("FROM:", 40, billingTop);
+    
+    // Billed To (Customer)
+    doc.fillColor("#111827").fontSize(10).font("Helvetica-Bold").text("BILL TO:", 320, billingTop);
+    doc.fillColor("#374151").font("Helvetica").fontSize(10)
+      .text(`${safe(customer?.user_name)}`, 320, billingTop + 15)
+      .text(`${safe(customer?.user_email)}`, 320, billingTop + 30)
+      .text(`${safe(customer?.user_phone_number)}`, 320, billingTop + 45);
 
     // ====== TABLE HEADER ======
-    const tableTop = 265;
+    const tableTop = 230;
     const colX = {
       sr: 40,
-      name: 75,
-      price: 360,
-      qty: 440,
+      name: 70,
+      price: 350,
+      qty: 430,
       total: 500,
     };
 
+    doc.rect(40, tableTop, 520, 25).fill("#f3f4f6"); // Header background
+    
     doc
-      .fontSize(10)
       .fillColor("#111827")
-      .text("#", colX.sr, tableTop)
-      .text("Product", colX.name, tableTop)
-      .text("Price", colX.price, tableTop, { width: 60, align: "right" })
-      .text("Qty", colX.qty, tableTop, { width: 40, align: "right" })
-      .text("Total", colX.total, tableTop, { width: 60, align: "right" });
-
-    drawLine(doc, tableTop + 18);
+      .font("Helvetica-Bold")
+      .fontSize(9)
+      .text("SR.", colX.sr + 5, tableTop + 8)
+      .text("DESCRIPTION", colX.name, tableTop + 8)
+      .text("UNIT PRICE", colX.price, tableTop + 8, { width: 70, align: "right" })
+      .text("QTY", colX.qty, tableTop + 8, { width: 40, align: "right" })
+      .text("AMOUNT", colX.total, tableTop + 8, { width: 60, align: "right" });
 
     // ====== TABLE ROWS ======
-    let y = tableTop + 28;
-
-    doc.fontSize(10).fillColor("#374151");
-
-    const lineHeight = 18;
+    let y = tableTop + 35;
+    doc.font("Helvetica").fontSize(9).fillColor("#374151");
 
     items.forEach((it, idx) => {
-      // page break
-      if (y > 760) {
+      if (y > 730) { 
         doc.addPage();
-        y = 60;
+        y = 50;
       }
 
       const pName = safe(it.product_name);
@@ -195,48 +156,56 @@ const quotationInvoicePdf = async (req, res) => {
       const qty = Number(it.qty || 0);
       const total = Number(it.total || price * qty);
 
-      doc.text(String(idx + 1), colX.sr, y);
-      doc.text(pName, colX.name, y, { width: 270 });
-
-      doc.text(`${money(price)}`, colX.price, y, { width: 60, align: "right" });
+      doc.text(String(idx + 1), colX.sr + 5, y);
+      doc.text(pName, colX.name, y, { width: 260 });
+      doc.text(`${money(price)}`, colX.price, y, { width: 70, align: "right" });
       doc.text(String(qty), colX.qty, y, { width: 40, align: "right" });
       doc.text(`${money(total)}`, colX.total, y, { width: 60, align: "right" });
 
-      y += lineHeight;
+      y += 25; // Row spacing
+      
+      // Light border between items
+      doc.moveTo(40, y - 10).lineTo(560, y - 10).strokeColor("#f3f4f6").lineWidth(1).stroke();
     });
 
-    drawLine(doc, y + 5);
-
-    // ====== TOTALS ======
+    // ====== TOTALS SECTION ======
     const subTotal = items.reduce((s, it) => s + Number(it.total || 0), 0);
     const grandTotal = Number(quotation.grand_total || subTotal);
 
+    y += 10;
+    if (y > 750) { doc.addPage(); y = 50; }
+
+    doc.font("Helvetica").fontSize(10).fillColor("#6b7280");
+    doc.text("Subtotal", 380, y, { width: 110, align: "right" });
+    doc.fillColor("#111827").text(`${money(subTotal)}`, 500, y, { width: 60, align: "right" });
+
     y += 20;
-    doc.fillColor("#111827").fontSize(11);
-
-    doc.text("Subtotal:", 380, y, { width: 110, align: "right" });
-    doc.text(`${money(subTotal)}`, 500, y, { width: 60, align: "right" });
-
-    y += 18;
-    doc.fontSize(13).text("Grand Total:", 380, y, { width: 110, align: "right" });
-    doc.fontSize(13).text(`${money(grandTotal)}`, 500, y, { width: 60, align: "right" });
+    // Grand Total highlight
+    doc.rect(380, y - 5, 185, 30).fill("#f9fafb"); 
+    doc.fillColor("#111827").font("Helvetica-Bold").fontSize(12);
+    doc.text("Grand Total", 390, y + 2, { width: 100, align: "left" });
+    doc.text(`${money(grandTotal)}`, 495, y + 2, { width: 65, align: "right" });
 
     // ====== FOOTER ======
+    const footerText = "Thank you for your business! This quotation is valid until the expiration date listed above.";
     doc
-      .fontSize(9)
-      .fillColor("#6b7280")
-      .text("Thank you! This is a computer-generated quotation invoice.", 40, 790, {
-        align: "center",
-        width: 515,
-      });
+      .fontSize(8)
+      .fillColor("#9ca3af")
+      .text(footerText, 40, 780, { align: "center", width: 515 });
 
     doc.end();
   } catch (err) {
-    console.log("PDF generation failed:", err);
-    return res.status(500).json({ status: false, message: "PDF generation failed" });
+    console.error("PDF generation failed:", err);
+    return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
 
+// --- Helper Functions ---
+const safe = (val) => val || "N/A";
+const money = (val) => `$${Number(val).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+const drawLine = (doc, y) => {
+  doc.moveTo(40, y).lineTo(560, y).strokeColor("#e5e7eb").lineWidth(1).stroke();
+};
 /* 🟡 READ ALL QUOTATIONS (JOIN + PAGINATION) */
 const index = async (req, res) => {
   try {
