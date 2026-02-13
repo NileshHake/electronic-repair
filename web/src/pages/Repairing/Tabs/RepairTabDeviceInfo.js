@@ -1,22 +1,87 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Row, Col, Label, Input } from "reactstrap";
 import Select from "react-select";
 
-const RepairTabDeviceInfo = ({
-  formData,
-  handleInputChange,
-  errorMessage,
-  deviceTypesOption,
-  brandsOption,
-  deviceModelsOption,
-  accessoriesOption,
-  storageLocationsOption,
-  deviceColorsOption,
-  setIsDeviceTypeModalOpen,
-  setIsBrandModalOpen,
-  setIsDeviceModelModalOpen,
-  setIsDeviceColorModalOpen,
-}) => {
+const findOption = (opts, id) =>
+  opts.find((o) => String(o.value) === String(id)) || null;
+
+const safeArray = (v) => (Array.isArray(v) ? v : []);
+
+const RepairTabDeviceInfo = ({ form, lookups }) => {
+  const { formData, setField, errorMessage } = form;
+
+  const {
+    deviceTypes = [],
+    brands = [],
+    deviceModels = [],
+    accessories = [],
+    storageLocations = [],
+    deviceColors = [],
+  } = lookups?.data || {};
+
+  // ✅ options
+  const deviceTypesOption = useMemo(
+    () =>
+      (deviceTypes || []).map((d) => ({
+        value: d.device_type_id,
+        label: d.device_type_name,
+      })),
+    [deviceTypes]
+  );
+
+  const brandsOption = useMemo(
+    () =>
+      (brands || []).map((b) => ({
+        value: b.brand_id,
+        label: b.brand_name,
+      })),
+    [brands]
+  );
+
+  const deviceModelsOption = useMemo(
+    () =>
+      (deviceModels || []).map((m) => ({
+        value: m.device_model_id,
+        label: m.device_model_name,
+      })),
+    [deviceModels]
+  );
+
+  const accessoriesOption = useMemo(
+    () =>
+      (accessories || []).map((a) => ({
+        value: a.accessories_id,
+        label: a.accessories_name,
+      })),
+    [accessories]
+  );
+
+  const storageLocationsOption = useMemo(
+    () =>
+      (storageLocations || []).map((s) => ({
+        value: s.storage_location_id,
+        label: s.storage_location_name,
+      })),
+    [storageLocations]
+  );
+
+  const deviceColorsOption = useMemo(
+    () =>
+      (deviceColors || []).map((c) => ({
+        value: c.device_color_id,
+        label: c.device_color_name,
+      })),
+    [deviceColors]
+  );
+
+  // ✅ Accessories value (recommended: store array in state)
+  // formData.repair_device_accessories_id should be array like: [1,2,3]
+  const selectedAccessories = useMemo(() => {
+    const ids = safeArray(formData.repair_device_accessories_id);
+    const set = new Set(ids.map(String));
+    return accessoriesOption.filter((o) => set.has(String(o.value)));
+  }, [formData.repair_device_accessories_id, accessoriesOption]);
+
   return (
     <Row>
       {/* Device Type */}
@@ -27,24 +92,22 @@ const RepairTabDeviceInfo = ({
           </Label>
           <span
             role="button"
-            onClick={() => setIsDeviceTypeModalOpen(true)}
+            onClick={() => lookups.ui.setIsDeviceTypeOpen(true)}
             className="text-success fw-bold me-2"
             style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
           >
             +
           </span>
         </div>
+
         <Select
-          value={deviceTypesOption.find(
-            (opt) => opt.value === formData.repair_device_type_id
-          )}
-          onChange={(opt) =>
-            handleInputChange("repair_device_type_id", opt.value)
-          }
+          value={findOption(deviceTypesOption, formData.repair_device_type_id)}
           options={deviceTypesOption}
           placeholder="Select Device Type"
+          onChange={(opt) => setField("repair_device_type_id", opt?.value || 0)}
         />
-        {errorMessage.repair_device_type_id && (
+
+        {errorMessage?.repair_device_type_id && (
           <span className="text-danger small">
             {errorMessage.repair_device_type_id}
           </span>
@@ -59,24 +122,26 @@ const RepairTabDeviceInfo = ({
           </Label>
           <span
             role="button"
-            onClick={() => setIsBrandModalOpen(true)}
+            onClick={() => lookups.ui.setIsBrandOpen(true)}
             className="text-success fw-bold me-2"
             style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
           >
             +
           </span>
         </div>
+
         <Select
-          value={brandsOption.find(
-            (opt) => opt.value === formData.repair_device_brand_id
-          )}
-          onChange={(opt) =>
-            handleInputChange("repair_device_brand_id", opt.value)
-          }
+          value={findOption(brandsOption, formData.repair_device_brand_id)}
           options={brandsOption}
           placeholder="Select Brand"
+          onChange={(opt) => {
+            setField("repair_device_brand_id", opt?.value || 0);
+            // Optional: reset model when brand changes
+            setField("repair_device_model_id", 0);
+          }}
         />
-        {errorMessage.repair_device_brand_id && (
+
+        {errorMessage?.repair_device_brand_id && (
           <span className="text-danger small">
             {errorMessage.repair_device_brand_id}
           </span>
@@ -89,22 +154,19 @@ const RepairTabDeviceInfo = ({
           <Label>Device Model</Label>
           <span
             role="button"
-            onClick={() => setIsDeviceModelModalOpen(true)}
+            onClick={() => lookups.ui.setIsDeviceModelOpen(true)}
             className="text-success fw-bold me-2"
             style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
           >
             +
           </span>
         </div>
+
         <Select
-          value={deviceModelsOption.find(
-            (opt) => opt.value === formData.repair_device_model_id
-          )}
-          onChange={(opt) =>
-            handleInputChange("repair_device_model_id", opt.value)
-          }
+          value={findOption(deviceModelsOption, formData.repair_device_model_id)}
           options={deviceModelsOption}
           placeholder="Select Device Model"
+          onChange={(opt) => setField("repair_device_model_id", opt?.value || 0)}
         />
       </Col>
 
@@ -112,10 +174,8 @@ const RepairTabDeviceInfo = ({
       <Col md={4} className="mt-3">
         <Label>Serial / IMEI Number</Label>
         <Input
-          value={formData.repair_device_serial_number}
-          onChange={(e) =>
-            handleInputChange("repair_device_serial_number", e.target.value)
-          }
+          value={formData.repair_device_serial_number || ""}
+          onChange={(e) => setField("repair_device_serial_number", e.target.value)}
           className="form-control"
           placeholder="Enter Serial / IMEI Number"
         />
@@ -128,21 +188,10 @@ const RepairTabDeviceInfo = ({
           isMulti
           options={accessoriesOption}
           placeholder="Select Accessories"
-          value={
-            formData.repair_device_accessories_id
-              ? accessoriesOption.filter((opt) =>
-                  JSON.parse(formData.repair_device_accessories_id).includes(
-                    opt.value
-                  )
-                )
-              : []
-          }
-          onChange={(selectedOptions) => {
-            const selectedIds = selectedOptions.map((opt) => opt.value);
-            handleInputChange(
-              "repair_device_accessories_id",
-              JSON.stringify(selectedIds)
-            );
+          value={selectedAccessories}
+          onChange={(selected) => {
+            const ids = (selected || []).map((o) => o.value);
+            setField("repair_device_accessories_id", ids); // ✅ store as array
           }}
         />
       </Col>
@@ -151,15 +200,15 @@ const RepairTabDeviceInfo = ({
       <Col md={4} className="mt-3">
         <Label>Storage Location</Label>
         <Select
-          value={storageLocationsOption.find(
-            (opt) =>
-              opt.value === formData.repair_device_storage_location_id
+          value={findOption(
+            storageLocationsOption,
+            formData.repair_device_storage_location_id
           )}
-          onChange={(opt) =>
-            handleInputChange("repair_device_storage_location_id", opt.value)
-          }
           options={storageLocationsOption}
           placeholder="Select Storage Location"
+          onChange={(opt) =>
+            setField("repair_device_storage_location_id", opt?.value || 0)
+          }
         />
       </Col>
 
@@ -169,22 +218,19 @@ const RepairTabDeviceInfo = ({
           <Label>Device Color</Label>
           <span
             role="button"
-            onClick={() => setIsDeviceColorModalOpen(true)}
+            onClick={() => lookups.ui.setIsDeviceColorOpen(true)}
             className="text-success fw-bold me-2"
             style={{ fontSize: "25px", cursor: "pointer", userSelect: "none" }}
           >
             +
           </span>
         </div>
+
         <Select
-          value={deviceColorsOption.find(
-            (opt) => opt.value === formData.repair_device_color_id
-          )}
-          onChange={(opt) =>
-            handleInputChange("repair_device_color_id", opt.value)
-          }
+          value={findOption(deviceColorsOption, formData.repair_device_color_id)}
           options={deviceColorsOption}
           placeholder="Select Device Color"
+          onChange={(opt) => setField("repair_device_color_id", opt?.value || 0)}
         />
       </Col>
 
@@ -192,10 +238,8 @@ const RepairTabDeviceInfo = ({
       <Col md={4} className="mt-3">
         <Label>Device Password</Label>
         <Input
-          value={formData.repair_device_password}
-          onChange={(e) =>
-            handleInputChange("repair_device_password", e.target.value)
-          }
+          value={formData.repair_device_password || ""}
+          onChange={(e) => setField("repair_device_password", e.target.value)}
           className="form-control"
           placeholder="Enter Device Password"
         />

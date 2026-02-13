@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Container,
   Row,
@@ -15,8 +15,9 @@ import { ToastContainer } from "react-toastify";
 import DeleteModal from "../../Components/Common/DeleteModal";
 import RepairingAdd from "./RepairingAdd";
 import RepairingUpdate from "./RepairingUpdate";
-
 import Flatpickr from "react-flatpickr";
+import Select from "react-select";
+
 import {
   deleteRepair,
   getRepairList,
@@ -24,83 +25,140 @@ import {
   resetDeleteRepairResponse,
   resetUpdateRepairResponse,
 } from "../../store/Repairing/index";
-import AuthUser from "../../helpers/AuthType/AuthUser";
-import Select from "react-select";
 import { getWorkflowList, getWorkflowStageList } from "../../store/Workflow";
-import { formatDateTime } from "../../helpers/date_and_time_format";
-import { Value } from "sass";
+import AuthUser from "../../helpers/AuthType/AuthUser";
 import RepairBoard from "./RepairComponent/RepairBoard";
+
+const LIMIT = 20;
 
 const RepairList = () => {
   const { permissions } = AuthUser();
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
 
-  const { repairs = [], addRepairResponse, DeleteRepairResponse, updateRepairResponse, loading = false } =
-    useSelector((state) => state.RepairReducer) || {};
+  const {
+    repairs = [],
+    total = 0,
+    addRepairResponse,
+    DeleteRepairResponse,
+    updateRepairResponse,
+    loading = false,
+  } = useSelector((state) => state.RepairReducer) || {};
 
-  const { workflows = [], workflowStages = [] } = useSelector(
-    (state) => state.WorkflowReducer
-  );
+  const { workflows = [], workflowStages = [] } =
+    useSelector((state) => state.WorkflowReducer) || {};
 
   // ================== LOCAL STATE ==================
   const [selectedRepair, setSelectedRepair] = useState(null);
   const [deleteModal, setDeleteModal] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  const [page, setPage] = useState(1);
+
   const [filterData, setfilterData] = useState({
     start_date: new Date(),
     end_date: new Date(),
     workflow_id: 0,
+    stage_id: 0,
     customer_search: "",
   });
 
-  // ================== INITIAL FETCH ==================
+  // ================== PERMISSIONS ==================
+  const canUpdate = useMemo(() => {
+    return permissions?.some(
+      (p) =>
+        (p.permission_category === "REPAIRING" ||
+          p.permission_category === "REPAIRINGCUSTOMER") &&
+        String(p.permission_path) === "3"
+    );
+  }, [permissions]);
 
+  const canDelete = useMemo(() => {
+    return permissions?.some(
+      (p) =>
+        (p.permission_category === "REPAIRING" ||
+          p.permission_category === "REPAIRINGCUSTOMER") &&
+        String(p.permission_path) === "4"
+    );
+  }, [permissions]);
+
+  const canAdd = useMemo(() => {
+    return permissions?.some(
+      (p) =>
+        (p.permission_category === "REPAIRING" ||
+          p.permission_category === "REPAIRINGCUSTOMER") &&
+        String(p.permission_path) === "2"
+    );
+  }, [permissions]);
+
+  // ================== INITIAL FETCH ==================
   useEffect(() => {
     dispatch(getWorkflowList());
     dispatch(resetAddRepairResponse());
   }, [dispatch]);
+
+  // ✅ set default workflow once loaded
   useEffect(() => {
-    // 1) Set default workflow_id once workflows are loaded
     if (workflows.length > 0 && !filterData.workflow_id) {
       setfilterData((prev) => ({
         ...prev,
         workflow_id: workflows[0].workflow_id,
       }));
-      return; // avoid running rest with empty workflow_id in same tick
     }
+  }, [workflows]);
 
-    // 2) When workflow_id is available, load workflow stages
+  // ✅ load stages when workflow changes
+  useEffect(() => {
     if (filterData.workflow_id) {
       dispatch(getWorkflowStageList(filterData.workflow_id));
     }
+  }, [filterData.workflow_id, dispatch]);
 
-    // 3) Whenever filters OR add/update/delete response flags change,
-    //    call getRepairList
-    if (filterData) {
-      dispatch(getRepairList(filterData));
-    }
+  // ✅ whenever filters change -> reset page + fetch page 1
+  useEffect(() => {
+    if (!filterData.workflow_id) return;
 
-    // 4) Reset flags after using them so next add/update/delete
-    //    will again trigger this effect
-    if (addRepairResponse) {
-      dispatch(resetAddRepairResponse());
-    }
-    if (updateRepairResponse) {
-      dispatch(resetUpdateRepairResponse());
-    }
-    if (DeleteRepairResponse) {
-      dispatch(resetDeleteRepairResponse());
+    setPage(1);
+
+    dispatch(
+      getRepairList({
+        ...filterData,
+        page: 1,
+        limit: LIMIT,
+      })
+    );
+  }, [
+    filterData.workflow_id,
+    filterData.stage_id,
+    filterData.start_date,
+    filterData.end_date,
+    filterData.customer_search,
+    dispatch,
+  ]);
+
+  // ✅ after add/update/delete -> refresh page 1
+  useEffect(() => {
+    if (addRepairResponse || updateRepairResponse || DeleteRepairResponse) {
+      dispatch(
+        getRepairList({
+          ...filterData,
+          page: 1,
+          limit: LIMIT,
+        })
+      );
+      setPage(1);
+
+      if (addRepairResponse) dispatch(resetAddRepairResponse());
+      if (updateRepairResponse) dispatch(resetUpdateRepairResponse());
+      if (DeleteRepairResponse) dispatch(resetDeleteRepairResponse());
     }
   }, [
-    workflows,
-    filterData,
     addRepairResponse,
     updateRepairResponse,
     DeleteRepairResponse,
     dispatch,
+    filterData,
   ]);
-
 
   // ================== DELETE LOGIC ==================
   const onClickDelete = (repair) => {
@@ -135,12 +193,22 @@ const RepairList = () => {
   useEffect(() => {
     document.title = "Repair List";
   }, []);
-  const canUpdate = permissions.some(
-    (p) => p.permission_category === "REPAIRING" || p.permission_category === "REPAIRINGCUSTOMER" && p.permission_path === "3"
-  );
-  const canDelete = permissions.some(
-    (p) => p.permission_category === "REPAIRING" || p.permission_category === "REPAIRINGCUSTOMER" && p.permission_path === "4"
-  );
+
+  // ================== INFINITE SCROLL fetch next ==================
+  const fetchNextPage = useCallback(() => {
+    const next = page + 1;
+    setPage(next);
+
+    dispatch(
+      getRepairList({
+        ...filterData,
+        page: next,
+        limit: LIMIT,
+      })
+    );
+  }, [page, dispatch, filterData]);
+
+  const hasMore = repairs.length < Number(total || 0);
 
   return (
     <div className="page-content">
@@ -157,20 +225,20 @@ const RepairList = () => {
           <Col lg={12}>
             <Card className="p-3">
               {/* === Header === */}
-              <CardHeader className="border-0 ">
+              <CardHeader className="border-0">
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-                  <h4 className="mb-0">Repair List</h4>
-
                   <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-end gap-2">
                     {/* === Workflow === */}
-                    <div className="w-100 w-sm-auto">
+                    <div className="w-100 w-sm-auto" style={{ minWidth: 220 }}>
                       <Label className="form-label mb-1">Workflow</Label>
                       <Select
                         className="w-100"
                         value={
                           workflows
                             .filter(
-                              (f) => f.workflow_id === filterData.workflow_id
+                              (f) =>
+                                Number(f.workflow_id) ===
+                                Number(filterData.workflow_id)
                             )
                             .map((w) => ({
                               label: w.workflow_name,
@@ -184,10 +252,48 @@ const RepairList = () => {
                         onChange={(selected) =>
                           setfilterData((prev) => ({
                             ...prev,
-                            workflow_id: selected.value,
+                            workflow_id: selected?.value || 0,
+                            stage_id: 0,
                           }))
                         }
                         placeholder="Select Workflow..."
+                      />
+                    </div>
+
+                    {/* === Stage === */}
+                    <div className="w-100 w-sm-auto" style={{ minWidth: 220 }}>
+                      <Label className="form-label mb-1">Stage</Label>
+                      <Select
+                        className="w-100"
+                        value={
+                          (filterData.stage_id === 0
+                            ? { label: "All Stages", value: 0 }
+                            : workflowStages
+                                .filter(
+                                  (s) =>
+                                    Number(s.workflow_child_id) ===
+                                    Number(filterData.stage_id)
+                                )
+                                .map((s) => ({
+                                  label: s.workflow_stage_name,
+                                  value: s.workflow_child_id,
+                                }))[0]) || { label: "All Stages", value: 0 }
+                        }
+                        options={[
+                          { label: "All Stages", value: 0 },
+                          ...workflowStages.map((s) => ({
+                            label: s.workflow_stage_name,
+                            value: s.workflow_child_id,
+                          })),
+                        ]}
+                        onChange={(selected) =>
+                          setfilterData((prev) => ({
+                            ...prev,
+                            stage_id: selected?.value ?? 0,
+                          }))
+                        }
+                        placeholder="Select Stage..."
+                        isDisabled={!filterData.workflow_id}
                       />
                     </div>
 
@@ -198,7 +304,7 @@ const RepairList = () => {
                         className="form-control w-100"
                         value={filterData.start_date}
                         onChange={(selectedDates) => {
-                          if (selectedDates && selectedDates[0]) {
+                          if (selectedDates?.[0]) {
                             setfilterData((prev) => ({
                               ...prev,
                               start_date: selectedDates[0],
@@ -206,7 +312,7 @@ const RepairList = () => {
                           }
                         }}
                         options={{
-                          dateFormat: "d/m/Y  ",
+                          dateFormat: "d/m/Y",
                           altInput: true,
                           altFormat: "d/m/Y",
                         }}
@@ -221,7 +327,7 @@ const RepairList = () => {
                         className="form-control w-100"
                         value={filterData.end_date}
                         onChange={(selectedDates) => {
-                          if (selectedDates && selectedDates[0]) {
+                          if (selectedDates?.[0]) {
                             setfilterData((prev) => ({
                               ...prev,
                               end_date: selectedDates[0],
@@ -229,7 +335,7 @@ const RepairList = () => {
                           }
                         }}
                         options={{
-                          dateFormat: "d/m/Y  ",
+                          dateFormat: "d/m/Y",
                           altInput: true,
                           altFormat: "d/m/Y",
                         }}
@@ -255,25 +361,21 @@ const RepairList = () => {
                     </div>
 
                     {/* === Add Repair Button === */}
-                    {permissions.find(
-                      (permission) =>
-                        permission.permission_category === "REPAIRING" || permission.permission_category === "REPAIRINGCUSTOMER"&&
-                        permission.permission_path === "2"
-                    ) && (
-                        <div className="w-100 w-sm-auto">
-                          <Label className="form-label mb-1 d-none d-sm-block">
-                            &nbsp;
-                          </Label>
-                          <Button
-                            color="success"
-                            className="w-100"
-                            onClick={() => setIsAddModalOpen(true)}
-                            style={{ whiteSpace: "nowrap" }}
-                          >
-                            + Add Repair
-                          </Button>
-                        </div>
-                      )}
+                    {canAdd && (
+                      <div className="w-100 w-sm-auto">
+                        <Label className="form-label mb-1 d-none d-sm-block">
+                          &nbsp;
+                        </Label>
+                        <Button
+                          color="success"
+                          className="w-100"
+                          onClick={() => setIsAddModalOpen(true)}
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          + Add Repair
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -289,6 +391,11 @@ const RepairList = () => {
                   setIsUpdateModalOpen={setIsUpdateModalOpen}
                   onClickDelete={onClickDelete}
                   canUpdate={canUpdate}
+                  filterData={filterData}
+                  total={total}
+                  loading={loading}
+                  hasMore={hasMore}
+                  fetchNextPage={fetchNextPage}
                 />
               </CardBody>
             </Card>

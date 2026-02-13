@@ -344,7 +344,7 @@ const ReqToSupplierList = () => {
                                                             <th style={{ width: "5%" }}>#</th>
                                                             <th style={{ width: "10%" }}>Request ID</th>
                                                             <th style={{ width: "15%" }}>{user.user_type == 7 ? "Vendor" : "Supplier"}</th>
-                                                            <th style={{ width: "25%" }}>Date</th> 
+                                                            <th style={{ width: "25%" }}>Date</th>
                                                             {user.user_type == 1 && <th style={{ width: "25%" }}>Vendor </th>}
                                                             <th style={{ width: "25%" }}>Message</th>
                                                             <th style={{ width: "25%" }}>Reply</th>
@@ -456,16 +456,14 @@ const ReqToSupplierList = () => {
                                                         ) : (
                                                             !loading && (
                                                                 <tr>
-                                                                    <td colSpan="7" className="text-center py-5">
+                                                                    <td colSpan="9" className="text-center py-5">
                                                                         <lord-icon
                                                                             src="https://cdn.lordicon.com/msoeawqm.json"
                                                                             trigger="loop"
                                                                             colors="primary:#405189,secondary:#0ab39c"
                                                                             style={{ width: "72px", height: "72px" }}
                                                                         ></lord-icon>
-                                                                        <div className="mt-4">
-                                                                            <h5>No requests found</h5>
-                                                                        </div>
+
                                                                     </td>
                                                                 </tr>
                                                             )
@@ -474,8 +472,8 @@ const ReqToSupplierList = () => {
                                                 </table>
                                             </div>
                                         </InfiniteScroll>
-                                    </div>
-                                </CardBody>
+                                    </div>  
+                                </CardBody> 
                             </Card>
                         </Col>
                     </Row>
