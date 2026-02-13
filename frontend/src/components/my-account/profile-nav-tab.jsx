@@ -44,6 +44,11 @@ const ProfileNavTab = () => {
           title="My Orders"
           icon="fa-light fa-clipboard-list-check"
         />
+        <SingleNav
+          id="quotation"
+          title="Quotation"
+          icon="fa-light fa-clipboard-list-check"
+        />
          
       </div>
     </nav>

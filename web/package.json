@@ -25,6 +25,7 @@
     "chart.js": "^4.3.0",
     "classnames": "^2.5.1",
     "cleave.js": "^1.6.0",
+    "cross-env": "^10.1.0",
     "echarts": "^5.4.2",
     "echarts-for-react": "^3.0.2",
     "emoji-picker-react": "^4.4.9",
