@@ -7,10 +7,10 @@ import pay from '@assets/img/footer/footer-pay.png';
 import social_data from '@/data/social-data';
 import { Email, Location } from '@/svg';
 
-const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
+const Footer = ({ style_2 = false, style_3 = false, primary_style = false }) => {
   return (
     <footer>
-      <div className={`tp-footer-area ${primary_style?'tp-footer-style-2 tp-footer-style-primary tp-footer-style-6':''} ${style_2 ?'tp-footer-style-2':style_3 ? 'tp-footer-style-2 tp-footer-style-3': ''}`}
+      <div className={`tp-footer-area ${primary_style ? 'tp-footer-style-2 tp-footer-style-primary tp-footer-style-6' : ''} ${style_2 ? 'tp-footer-style-2' : style_3 ? 'tp-footer-style-2 tp-footer-style-3' : ''}`}
         data-bg-color={`${style_2 ? 'footer-bg-white' : 'footer-bg-grey'}`}>
         <div className="tp-footer-top pt-95 pb-40">
           <div className="container">
@@ -38,12 +38,19 @@ const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
                   <h4 className="tp-footer-widget-title">My Account</h4>
                   <div className="tp-footer-widget-content">
                     <ul>
-                      <li><a href="#">Track Orders</a></li>
-                      <li><a href="#">Shipping</a></li>
-                      <li><a href="#">Wishlist</a></li>
-                      <li><a href="#">My Account</a></li>
-                      <li><a href="#">Order History</a></li>
-                      <li><a href="#">Returns</a></li>
+
+                      <li><a href="/cart">Cart</a></li>
+                      <li><a href="/shop">Cart</a></li>
+                      <li>
+                        <Link href="/profile#nav-profile">My Account</Link>
+                      </li>
+                      <li>
+                        <Link href="/profile#nav-order">Order History</Link>
+                      </li>
+                      <li>
+                        <Link href="/profile#nav-quotation">Quotations History</Link>
+                      </li>
+
                     </ul>
                   </div>
                 </div>
@@ -102,8 +109,8 @@ const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
         <div className="tp-footer-bottom">
           <div className="container">
             <div className="tp-footer-bottom-wrapper">
-                <div className="row align-items-center">
-                  <div className="col-md-6">
+              <div className="row align-items-center">
+                <div className="col-md-6">
                   <div className="tp-footer-copyright">
                     <p>© {new Date().getFullYear()} All Rights Reserved  |   Develop  by
                       <Link href="/">{" "}NBH HEALTH SOFT</Link>.

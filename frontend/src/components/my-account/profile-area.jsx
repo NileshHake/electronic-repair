@@ -1,12 +1,51 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
+
 import ProfileNavTab from "./profile-nav-tab";
 import ProfileShape from "./profile-shape";
 import NavProfileTab from "./nav-profile-tab";
 import ProfileInfo from "./profile-info";
 import ChangePassword from "./change-password";
-import MyOrders from "./my-orders";  
+import MyOrders from "./my-orders";
 import QuotationTab from "./quotations";
+
 const ProfileArea = ({ orderData, quotationData }) => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const activateTabByHash = async () => {
+      const hash = window.location.hash || "#nav-profile"; // default tab
+
+      // Bootstrap Tab JS load (only client side)
+      const bs = await import("bootstrap/dist/js/bootstrap.bundle.min.js");
+
+      // Find the tab button that targets this hash
+      const triggerEl = document.querySelector(
+        `[data-bs-toggle="tab"][data-bs-target="${hash}"],` +
+          `[data-toggle="tab"][data-target="${hash}"],` + // old bootstrap support
+          `a[href="${hash}"]`
+      );
+
+      if (triggerEl && bs?.Tab) {
+        const tab = bs.Tab.getOrCreateInstance(triggerEl);
+        tab.show();
+      }
+    };
+
+    activateTabByHash();
+
+    // when hash changes (footer click, back/forward)
+    const onHashChange = () => activateTabByHash();
+
+    window.addEventListener("hashchange", onHashChange);
+    router.events?.on("hashChangeComplete", onHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+      router.events?.off("hashChangeComplete", onHashChange);
+    };
+  }, [router]);
+
   return (
     <section className="profile__area pt-120 pb-120">
       <div className="container">
@@ -52,7 +91,7 @@ const ProfileArea = ({ orderData, quotationData }) => {
                     <MyOrders orderData={orderData} />
                   </div>
 
-                  {/* ✅ Quotation */}
+                  {/* Quotation */}
                   <div
                     className="tab-pane fade"
                     id="nav-quotation"
@@ -62,7 +101,7 @@ const ProfileArea = ({ orderData, quotationData }) => {
                     <QuotationTab quotationData={quotationData} />
                   </div>
 
-                  {/* ⚠️ Only keep this if you also add "password" button in nav */}
+                  {/* Password */}
                   <div
                     className="tab-pane fade"
                     id="nav-password"
