@@ -25,7 +25,10 @@ const QuotationMaster = sequelize.define(
       type: DataTypes.BIGINT,
       allowNull: false,
     },
-
+    created_for_name: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
     create_date: {
       type: DataTypes.DATEONLY,
       allowNull: false,

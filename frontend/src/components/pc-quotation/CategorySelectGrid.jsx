@@ -55,6 +55,7 @@ const CategorySelectGrid = ({
   const [selectedIdByCategory, setSelectedIdByCategory] = useState({});
   const [selectedOptionByCategory, setSelectedOptionByCategory] = useState({});
   const [qtyByCategory, setQtyByCategory] = useState({});
+  const [customerName, setCustomerName] = useState("");
 
   // ✅ preview modal
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -143,7 +144,7 @@ const CategorySelectGrid = ({
       const payload = {
         business_id: businessId,
         customer_id: customerId,
-
+        created_for_name: customerName,
         create_date: toDateOnly(today),
         expire_date: toDateOnly(expiry),
 
@@ -206,9 +207,7 @@ const CategorySelectGrid = ({
     }
   };
 
-  const channel = null; // (PC quotation doesn't use channel)
-  const cameraCount = 0; // (PC quotation doesn't use camera count)
-  const quoteType = 0; // you can keep 0 or remove if not needed in modal
+
 
   return (
     <div className="table-responsive">
@@ -219,10 +218,19 @@ const CategorySelectGrid = ({
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          
-          <ul className="list-unstyled d-flex flex-wrap align-items-center gap-2 mb-0">
 
-            <li className="btn btn-outline-secondary btn-sm px-3"
+          <ul className="list-unstyled d-flex flex-wrap align-items-center gap-2 mb-0">
+            <li  >
+              <label>Created For</label>
+              <input
+                style={{ height: "10px" }}
+                type="text"
+                className="form-control form-control-sm"
+                placeholder="Customer Name"
+                onChange={(e) => setCustomerName(e.target.value)}
+              />
+            </li>
+            <li className="btn btn-outline-secondary btn-sm px-3 mt-4"
               style={{
                 borderRadius: 8,
                 fontWeight: 600,
@@ -236,7 +244,7 @@ const CategorySelectGrid = ({
             color="info"
             onClick={() => setPreviewOpen(true)}
             disabled={selectedRows.length === 0}
-            className="px-3"
+            className="px-3 mt-4"
           >
             View
           </Button>
@@ -245,7 +253,7 @@ const CategorySelectGrid = ({
             color="primary"
             onClick={() => handleSaveQuotation({ shouldDownload: true })}
             disabled={!canSave}
-            className="px-3"
+            className="px-3 mt-4"
           >
             {isSaving ? "Saving..." : "Save & Download"}
           </Button>

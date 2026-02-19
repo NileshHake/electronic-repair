@@ -500,9 +500,7 @@ const filterProductsForQuotation
   = async (req, res) => {
     try {
       const { category_id } = req.body;
-        console.log("category_id", category_id);
-
-      const whereConditions = [];
+     const whereConditions = [];
       const replacements = {};
 
       // ✅ ALWAYS show only active products

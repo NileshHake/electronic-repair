@@ -114,6 +114,7 @@ const CCTVCategorySelectGrid = ({
   const [selectedIdByCategory, setSelectedIdByCategory] = useState({});
   const [selectedOptionByCategory, setSelectedOptionByCategory] = useState({});
   const [qtyByCategory, setQtyByCategory] = useState({});
+const [customerName, setCustomerName] = useState("");
 
   // ✅ manual override flags
   const [manualQty, setManualQty] = useState({}); // { [cid]: true/false }
@@ -644,6 +645,7 @@ const CCTVCategorySelectGrid = ({
       const payload = {
         business_id: businessId,
         customer_id: customerId,
+        created_for_name: customerName,
         create_date: toDateOnly(today),
         expire_date: toDateOnly(expiry),
         grand_total: Number(grandTotal || 0),
@@ -728,8 +730,18 @@ const CCTVCategorySelectGrid = ({
 
         <div className="d-flex align-items-center gap-2">
           <ul className="list-unstyled d-flex flex-wrap align-items-center gap-2 mb-0">
+            <li  >
+              <label>Created For</label>
+              <input
+              style={{height:"10px" }}
+                type="text"
+                className="form-control form-control-sm"
+                placeholder="Customer Name"
+                onChange={(e) => setCustomerName(e.target.value)}
+              />
+            </li>
 
-            <li className="btn btn-outline-secondary btn-sm px-3"
+            <li className="btn btn-outline-secondary btn-sm px-3  mt-4"
               style={{
                 borderRadius: 8,
                 fontWeight: 600,
@@ -738,7 +750,7 @@ const CCTVCategorySelectGrid = ({
               <Link href="/profile#nav-quotation">My Quotations  </Link>
             </li>
 
-            <li>
+            <li className=" mt-4">
               <Button
                 color="info"
                 onClick={() => setPreviewOpen(true)}
@@ -753,7 +765,7 @@ const CCTVCategorySelectGrid = ({
               </Button>
             </li>
 
-            <li>
+            <li className=" mt-4">
               <Button
                 color="success"
                 onClick={() => handleSaveQuotation({ shouldDownload: true })}
