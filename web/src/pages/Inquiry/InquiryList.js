@@ -116,17 +116,30 @@ const InquiryList = () => {
 const onChangeRowStatus = (q, selected) => {
   if (!selected?.value) return;
 
+  const newStatus = Number(selected.value);
+  const oldStatus = Number(q.quotation_status);
+
+  // ✅ 1. If same status selected → do nothing (prevent 409)
+  if (oldStatus === newStatus) {
+    return;
+  }
+
+  // ✅ 2. Call update API
   dispatch(updateQuotationMaster({
     quotation_id: q.quotation_id,
-    quotation_status: selected.value,
+    quotation_status: newStatus,
   }));
 
-  // ✅ If currently filtered (e.g. New) and item moves out, remove instantly
+  // ✅ 3. If filtered list (not All) and status changed → remove instantly
   const currentFilter = Number(statusFilter?.value || 0);
-  if (currentFilter !== 0 && currentFilter !== Number(selected.value)) {
-    setRows((prev) => prev.filter((x) => x.quotation_id !== q.quotation_id));
+
+  if (currentFilter !== 0 && currentFilter !== newStatus) {
+    setRows((prev) =>
+      prev.filter((x) => x.quotation_id !== q.quotation_id)
+    );
   }
 };
+
 
 
     /* ✅✅ FIXED CALLBACK: after update success, refresh list */
