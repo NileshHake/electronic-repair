@@ -97,6 +97,7 @@ import { beadingSaga } from "./Beading";
 import { requestsSaga } from "./Requests";
 import { generationSaga } from "./Generation";
 import { ramSaga } from "./Ram";
+import { quotationSaga } from "./Inquiry";
 export default function* rootSaga() {
   yield all([
     //public
@@ -128,6 +129,7 @@ export default function* rootSaga() {
     fork(paymentTypeSaga),
     fork(businessSaga),
     fork(brandSaga),
+    fork(quotationSaga),
     fork(generationSaga),
     fork(ramSaga),
     fork(AccountSaga),

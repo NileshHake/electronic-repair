@@ -105,6 +105,7 @@ import { BeadingReducer } from "./Beading";
 import { RequestsReducer } from "./Requests";
 import { GenerationReducer } from "./Generation";
 import { RamReducer } from "./Ram";
+import { QuotationReducer } from "./Inquiry";
 
 const rootReducer = combineReducers({
   // public
@@ -125,6 +126,7 @@ const rootReducer = combineReducers({
   Invoice,
   TaxReducer,
   RequestsReducer,
+  QuotationReducer,
   OrderReducer,
   CustomerReducer,
   SourceReducer,

@@ -38,22 +38,29 @@ const QuotationTab = () => {
       toast.error("Download failed");
     }
   };
+const getStatusBadge = (status) => {
+  const s = Number(status);
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 1:
-      case "Pending":
-        return <span className="badge bg-warning text-dark">Pending</span>;
-      case 2:
-      case "Approved":
-        return <span className="badge bg-success">Approved</span>;
-      case 3:
-      case "Rejected":
-        return <span className="badge bg-danger">Rejected</span>;
-      default:
-        return <span className="badge bg-secondary">Unknown</span>;
-    }
-  };
+  switch (s) {
+    case 0:
+      return <span className="badge bg-warning text-dark">Pending</span>;
+
+    case 1:
+      return <span className="badge bg-secondary">New</span>;
+
+    case 2:
+      return <span className="badge bg-primary">Accept</span>;
+
+    case 3:
+      return <span className="badge bg-success">Final</span>;
+
+    case 4:
+      return <span className="badge bg-danger">Reject</span>;
+
+    default:
+      return <span className="badge bg-dark">Unknown</span>;
+  }
+};
 
   if (isLoading) return <p>Loading quotations...</p>;
 

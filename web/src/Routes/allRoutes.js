@@ -280,6 +280,7 @@ import BeadingList from "../pages/Beading/Beadinglist";
 import ReqToSupplierList from "../pages/Requests/ReqToSupplierList";
 import GenerationList from "../pages/Generation/GenerationList";
 import RamList from "../pages/Ram/Ramlist";
+import InquiryList from "../pages/Inquiry/InquiryList";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -335,7 +336,8 @@ const authProtectedRoutes = [
   { path: "/sub-category-list/:category_id", component: <SubCategoryList /> },
   { path: "/repair/overview/:repair_id", component: <OverView /> },
   { path: "/slider-list", component: <SliderList /> },
-  { path: "/supplier-list", component: <SupplierList /> },
+  { path: "/supplier-list", component: <SupplierList /> }, 
+  { path: "/inquiry-list", component: <InquiryList /> }, 
   // ORDER TRACKING ROUTES
   { path: "/order-list", component: <OrderList /> },
   { path: "/order-new", component: <NewOrderList /> },
