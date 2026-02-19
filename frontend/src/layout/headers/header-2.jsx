@@ -42,7 +42,7 @@ const HeaderTwo = ({ style_2 = false }) => {
                         <span>
                           <PhoneTwo />
                         </span> +(880) 1622097651
-                      </a>          
+                      </a>
                     </div> */}
                   </div>
                 </div>

@@ -12,31 +12,34 @@ const HeaderCategory = ({ isCategoryActive }) => {
     useGetCategoriesWithSubQuery();
   const router = useRouter();
 
-  const handleCategoryRoute = (name, type) => {
-    const param = type === "parent" ? "category" : "subCategory";
-    router.push(
-      `/shop?${param}=${name
-        .toLowerCase()
-        .replace("&", "")
-        .split(" ")
-        .join("-")}`
-    );
+  // ✅ Common router function
+  const goShop = (category_id) => {
+    router.push({
+      pathname: "/shop",
+      query: {
+        category_id: category_id,
+      },
+    });
   };
 
   let content = null;
 
   if (isLoading) content = <Loader loading />;
   if (!isLoading && isError) content = <ErrorMsg msg="There was an error" />;
-  if (!isLoading && !isError && categories?.length === 0)
+  if (!isLoading && !isError && (!categories || categories?.length === 0))
     content = <ErrorMsg msg="No Category found!" />;
 
   if (!isLoading && !isError && categories?.length > 0) {
     content = categories.map((item) => (
       <li className="has-dropdown" key={item.category_id}>
-        {/* Parent Category */}
+        
+        {/* ✅ Parent Category */}
         <a
           className="cursor-pointer"
-          onClick={() => handleCategoryRoute(item.category_name, "parent")}
+          onClick={(e) => {
+            e.preventDefault();
+            goShop(item.category_id); // send parent id
+          }}
         >
           <span>
             <Image
@@ -53,17 +56,20 @@ const HeaderCategory = ({ isCategoryActive }) => {
           {item.category_name}
         </a>
 
-        {/* Sub Categories */}
+        {/* ✅ Sub Categories */}
         {item.children?.length > 0 && (
           <ul className="tp-submenu">
             {item.children.map((child) => (
-              <li
-                key={child.category_id}
-                onClick={() =>
-                  handleCategoryRoute(child.category_name, "children")
-                }
-              >
-                <a className="cursor-pointer">
+              <li key={child.category_id}>
+                <a
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    // 🔥 Send category_main_id instead of child id
+                    goShop(child.category_main_id);
+                  }}
+                >
                   {child.category_name}
                 </a>
               </li>

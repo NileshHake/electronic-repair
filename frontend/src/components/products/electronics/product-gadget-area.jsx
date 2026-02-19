@@ -92,7 +92,7 @@ const ProductGadgetArea = () => {
                   <div className="tp-product-gadget-thumb">
                     <Image src={gadget_girl} alt="gadget_girl img" priority />
                   </div>
-                  <h3 className="tp-product-gadget-categories-title">Electronics <br /> Gadgets</h3>
+                  <h3 className="tp-product-gadget-categories-title">Categories </h3>
 
                   <div className="tp-product-gadget-categories-list">
                     <PrdCategoryList />
@@ -105,7 +105,7 @@ const ProductGadgetArea = () => {
                   </div>
                 </div>
                 <div className="tp-product-gadget-banner">
-                  <GadgetBanner />
+                  {/* <GadgetBanner /> */}
                 </div>
               </div>
             </div>

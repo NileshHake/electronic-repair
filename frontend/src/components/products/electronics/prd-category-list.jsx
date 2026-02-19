@@ -1,26 +1,22 @@
 import React from "react";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import ErrorMsg from "@/components/common/error-msg";
 import { useGetCategoriesWithSubQuery } from "@/redux/features/categoryApi";
 import CategoryListLoader from "@/components/loader/home/category-list-loader";
-import { api } from "../../../../config";
-import D_img from "@/components/Default/D_img";
 
 const PrdCategoryList = () => {
   const { data: categories, isLoading, isError } =
     useGetCategoriesWithSubQuery();
   const router = useRouter();
 
-  const handleCategoryRoute = (name, type = "parent") => {
-    const param = type === "parent" ? "category" : "subCategory";
-    router.push(
-      `/shop?${param}=${name
-        .toLowerCase()
-        .replace("&", "")
-        .split(" ")
-        .join("-")}`
-    );
+  // ✅ Navigate using category_id
+  const handleCategoryRoute = (category_id) => {
+    router.push({
+      pathname: "/shop",
+      query: {
+        category_id: category_id,
+      },
+    });
   };
 
   let content = null;
@@ -33,9 +29,14 @@ const PrdCategoryList = () => {
     content = <ErrorMsg msg="No Category found!" />;
 
   if (!isLoading && !isError && categories?.length > 0) {
-    content = categories.slice(0,5).map((item) => (
-    <li key={item.category_id}>
-        <a onClick={() => handleCategoryRoute(item.category_name)} className="cursor-pointer">{item.category_name}</a>
+    content = categories.slice(0, 5).map((item) => (
+      <li key={item.category_id}>
+        <a
+          onClick={() => handleCategoryRoute(item.category_id)}
+          className="cursor-pointer"
+        >
+          {item.category_name}
+        </a>
       </li>
     ));
   }
