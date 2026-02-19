@@ -431,40 +431,65 @@ const SearchProducts = async (req, res) => {
   try {
     const { search } = req.body;
 
+    if (!search || search.trim().length < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Search must be at least 1 characters",
+      });
+    }
+
     const products = await sequelize.query(
       `
       SELECT
         pro.product_id,
         pro.product_name,
+
         br.brand_id,
         br.brand_name,
+
         cat.category_id,
-        cat.category_name
+        cat.category_name,
+
+        subcat.category_id AS sub_category_id,
+        subcat.category_name AS sub_category_name
+
       FROM tbl_products pro
+
       LEFT JOIN tbl_brands br 
         ON br.brand_id = pro.product_brand
+
       LEFT JOIN tbl_categories cat 
         ON cat.category_id = pro.product_category
+
+      LEFT JOIN tbl_categories subcat 
+        ON subcat.category_id = pro.product_sub_category
+
       WHERE pro.product_status = 2
-        AND CHAR_LENGTH(TRIM(:search)) >= 3
         AND (
           LOWER(TRIM(pro.product_name)) COLLATE utf8mb4_general_ci
             LIKE CONCAT('%', LOWER(TRIM(:search)), '%') COLLATE utf8mb4_general_ci
+
           OR LOWER(TRIM(COALESCE(br.brand_name, ''))) COLLATE utf8mb4_general_ci
             LIKE CONCAT('%', LOWER(TRIM(:search)), '%') COLLATE utf8mb4_general_ci
+
           OR LOWER(TRIM(COALESCE(cat.category_name, ''))) COLLATE utf8mb4_general_ci
             LIKE CONCAT('%', LOWER(TRIM(:search)), '%') COLLATE utf8mb4_general_ci
+
+          OR LOWER(TRIM(COALESCE(subcat.category_name, ''))) COLLATE utf8mb4_general_ci
+            LIKE CONCAT('%', LOWER(TRIM(:search)), '%') COLLATE utf8mb4_general_ci
         )
+
       ORDER BY pro.product_id ASC
       LIMIT 20
       `,
       {
-        replacements: { search },
+        replacements: { search: search.trim() },
         type: QueryTypes.SELECT,
       }
     );
 
     return res.status(200).json({ success: true, data: products });
+
   } catch (error) {
     console.error("Search Error:", error);
     return res.status(500).json({ success: false, message: error.message });

@@ -20,7 +20,7 @@ const HeaderSearchForm = () => {
 
   // 🔹 On select item → navigate to shop with category + brand
   const handleChange = (selected) => {
-    if (selected.length > 0) {
+    if (selected.length >= 1) {
 
 
       const product = selected[0];
@@ -38,7 +38,7 @@ const HeaderSearchForm = () => {
       });
     }
   };
-console.log("data",data);
+ 
 
   return (
     <form onSubmit={handleSubmit}>

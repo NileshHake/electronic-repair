@@ -6,6 +6,8 @@ import {
   useCreateQuotationMutation,
   useLazyDownloadQuotationInvoiceQuery,
 } from "@/redux/features/quotationApi";
+import QuotationPreviewModal from "../cctv-quotation/QuotationPreviewModal";
+import Link from "next/link";
 
 const PROCESSOR_CAT_ID = 1;
 const MOTHERBOARD_CAT_ID = 2;
@@ -45,18 +47,41 @@ const downloadBlob = (blob, filename = "quotation.pdf") => {
   window.URL.revokeObjectURL(url);
 };
 
-const CategorySelectGrid = ({ categoryList = [], businessId = null, customerId = null }) => {
+const CategorySelectGrid = ({
+  categoryList = [],
+  businessId = null,
+  customerId = null,
+}) => {
   const [selectedIdByCategory, setSelectedIdByCategory] = useState({});
   const [selectedOptionByCategory, setSelectedOptionByCategory] = useState({});
   const [qtyByCategory, setQtyByCategory] = useState({});
 
-  const [createQuotation, { isLoading: isSaving }] = useCreateQuotationMutation();
+  // ✅ preview modal
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const [createQuotation, { isLoading: isSaving }] =
+    useCreateQuotationMutation();
   const [downloadInvoice] = useLazyDownloadQuotationInvoiceQuery();
 
+  // ✅ Select handler with N/A support
   const setSelectedForCategory = (cid, selected) => {
-    setSelectedIdByCategory((p) => ({ ...p, [cid]: selected?.value || null }));
-    setSelectedOptionByCategory((p) => ({ ...p, [cid]: selected || null }));
-    setQtyByCategory((p) => ({ ...p, [cid]: Number(p[cid] || 1) }));
+    const isNA = selected?.value === "NA";
+    const nextSelected = isNA ? null : selected || null;
+
+    setSelectedIdByCategory((p) => ({
+      ...p,
+      [cid]: nextSelected?.value || null,
+    }));
+    setSelectedOptionByCategory((p) => ({
+      ...p,
+      [cid]: nextSelected,
+    }));
+
+    // ✅ if N/A or clear -> qty 0
+    setQtyByCategory((p) => ({
+      ...p,
+      [cid]: nextSelected ? Number(p[cid] || 1) : 0,
+    }));
   };
 
   const processorGenId = useMemo(() => {
@@ -79,7 +104,10 @@ const CategorySelectGrid = ({ categoryList = [], businessId = null, customerId =
       const cid = Number(cat.category_id);
       const opt = selectedOptionByCategory[cid];
       const price = Number(opt?.product?.product_sale_price || 0);
-      const qty = Number(qtyByCategory[cid] || 1);
+
+      // ✅ if no product selected -> qty 0
+      const qty = opt ? Number(qtyByCategory[cid] || 1) : 0;
+
       return {
         index: i + 1,
         category_id: cid,
@@ -93,7 +121,11 @@ const CategorySelectGrid = ({ categoryList = [], businessId = null, customerId =
     });
   }, [categoryList, selectedOptionByCategory, qtyByCategory, selectedIdByCategory]);
 
-  const selectedRows = useMemo(() => rows.filter((r) => !!r.product), [rows]);
+  // ✅ only rows with product and qty > 0
+  const selectedRows = useMemo(
+    () => rows.filter((r) => !!r.product && Number(r.qty || 0) > 0),
+    [rows]
+  );
 
   const grandTotal = useMemo(
     () => selectedRows.reduce((s, r) => s + Number(r.total || 0), 0),
@@ -102,7 +134,7 @@ const CategorySelectGrid = ({ categoryList = [], businessId = null, customerId =
 
   const canSave = selectedRows.length > 0 && !isSaving;
 
-  const handleSaveQuotation = async () => {
+  const handleSaveQuotation = async ({ shouldDownload = true } = {}) => {
     try {
       const today = new Date();
       const expiry = new Date();
@@ -117,6 +149,8 @@ const CategorySelectGrid = ({ categoryList = [], businessId = null, customerId =
 
         grand_total: Number(grandTotal || 0),
         total_items: Number(selectedRows.length || 0),
+
+        // ✅ default status
         quotation_status: 1,
 
         quotation_items: selectedRows.map((r) => ({
@@ -144,30 +178,37 @@ const CategorySelectGrid = ({ categoryList = [], businessId = null, customerId =
         return;
       }
 
-      // ✅ 2) download invoice PDF
-      let pdfBlob;
-      try {
-        pdfBlob = await downloadInvoice(quotationId).unwrap();
-      } catch (err) {
-        console.log("❌ invoice download error:", err);
-        return;
-      }
+      // ✅ 2) download invoice PDF (optional)
+      if (shouldDownload) {
+        let pdfBlob;
+        try {
+          pdfBlob = await downloadInvoice(quotationId).unwrap();
+        } catch (err) {
+          console.log("❌ invoice download error:", err);
+          return;
+        }
 
-      if (!(pdfBlob instanceof Blob)) {
-        console.log("❌ invoice API did not return Blob:", pdfBlob);
-        return;
-      }
+        if (!(pdfBlob instanceof Blob)) {
+          console.log("❌ invoice API did not return Blob:", pdfBlob);
+          return;
+        }
 
-      downloadBlob(pdfBlob, `Quotation-${quotationId}.pdf`);
+        downloadBlob(pdfBlob, `Quotation-${quotationId}.pdf`);
+      }
 
       // ✅ reset
       setSelectedIdByCategory({});
       setSelectedOptionByCategory({});
       setQtyByCategory({});
+      setPreviewOpen(false);
     } catch (e) {
       console.log("❌ save quotation error", e);
     }
   };
+
+  const channel = null; // (PC quotation doesn't use channel)
+  const cameraCount = 0; // (PC quotation doesn't use camera count)
+  const quoteType = 0; // you can keep 0 or remove if not needed in modal
 
   return (
     <div className="table-responsive">
@@ -178,13 +219,35 @@ const CategorySelectGrid = ({ categoryList = [], businessId = null, customerId =
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <div className="text-end">
-            <div className="text-muted small">Grand Total</div>
-            <div className="fw-bold">₹{money(grandTotal)}</div>
-          </div>
+          
+          <ul className="list-unstyled d-flex flex-wrap align-items-center gap-2 mb-0">
 
-          <Button color="primary" onClick={handleSaveQuotation} disabled={!canSave} className="px-3">
-            {isSaving ? "Saving..." : "Save Quotation"}
+            <li className="btn btn-outline-secondary btn-sm px-3"
+              style={{
+                borderRadius: 8,
+                fontWeight: 600,
+                textDecoration: "none",
+              }}>
+              <Link href="/profile#nav-quotation">My Quotations </Link>
+            </li>
+
+          </ul>
+          <Button
+            color="info"
+            onClick={() => setPreviewOpen(true)}
+            disabled={selectedRows.length === 0}
+            className="px-3"
+          >
+            View
+          </Button>
+
+          <Button
+            color="primary"
+            onClick={() => handleSaveQuotation({ shouldDownload: true })}
+            disabled={!canSave}
+            className="px-3"
+          >
+            {isSaving ? "Saving..." : "Save & Download"}
           </Button>
         </div>
       </div>
@@ -209,13 +272,26 @@ const CategorySelectGrid = ({ categoryList = [], businessId = null, customerId =
               onSelect={(sel) => {
                 if (row.category_id === PROCESSOR_CAT_ID) {
                   setSelectedForCategory(PROCESSOR_CAT_ID, sel);
+
+                  // ✅ if processor is cleared/NA, clear dependent too
                   setSelectedForCategory(MOTHERBOARD_CAT_ID, null);
                   setSelectedForCategory(RAM_CAT_ID, null);
-                  setQtyByCategory((p) => ({ ...p, [MOTHERBOARD_CAT_ID]: 1, [RAM_CAT_ID]: 1 }));
+
+                  setQtyByCategory((p) => ({
+                    ...p,
+                    [MOTHERBOARD_CAT_ID]: 0,
+                    [RAM_CAT_ID]: 0,
+                  }));
                 } else if (row.category_id === MOTHERBOARD_CAT_ID) {
                   setSelectedForCategory(MOTHERBOARD_CAT_ID, sel);
+
+                  // ✅ if motherboard cleared/NA, clear RAM too
                   setSelectedForCategory(RAM_CAT_ID, null);
-                  setQtyByCategory((p) => ({ ...p, [RAM_CAT_ID]: 1 }));
+
+                  setQtyByCategory((p) => ({
+                    ...p,
+                    [RAM_CAT_ID]: 0,
+                  }));
                 } else {
                   setSelectedForCategory(row.category_id, sel);
                 }
@@ -234,6 +310,20 @@ const CategorySelectGrid = ({ categoryList = [], businessId = null, customerId =
           </tr>
         </tbody>
       </table>
+
+      {/* ✅ Preview Modal */}
+      {previewOpen && (
+        <QuotationPreviewModal
+          isOpen={previewOpen}
+          toggle={() => setPreviewOpen(false)}
+          status={1}
+          selectedRows={selectedRows}
+          grandTotal={grandTotal}
+          saving={isSaving}
+          onSaveOnly={() => handleSaveQuotation({ shouldDownload: false })}
+          onSaveAndDownload={() => handleSaveQuotation({ shouldDownload: true })}
+        />
+      )}
     </div>
   );
 };
@@ -243,9 +333,18 @@ export default CategorySelectGrid;
 /* ===========================
    Row Component
 =========================== */
-const CategoryRow = ({ row, onSelect, onQtyChange, processorGenId, motherboardRamId }) => {
+const CategoryRow = ({
+  row,
+  onSelect,
+  onQtyChange,
+  processorGenId,
+  motherboardRamId,
+}) => {
   const cid = row.category_id;
-  const { data, isLoading } = useGetProductsForQuotationQuery({ category_id: cid }, { skip: !cid });
+  const { data, isLoading } = useGetProductsForQuotationQuery(
+    { category_id: cid },
+    { skip: !cid }
+  );
 
   const parseSupportGens = (v) => {
     if (!v) return [];
@@ -253,7 +352,9 @@ const CategoryRow = ({ row, onSelect, onQtyChange, processorGenId, motherboardRa
       const parsed = JSON.parse(v);
       return Array.isArray(parsed) ? parsed.map(Number) : [];
     } catch {
-      return String(v).split(",").map((x) => Number(x.trim()));
+      return String(v)
+        .split(",")
+        .map((x) => Number(x.trim()));
     }
   };
 
@@ -263,32 +364,45 @@ const CategoryRow = ({ row, onSelect, onQtyChange, processorGenId, motherboardRa
     if (cid === MOTHERBOARD_CAT_ID) {
       if (!processorGenId) return [];
       list = list.filter((p) =>
-        parseSupportGens(p.product_support_generations).includes(Number(processorGenId))
+        parseSupportGens(p.product_support_generations).includes(
+          Number(processorGenId)
+        )
       );
     }
 
     if (cid === RAM_CAT_ID) {
       if (!motherboardRamId) return [];
-      list = list.filter((p) => Number(p.product_ram_id) === Number(motherboardRamId));
+      list = list.filter(
+        (p) => Number(p.product_ram_id) === Number(motherboardRamId)
+      );
     }
 
     return list;
   }, [data, cid, processorGenId, motherboardRamId]);
 
-  const options = useMemo(
-    () =>
-      products.map((p) => ({
-        value: p.product_id,
-        label: `${p.product_name} • ₹${money(p.product_sale_price)}`,
-        product: p,
-      })),
-    [products]
-  );
+  // ✅ add N/A option at top
+  const options = useMemo(() => {
+    const opts = products.map((p) => ({
+      value: p.product_id,
+      label: `${p.product_name} • ₹${money(p.product_sale_price)}`,
+      product: p,
+    }));
 
-  const selected = useMemo(
-    () => options.find((o) => Number(o.value) === Number(row.selectedId)) || null,
-    [options, row.selectedId]
-  );
+    return [{ value: "NA", label: "N/A" }, ...opts];
+  }, [products]);
+
+  // ✅ selected handling (if null -> show N/A)
+  const selected = useMemo(() => {
+    if (!row.selectedId) return { value: "NA", label: "N/A" };
+    return options.find((o) => String(o.value) === String(row.selectedId)) || {
+      value: "NA",
+      label: "N/A",
+    };
+  }, [options, row.selectedId]);
+
+  const isDisabled =
+    (cid === MOTHERBOARD_CAT_ID && !processorGenId) ||
+    (cid === RAM_CAT_ID && !motherboardRamId);
 
   return (
     <tr>
@@ -304,11 +418,9 @@ const CategoryRow = ({ row, onSelect, onQtyChange, processorGenId, motherboardRa
             options={options}
             value={selected}
             onChange={onSelect}
-            isClearable
-            isDisabled={
-              (cid === MOTHERBOARD_CAT_ID && !processorGenId) ||
-              (cid === RAM_CAT_ID && !motherboardRamId)
-            }
+            isClearable={false} // ✅ because N/A exists
+            isDisabled={isDisabled}
+            placeholder="Select"
           />
         )}
       </td>
@@ -320,7 +432,7 @@ const CategoryRow = ({ row, onSelect, onQtyChange, processorGenId, motherboardRa
           type="number"
           min={1}
           value={row.qty}
-          disabled={!row.price}
+          disabled={!row.price} // ✅ if N/A selected -> price 0 -> disable
           onChange={(e) => onQtyChange(cid, e.target.value)}
           className="form-control form-control-sm w-auto d-inline-block text-end px-1"
         />

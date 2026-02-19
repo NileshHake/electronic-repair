@@ -7,6 +7,9 @@ import {
   useLazyDownloadQuotationInvoiceQuery,
 } from "@/redux/features/quotationApi";
 
+import QuotationPreviewModal from "./QuotationPreviewModal";
+import Link from "next/link";
+
 /* =========================
    CCTV Category IDs (match your DB)
 ========================= */
@@ -26,7 +29,7 @@ const CAT_DC = 22;
 const CAT_SCREEN = 23;
 const CAT_RACK = 24;
 
-const CAT_CABLE = 25; // not used as product row (static row)
+const CAT_CABLE = 25; // not used now
 const CAT_MICRO_SD = 26;
 
 const CAT_IP_DOME = 27;
@@ -35,13 +38,13 @@ const CAT_IP_BULLET = 28;
 const CAT_POE = 29; // ✅ ONLY NVR
 
 const CAT_PVC = 31;
-const CAT_CABLE_IP = 32; // not used as product row (static row)
+const CAT_CABLE_IP = 32; // not used now
 
 /* =========================
-   Cable rules
+   ✅ NEW Cable Variables (Indoor / Outdoor)
 ========================= */
-const CABLE_OPEN_PER_M = 50;
-const CABLE_CASE_PER_M = 70;
+const INDOOR_CABLE_PER_M = 50;
+const OUTDOOR_CABLE_PER_M = 70;
 
 /* =========================
    Helpers
@@ -112,15 +115,17 @@ const CCTVCategorySelectGrid = ({
   const [selectedOptionByCategory, setSelectedOptionByCategory] = useState({});
   const [qtyByCategory, setQtyByCategory] = useState({});
 
-  // ✅ manual override flags (so camera decrease => auto decrease only when not manually overridden)
+  // ✅ manual override flags
   const [manualQty, setManualQty] = useState({}); // { [cid]: true/false }
 
-  // Cable row state
-  const [cableType, setCableType] = useState("open");
-  const [cableMeters, setCableMeters] = useState(0);
+  // ✅ NEW: indoor/outdoor cable meters
+  const [indoorCableMeters, setIndoorCableMeters] = useState(0);
+  const [outdoorCableMeters, setOutdoorCableMeters] = useState(0);
 
-  const [createQuotation, { isLoading: isSaving }] =
-    useCreateQuotationMutation();
+  // ✅ Preview modal
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const [createQuotation, { isLoading: isSaving }] = useCreateQuotationMutation();
   const [downloadInvoice] = useLazyDownloadQuotationInvoiceQuery();
 
   // ✅ Reset when quoteType changes
@@ -129,48 +134,100 @@ const CCTVCategorySelectGrid = ({
     setSelectedOptionByCategory({});
     setQtyByCategory({});
     setManualQty({});
-    setCableMeters(0);
-    setCableType("open");
+    setIndoorCableMeters(0);
+    setOutdoorCableMeters(0);
+    setPreviewOpen(false);
   }, [quoteType]);
 
   /* ✅ Select handler:
-     - NA/clear => qty 0
-     - Camera selected => default qty 1
+     - N/A or clear => qty 0 and no rules apply
+     - Camera first select => default qty 1
      - Other product selected => default qty 1
-     - Clear selection => also clear manual flag
   */
-const setSelectedForCategory = (cid, selected) => {
-  const nextId = selected?.value ?? null;
+  const setSelectedForCategory = (cid, selected) => {
+    const nextId = selected?.value ?? null;
 
-  setSelectedIdByCategory((p) => ({ ...p, [cid]: nextId }));
-  setSelectedOptionByCategory((p) => ({ ...p, [cid]: selected ?? null }));
+    setSelectedIdByCategory((p) => ({ ...p, [cid]: nextId }));
+    setSelectedOptionByCategory((p) => ({ ...p, [cid]: selected ?? null }));
 
-  setQtyByCategory((p) => {
-    // clear -> qty 0
-    if (!selected) return { ...p, [cid]: 0 };
+    setQtyByCategory((p) => {
+      if (!selected) return { ...p, [cid]: 0 };
 
-    const wasSelected = !!p[cid] && Number(p[cid]) > 0;
+      const wasSelected = !!p[cid] && Number(p[cid]) > 0;
 
-    // ✅ CAMERA: on first select -> force qty = 1
-    if (isCameraCategory(cid) && !wasSelected) {
-      return { ...p, [cid]: 1 };
+      if (isCameraCategory(cid) && !wasSelected) {
+        return { ...p, [cid]: 1 };
+      }
+
+      const cur = Number(p[cid] || 0);
+      return { ...p, [cid]: cur > 0 ? cur : 1 };
+    });
+
+    if (!selected) {
+      setManualQty((p) => {
+        const next = { ...p };
+        delete next[cid];
+        return next;
+      });
     }
+  };
 
-    // ✅ Other items: default 1 if 0/undefined
-    const cur = Number(p[cid] || 0);
-    return { ...p, [cid]: cur > 0 ? cur : 1 };
-  });
+  /* =========================
+     ✅ CLEAR DEPENDENTS (DVR / NVR)
+========================= */
+  const clearDvrDependents = () => {
+    setSelectedForCategory(CAT_POWER_SUPPLY, null);
+    setSelectedForCategory(CAT_DOME, null);
+    setSelectedForCategory(CAT_BULLET, null);
+    setSelectedForCategory(CAT_BNC, null);
+    setSelectedForCategory(CAT_DC, null);
+    setSelectedForCategory(CAT_PVC, null);
 
-  // ✅ if clear selection, remove manual flag too
-  if (!selected) {
-    setManualQty((p) => {
-      const next = { ...p };
-      delete next[cid];
+    setManualQty((m) => {
+      const next = { ...m };
+      delete next[CAT_POWER_SUPPLY];
+      delete next[CAT_DOME];
+      delete next[CAT_BULLET];
+      delete next[CAT_BNC];
+      delete next[CAT_DC];
+      delete next[CAT_PVC];
       return next;
     });
-  }
-};
 
+    setQtyByCategory((p) => ({
+      ...p,
+      [CAT_POWER_SUPPLY]: 0,
+      [CAT_DOME]: 0,
+      [CAT_BULLET]: 0,
+      [CAT_BNC]: 0,
+      [CAT_DC]: 0,
+      [CAT_PVC]: 0,
+    }));
+  };
+
+  const clearNvrDependents = () => {
+    setSelectedForCategory(CAT_POE, null);
+    setSelectedForCategory(CAT_IP_DOME, null);
+    setSelectedForCategory(CAT_IP_BULLET, null);
+    setSelectedForCategory(CAT_PVC, null);
+
+    setManualQty((m) => {
+      const next = { ...m };
+      delete next[CAT_POE];
+      delete next[CAT_IP_DOME];
+      delete next[CAT_IP_BULLET];
+      delete next[CAT_PVC];
+      return next;
+    });
+
+    setQtyByCategory((p) => ({
+      ...p,
+      [CAT_POE]: 0,
+      [CAT_IP_DOME]: 0,
+      [CAT_IP_BULLET]: 0,
+      [CAT_PVC]: 0,
+    }));
+  };
 
   /* =========================
      DVR / NVR Channel
@@ -220,8 +277,7 @@ const setSelectedForCategory = (cid, selected) => {
 
   /* ======================================================
      ✅ Auto adjust camera qty to channel (DVR)
-     - If channel increases, auto add cameras to Dome if selected else Bullet
-     - If channel decreases, clamp total to channel (reduce Bullet first by our logic)
+     (only if DVR exists; if DVR is N/A -> channel null -> effect won't run)
   ====================================================== */
   useEffect(() => {
     if (!isType2(quoteType) || !selectedDvrChannel) return;
@@ -321,11 +377,10 @@ const setSelectedForCategory = (cid, selected) => {
        - DC = cameras
        - PVC = cameras
      NVR:
-       - PVC = cameras (if selected)
-     IMPORTANT:
-       - If user manually changes qty for these items, we keep their value
-         BUT if min increases above their value, we raise it.
-       - If NOT manual, we always sync exactly to min (auto decrease also)
+       - PVC = cameras
+     NOTE:
+       - If manual set -> keep, but if min bigger -> raise it
+       - If not manual -> always sync exactly to min
   ========================= */
   useEffect(() => {
     const qt = Number(quoteType);
@@ -338,13 +393,11 @@ const setSelectedForCategory = (cid, selected) => {
         const cur = Number(p[cid] || 0);
         const isManual = !!manualQty[cid];
 
-        // ✅ manual: keep if >= min, but if min is bigger, raise it
         if (isManual) {
           if (cur < minVal) return { ...p, [cid]: minVal };
           return p;
         }
 
-        // ✅ auto: always follow min (increase & decrease)
         if (cur === minVal) return p;
         return { ...p, [cid]: minVal };
       });
@@ -355,7 +408,6 @@ const setSelectedForCategory = (cid, selected) => {
       const minDc = cam;
       const minPvc = cam;
 
-      // camera 0 => auto set to 0 (if selected and not manual)
       if (cam === 0) {
         [CAT_BNC, CAT_DC, CAT_PVC].forEach((cid) => {
           if (!selectedOptionByCategory[cid]) return;
@@ -385,13 +437,12 @@ const setSelectedForCategory = (cid, selected) => {
   }, [quoteType, cameraCount, selectedOptionByCategory, manualQty]);
 
   /* =========================
-     Qty change with clamp + mins
+     Qty change with clamp
      - Mark manualQty[cid] = true when user changes qty
   ========================= */
   const handleQtyChange = (cid, value) => {
     const n = Number(value);
 
-    // ✅ user manually changed qty
     setManualQty((p) => ({ ...p, [cid]: true }));
 
     setQtyByCategory((p) => {
@@ -424,7 +475,6 @@ const setSelectedForCategory = (cid, selected) => {
         }
       }
 
-      // for all normal items: min 1 if selected, else allow 0
       const isCamSplit =
         cid === CAT_DOME ||
         cid === CAT_BULLET ||
@@ -437,7 +487,7 @@ const setSelectedForCategory = (cid, selected) => {
   };
 
   /* =========================
-     Build rows
+     Build rows (normal categories)
   ========================= */
   const rows = useMemo(() => {
     return categoryList.map((cat, i) => {
@@ -461,7 +511,7 @@ const setSelectedForCategory = (cid, selected) => {
   }, [categoryList, selectedOptionByCategory, qtyByCategory, selectedIdByCategory]);
 
   /* =========================
-     INSTALLATION
+     INSTALLATION (static rows)
   ========================= */
   const installationRow = useMemo(() => {
     const qt = Number(quoteType);
@@ -509,40 +559,66 @@ const setSelectedForCategory = (cid, selected) => {
   }, [quoteType, cameraCount, rows.length]);
 
   /* =========================
-     CABLE ROW
+     ✅ NEW: Indoor / Outdoor Cable rows
+     - not staticType old cable logic
   ========================= */
-  const cableRow = useMemo(() => {
+  const indoorCableRow = useMemo(() => {
     const qt = Number(quoteType);
     if (qt === 1) return null;
 
-    const label = qt === 2 ? "Cable (Analog) + Fitting" : "Cable IP + Fitting";
-    const price = cableType === "case" ? CABLE_CASE_PER_M : CABLE_OPEN_PER_M;
-    const qty = Number(cableMeters || 0);
+    const qty = Number(indoorCableMeters || 0);
+    const price = Number(INDOOR_CABLE_PER_M);
 
     return {
       index: rows.length + (installationRow ? 2 : 1),
-      category_id: qt === 2 ? "CABLE_ANALOG" : "CABLE_IP",
-      category_name: label,
-      selectedId: qt === 2 ? "CABLE_ANALOG" : "CABLE_IP",
+      category_id: "INDOOR_CABLE",
+      category_name: "Indoor Cable + Fitting",
+      selectedId: "INDOOR_CABLE",
       product: {
-        product_id: qt === 2 ? "CABLE_ANALOG" : "CABLE_IP",
-        product_name: label,
+        product_id: "INDOOR_CABLE",
+        product_name: `Indoor Cable (₹${price}/m)`,
         product_sale_price: price,
       },
       price,
       qty,
       total: price * qty,
       isStatic: true,
-      staticType: "CABLE",
+      staticType: "INDOOR_CABLE",
     };
-  }, [quoteType, cableType, cableMeters, rows.length, installationRow]);
+  }, [quoteType, indoorCableMeters, rows.length, installationRow]);
+
+  const outdoorCableRow = useMemo(() => {
+    const qt = Number(quoteType);
+    if (qt === 1) return null;
+
+    const qty = Number(outdoorCableMeters || 0);
+    const price = Number(OUTDOOR_CABLE_PER_M);
+
+    return {
+      index: rows.length + (installationRow ? 3 : 2),
+      category_id: "OUTDOOR_CABLE",
+      category_name: "Outdoor Cable + Fitting",
+      selectedId: "OUTDOOR_CABLE",
+      product: {
+        product_id: "OUTDOOR_CABLE",
+        product_name: `Outdoor Cable (₹${price}/m)`,
+        product_sale_price: price,
+      },
+      price,
+      qty,
+      total: price * qty,
+      isStatic: true,
+      staticType: "OUTDOOR_CABLE",
+    };
+  }, [quoteType, outdoorCableMeters, rows.length, installationRow]);
 
   const finalRows = useMemo(() => {
     const list = [...rows];
     if (installationRow) list.push(installationRow);
-    if (cableRow) list.push(cableRow);
+    if (indoorCableRow) list.push(indoorCableRow);
+    if (outdoorCableRow) list.push(outdoorCableRow);
     return list;
-  }, [rows, installationRow, cableRow]);
+  }, [rows, installationRow, indoorCableRow, outdoorCableRow]);
 
   const selectedRows = useMemo(
     () => finalRows.filter((r) => !!r.product && Number(r.qty || 0) > 0),
@@ -557,9 +633,9 @@ const setSelectedForCategory = (cid, selected) => {
   const canSave = selectedRows.length > 0 && !isSaving;
 
   /* =========================
-     Save + download
+     Save (+ optional download)
   ========================= */
-  const handleSaveQuotation = async () => {
+  const handleSaveQuotation = async ({ shouldDownload = true } = {}) => {
     try {
       const today = new Date();
       const expiry = new Date();
@@ -573,8 +649,10 @@ const setSelectedForCategory = (cid, selected) => {
         grand_total: Number(grandTotal || 0),
         total_items: Number(selectedRows.length || 0),
         quotation_status: 1,
+
         quotation_items: selectedRows.map((r) => ({
-          category_id: typeof r.category_id === "string" ? null : Number(r.category_id),
+          category_id:
+            typeof r.category_id === "string" ? null : Number(r.category_id),
           product_id: r.product?.product_id,
           product_name: r.product?.product_name,
           price: Number(r.price || 0),
@@ -594,34 +672,47 @@ const setSelectedForCategory = (cid, selected) => {
 
       if (!quotationId) return;
 
-      const pdfBlob = await downloadInvoice(quotationId).unwrap();
-      if (!(pdfBlob instanceof Blob)) return;
+      if (shouldDownload) {
+        const pdfBlob = await downloadInvoice(quotationId).unwrap();
+        if (pdfBlob instanceof Blob) {
+          downloadBlob(pdfBlob, `Quotation-${quotationId}.pdf`);
+        }
+      }
 
-      downloadBlob(pdfBlob, `Quotation-${quotationId}.pdf`);
-
+      // ✅ reset after save
+      setPreviewOpen(false);
       setSelectedIdByCategory({});
       setSelectedOptionByCategory({});
       setQtyByCategory({});
       setManualQty({});
-      setCableMeters(0);
-      setCableType("open");
+      setIndoorCableMeters(0);
+      setOutdoorCableMeters(0);
     } catch (e) {
       console.log("❌ save quotation error", e);
     }
   };
+
+  const channelForPreview =
+    Number(quoteType) === 2
+      ? selectedDvrChannel
+      : Number(quoteType) === 3
+        ? selectedNvrChannel
+        : null;
 
   return (
     <div className="table-responsive">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
         <div>
           <div className="fw-bold">Build CCTV Quotation</div>
+
           <div className="text-muted small">
             Type:{" "}
             {Number(quoteType) === 1
               ? "ONLY CAMERA"
               : Number(quoteType) === 2
-              ? "DVR SETUP"
-              : "NVR SETUP (IP CAMERA)"}
+                ? "DVR SETUP"
+                : "NVR SETUP (IP CAMERA)"}
+
             {Number(quoteType) !== 1 && (
               <>
                 {" "}
@@ -636,20 +727,50 @@ const setSelectedForCategory = (cid, selected) => {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <div className="text-end">
-            <div className="text-muted small">Grand Total</div>
-            <div className="fw-bold">₹{money(grandTotal)}</div>
-          </div>
+          <ul className="list-unstyled d-flex flex-wrap align-items-center gap-2 mb-0">
 
-          <Button
-            color="primary"
-            onClick={handleSaveQuotation}
-            disabled={!canSave}
-            className="px-3"
-          >
-            {isSaving ? "Saving..." : "Save Quotation"}
-          </Button>
+            <li className="btn btn-outline-secondary btn-sm px-3"
+              style={{
+                borderRadius: 8,
+                fontWeight: 600,
+                textDecoration: "none",
+              }}>
+              <Link href="/profile#nav-quotation">My Quotations  </Link>
+            </li>
+
+            <li>
+              <Button
+                color="info"
+                onClick={() => setPreviewOpen(true)}
+                disabled={selectedRows.length === 0}
+                className="btn-sm px-3"
+                style={{
+                  borderRadius: 8,
+                  fontWeight: 600,
+                }}
+              >
+                View
+              </Button>
+            </li>
+
+            <li>
+              <Button
+                color="success"
+                onClick={() => handleSaveQuotation({ shouldDownload: true })}
+                disabled={!canSave}
+                className="btn-sm px-3"
+                style={{
+                  borderRadius: 8,
+                  fontWeight: 600,
+                }}
+              >
+                {isSaving ? "Saving..." : "Save & Download"}
+              </Button>
+            </li>
+
+          </ul>
         </div>
+
       </div>
 
       <table className="table table-hover align-middle">
@@ -672,40 +793,19 @@ const setSelectedForCategory = (cid, selected) => {
 
         <tbody>
           {finalRows.map((row) => {
-            // Static rows
+            // ✅ Static rows
             if (row.isStatic) {
-              // Cable row
-              if (row.staticType === "CABLE") {
+              // Indoor Cable
+              if (row.staticType === "INDOOR_CABLE") {
                 return (
                   <tr key={String(row.category_id)}>
                     <td>{row.index}</td>
                     <td className="fw-semibold">{row.category_name}</td>
 
                     <td>
-                      <div className="d-flex flex-column flex-md-row gap-2 align-items-md-center">
-                        <div style={{ minWidth: 220 }}>
-                          <Select
-                            styles={selectStyles}
-                            value={
-                              cableType === "case"
-                                ? { value: "case", label: "With Case (₹70/m)" }
-                                : { value: "open", label: "Open Wire (₹50/m)" }
-                            }
-                            options={[
-                              { value: "open", label: "Open Wire (₹50/m)" },
-                              { value: "case", label: "With Case (₹70/m)" },
-                            ]}
-                            onChange={(opt) =>
-                              setCableType(opt?.value || "open")
-                            }
-                            isClearable={false}
-                          />
-                        </div>
-
-                        <div className="text-muted small">
-                          Meter input (as per use). 0 = not included.
-                        </div>
-                      </div>
+                      <span className="text-muted">
+                        Indoor Cable — Price: ₹{money(row.price)}/m
+                      </span>
                     </td>
 
                     <td className="text-end">₹{money(row.price)}</td>
@@ -714,9 +814,43 @@ const setSelectedForCategory = (cid, selected) => {
                       <Input
                         type="number"
                         min={0}
-                        value={cableMeters}
+                        value={indoorCableMeters}
                         onChange={(e) =>
-                          setCableMeters(
+                          setIndoorCableMeters(
+                            Math.max(0, Number(e.target.value || 0))
+                          )
+                        }
+                        className="form-control form-control-sm w-auto d-inline-block text-end px-1"
+                      />
+                    </td>
+
+                    <td className="text-end fw-bold">₹{money(row.total)}</td>
+                  </tr>
+                );
+              }
+
+              // Outdoor Cable
+              if (row.staticType === "OUTDOOR_CABLE") {
+                return (
+                  <tr key={String(row.category_id)}>
+                    <td>{row.index}</td>
+                    <td className="fw-semibold">{row.category_name}</td>
+
+                    <td>
+                      <span className="text-muted">
+                        Outdoor Cable — Price: ₹{money(row.price)}/m
+                      </span>
+                    </td>
+
+                    <td className="text-end">₹{money(row.price)}</td>
+
+                    <td className="text-end">
+                      <Input
+                        type="number"
+                        min={0}
+                        value={outdoorCableMeters}
+                        onChange={(e) =>
+                          setOutdoorCableMeters(
                             Math.max(0, Number(e.target.value || 0))
                           )
                         }
@@ -735,9 +869,7 @@ const setSelectedForCategory = (cid, selected) => {
                   <td>{row.index}</td>
                   <td className="fw-semibold">{row.category_name}</td>
                   <td>
-                    <span className="text-muted">
-                      {row.product?.product_name}
-                    </span>
+                    <span className="text-muted">{row.product?.product_name}</span>
                   </td>
                   <td className="text-end">₹{money(row.price)}</td>
                   <td className="text-end">
@@ -753,7 +885,7 @@ const setSelectedForCategory = (cid, selected) => {
               );
             }
 
-            // Normal rows
+            // ✅ Normal rows
             return (
               <CategoryRow
                 key={row.category_id}
@@ -765,57 +897,41 @@ const setSelectedForCategory = (cid, selected) => {
                 onSelect={(sel) => {
                   const rcid = Number(row.category_id);
 
-                  // DVR changed -> clear power supply + reset dependent items
+                  // ✅ Handle N/A option
+                  const safeSel =
+                    sel?.value === "NA" || !sel ? null : sel;
+
+                  // DVR changed
                   if (rcid === CAT_DVR) {
-                    setSelectedForCategory(CAT_DVR, sel);
-                    setSelectedForCategory(CAT_POWER_SUPPLY, null);
+                    setSelectedForCategory(CAT_DVR, safeSel);
 
-                    // clear manual flags for auto items
-                    setManualQty((m) => {
-                      const next = { ...m };
-                      delete next[CAT_BNC];
-                      delete next[CAT_DC];
-                      delete next[CAT_PVC];
-                      delete next[CAT_POWER_SUPPLY];
-                      return next;
-                    });
+                    // ✅ DVR is N/A -> remove all conditions + clear dependents
+                    if (!safeSel) {
+                      clearDvrDependents();
+                      return;
+                    }
 
-                    setQtyByCategory((p) => ({
-                      ...p,
-                      [CAT_POWER_SUPPLY]: 0,
-                      [CAT_DOME]: 0,
-                      [CAT_BULLET]: 0,
-                      [CAT_BNC]: 0,
-                      [CAT_DC]: 0,
-                      [CAT_PVC]: 0,
-                    }));
+                    // ✅ DVR selected -> reset dependents
+                    clearDvrDependents();
                     return;
                   }
 
-                  // NVR changed -> clear POE + reset dependent items
+                  // NVR changed
                   if (rcid === CAT_NVR) {
-                    setSelectedForCategory(CAT_NVR, sel);
-                    setSelectedForCategory(CAT_POE, null);
+                    setSelectedForCategory(CAT_NVR, safeSel);
 
-                    // clear manual flags for auto items
-                    setManualQty((m) => {
-                      const next = { ...m };
-                      delete next[CAT_POE];
-                      delete next[CAT_PVC];
-                      return next;
-                    });
+                    // ✅ NVR is N/A -> remove all conditions + clear dependents
+                    if (!safeSel) {
+                      clearNvrDependents();
+                      return;
+                    }
 
-                    setQtyByCategory((p) => ({
-                      ...p,
-                      [CAT_POE]: 0,
-                      [CAT_IP_DOME]: 0,
-                      [CAT_IP_BULLET]: 0,
-                      [CAT_PVC]: 0,
-                    }));
+                    // ✅ NVR selected -> reset dependents
+                    clearNvrDependents();
                     return;
                   }
 
-                  setSelectedForCategory(rcid, sel);
+                  setSelectedForCategory(rcid, safeSel);
                 }}
                 onQtyChange={handleQtyChange}
               />
@@ -830,6 +946,22 @@ const setSelectedForCategory = (cid, selected) => {
           </tr>
         </tbody>
       </table>
+
+      {/* ✅ Preview Modal */}
+      {previewOpen && (
+        <QuotationPreviewModal
+          isOpen={previewOpen}
+          toggle={() => setPreviewOpen(false)}
+          quoteType={quoteType}
+          channel={channelForPreview}
+          cameraCount={cameraCount}
+          selectedRows={selectedRows}
+          grandTotal={grandTotal}
+          saving={isSaving}
+          onSaveOnly={() => handleSaveQuotation({ shouldDownload: false })}
+          onSaveAndDownload={() => handleSaveQuotation({ shouldDownload: true })}
+        />
+      )}
     </div>
   );
 };
@@ -839,6 +971,7 @@ export default CCTVCategorySelectGrid;
 /* =========================
    CategoryRow
    ✅ Power Supply / POE filtering uses channelNum()
+   ✅ Adds N/A option in every select
 ========================= */
 const CategoryRow = ({
   row,
@@ -863,8 +996,7 @@ const CategoryRow = ({
     if (Number(quoteType) === 2 && cid === CAT_POWER_SUPPLY) {
       if (!selectedDvrChannel) return [];
       return list.filter(
-        (p) =>
-          channelNum(p.product_dvr_or_nvr_channel) === Number(selectedDvrChannel)
+        (p) => channelNum(p.product_dvr_or_nvr_channel) === Number(selectedDvrChannel)
       );
     }
 
@@ -872,29 +1004,33 @@ const CategoryRow = ({
     if (Number(quoteType) === 3 && cid === CAT_POE) {
       if (!selectedNvrChannel) return [];
       return list.filter(
-        (p) =>
-          channelNum(p.product_dvr_or_nvr_channel) === Number(selectedNvrChannel)
+        (p) => channelNum(p.product_dvr_or_nvr_channel) === Number(selectedNvrChannel)
       );
     }
 
     return list;
   }, [data, quoteType, cid, selectedDvrChannel, selectedNvrChannel]);
 
-  const options = useMemo(
-    () =>
-      products.map((p) => ({
-        value: p.product_id,
-        label: `${p.product_name} • ₹${money(p.product_sale_price)}`,
-        product: p,
-      })),
-    [products]
-  );
+  const options = useMemo(() => {
+    const normal = products.map((p) => ({
+      value: p.product_id,
+      label: `${p.product_name} • ₹${money(p.product_sale_price)}`,
+      product: p,
+    }));
 
-  const selected = useMemo(
-    () =>
-      options.find((o) => Number(o.value) === Number(row.selectedId)) || null,
-    [options, row.selectedId]
-  );
+    // ✅ Add N/A at top
+    return [{ value: "NA", label: "N/A" }, ...normal];
+  }, [products]);
+
+  const selected = useMemo(() => {
+    // if no selection -> show N/A
+    if (!row.selectedId) return options[0] || null;
+
+    return (
+      options.find((o) => String(o.value) === String(row.selectedId)) ||
+      null
+    );
+  }, [options, row.selectedId]);
 
   const minQty = useMemo(() => {
     const qt = Number(quoteType);
@@ -919,8 +1055,7 @@ const CategoryRow = ({
 
   const disabledSelect = useMemo(() => {
     // disable PS until DVR selected
-    if (Number(quoteType) === 2 && cid === CAT_POWER_SUPPLY)
-      return !selectedDvrChannel;
+    if (Number(quoteType) === 2 && cid === CAT_POWER_SUPPLY) return !selectedDvrChannel;
 
     // disable POE until NVR selected
     if (Number(quoteType) === 3 && cid === CAT_POE) return !selectedNvrChannel;
@@ -942,9 +1077,9 @@ const CategoryRow = ({
             options={options}
             value={selected}
             onChange={onSelect}
-            isClearable
+            isClearable={false}
             isDisabled={disabledSelect}
-            placeholder="Select / NA"
+            placeholder="Select"
           />
         )}
       </td>
@@ -954,7 +1089,7 @@ const CategoryRow = ({
       <td className="text-end">
         <Input
           type="number"
-          min={minQty}
+          min={0}
           value={row.qty}
           disabled={!row.price}
           onChange={(e) => onQtyChange(cid, e.target.value)}

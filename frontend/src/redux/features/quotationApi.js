@@ -15,7 +15,7 @@ export const quotationApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success("✅ Quotation created successfully!");
+          toast.success("  Quotation created successfully!");
         } catch (err) {
           toast.error("❌ Failed to create quotation!");
         }
