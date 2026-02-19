@@ -12,3 +12,4 @@ router.put("/category/update", verifyToken, controller.update);
 router.delete("/category/delete/:id", verifyToken, controller.deleted);
 
 module.exports = router;
+    

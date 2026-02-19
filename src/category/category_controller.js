@@ -33,14 +33,7 @@ const store = async (req, res) => {
 // 🟡 READ ALL
 const index = async (req, res) => {
   try {
-    const categories = await Category.findAll({
-      where: {
-
-        category_main_id: {
-          [Op.or]: [0, null],
-        },
-      },
-    });
+    const categories = await Category.findAll( );
     res.status(200).json(categories);
   } catch (error) {
     res
@@ -78,7 +71,7 @@ const getCategoriesWithSub = async (req, res) => {
   FROM tbl_categories AS c
   LEFT JOIN tbl_products AS p 
     ON p.product_category = c.category_id
-   AND p.product_status = 2   -- ✅ count only status = 2
+   AND p.product_status = 2    
   WHERE c.category_main_id IS NULL
   GROUP BY c.category_id
   ORDER BY c.category_id ASC

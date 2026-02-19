@@ -37,9 +37,9 @@ const Header = () => {
                 <div className="col-md-6">
                   <div className="tp-header-welcome d-flex align-items-center">
                     <span>
-                      <ShippingCar />
+                   
                     </span>
-                    <p>FREE Express Shipping On Orders $570+</p>
+                    
                   </div>
                 </div>
                 <div className="col-md-6">

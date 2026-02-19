@@ -353,7 +353,7 @@ const createSuperAdmin = async () => {
     allBrands.forEach((b) => (brandMap[b.brand_name] = b.brand_id));
 
     const categoriesPayload = [
-      "PROCESSOR", "MOTHERBOARD", "CPU COOLER", "RAM", "SSD", "HARD DISK",
+      "PROCESSOR", "MOTHERBOARD", "CPU COOLER", "RAM", "Storage", "HARD DISK",
       "CABINET", "SMPS", "MONITOR", "KEYBOARD AND MOUSE", "OS", "APPLICATION",
     ].map((name) => ({
       category_name: name,
@@ -362,7 +362,49 @@ const createSuperAdmin = async () => {
       category_status: 1,
     }));
 
+
     await Category.bulkCreate(categoriesPayload, { transaction: t, ignoreDuplicates: true });
+    // Create Main Category
+    const mainCategory = await Category.create(
+      {
+        category_name: "CCTV",
+        category_main_id: null, // null = main category
+        category_created_by: 1,
+        category_status: 1,
+      },
+      { transaction: t }
+    );
+    const subCategories = [
+      "NVR",
+      "DVR",
+      "Single Camera",
+      "Dome (Indoor)",
+      "Bullet (Outdoor)",
+      "Power Supply",
+      "Storage (CCTV HDD)",
+      "BNC Connectors",
+      "DC Connectors",
+      "Screen",
+      "Rack",
+      "Cable",
+      "Micro SD",
+      "IP Dome",
+      "IP Bullet",
+      "POE Switch",
+      "Hard Disk",
+      "PVC Box",
+      "Cable IP",
+    ].map((name) => ({
+      category_name: name,
+      category_main_id: mainCategory.category_id, // 👈 link to CCTV
+      category_created_by: 1,
+      category_status: 1,
+    }));
+
+    await Category.bulkCreate(subCategories, {
+      transaction: t,
+      ignoreDuplicates: true,
+    });
 
     const allCategories = await Category.findAll({ transaction: t });
     const categoryMap = {};
@@ -459,6 +501,204 @@ const createSuperAdmin = async () => {
 
 
     await Product.bulkCreate(productsPayload, { transaction: t, ignoreDuplicates: true });
+
+    /* =========================
+       CCTV BRANDS (ADD)
+    ========================= */
+    const cctvBrandsPayload = [
+      { brand_name: "CP Plus", brand_created_by: 1 },
+      { brand_name: "Hikvision", brand_created_by: 1 },
+      { brand_name: "Dahua", brand_created_by: 1 },
+      { brand_name: "Godrej", brand_created_by: 1 },
+      { brand_name: "Prama", brand_created_by: 1 },
+      { brand_name: "Bosch", brand_created_by: 1 },
+      { brand_name: "Honeywell", brand_created_by: 1 },
+      { brand_name: "TP-Link", brand_created_by: 1 },
+      { brand_name: "SanDisk", brand_created_by: 1 },
+      { brand_name: "Generic", brand_created_by: 1 },
+    ];
+
+    await Brand.bulkCreate(cctvBrandsPayload, { transaction: t, ignoreDuplicates: true });
+
+    // refresh brandMap after adding
+    const allBrands2 = await Brand.findAll({ transaction: t });
+    const brandMap1 = {};
+    allBrands2.forEach((b) => (brandMap1[b.brand_name] = b.brand_id));
+
+    const makeCctvProduct = (name, subCat, brand, buy, sell, mrp, extra = {}) => ({
+      product_name: name,
+      product_tax: 1,
+      product_created_by: 1,
+      product_description: `<p>${name}</p>`,
+      product_usage_type: "both",
+      product_brand: brandMap1[brand] || null,
+      product_category: categoryMap["CCTV"],         // main category
+      product_sub_category: categoryMap[subCat],     // sub category
+      product_image: JSON.stringify([]),
+      product_purchase_price: buy,
+      product_sale_price: sell,
+      product_mrp: mrp,
+      product_status: 2,
+      ...extra,
+    });
+
+
+
+
+    /* =========================
+       CCTV PRODUCTS CATEGORY-WISE
+    ========================= */
+
+    const DVR_PRODUCTS = [
+      makeCctvProduct("4 Channel DVR", "DVR", "CP Plus", 2200, 2500, 2999, { product_channel: 4 }),
+      makeCctvProduct("8 Channel DVR", "DVR", "CP Plus", 3500, 3900, 4499, { product_channel: 8 }),
+      makeCctvProduct("16 Channel DVR", "DVR", "CP Plus", 6200, 6900, 7999, { product_channel: 16 }),
+      makeCctvProduct("32 Channel DVR", "DVR", "CP Plus", 11500, 12900, 14999, { product_channel: 32 }),
+    ];
+
+    const NVR_PRODUCTS = [
+      makeCctvProduct("4 Channel NVR", "NVR", "Hikvision", 3000, 3500, 3999, { product_channel: 4 }),
+      makeCctvProduct("8 Channel NVR", "NVR", "Hikvision", 5200, 5900, 6999, { product_channel: 8 }),
+      makeCctvProduct("16 Channel NVR", "NVR", "Hikvision", 8500, 9200, 10999, { product_channel: 16 }),
+      makeCctvProduct("32 Channel NVR", "NVR", "Hikvision", 15500, 16900, 19999, { product_channel: 32 }),
+    ];
+
+    const SINGLE_CAMERA_PRODUCTS = [
+      makeCctvProduct("2MP Single Camera", "Single Camera", "CP Plus", 800, 999, 1299),
+      makeCctvProduct("5MP Single Camera", "Single Camera", "CP Plus", 1200, 1499, 1899),
+      makeCctvProduct("8MP Single Camera", "Single Camera", "CP Plus", 2200, 2599, 3299),
+    ];
+
+    const DOME_PRODUCTS = [
+      makeCctvProduct("2MP Dome Camera", "Dome (Indoor)", "Hikvision", 850, 1050, 1399),
+      makeCctvProduct("5MP Dome Camera", "Dome (Indoor)", "Hikvision", 1300, 1599, 1999),
+      makeCctvProduct("8MP Dome Camera", "Dome (Indoor)", "Hikvision", 2400, 2799, 3499),
+    ];
+
+    const BULLET_PRODUCTS = [
+      makeCctvProduct("2MP Bullet Camera", "Bullet (Outdoor)", "Hikvision", 900, 1100, 1499),
+      makeCctvProduct("5MP Bullet Camera", "Bullet (Outdoor)", "Hikvision", 1500, 1799, 2299),
+      makeCctvProduct("8MP Bullet Camera", "Bullet (Outdoor)", "Hikvision", 2600, 2999, 3799),
+    ];
+
+    const IP_DOME_PRODUCTS = [
+      makeCctvProduct("2MP IP Dome", "IP Dome", "Hikvision", 1400, 1699, 2199),
+      makeCctvProduct("5MP IP Dome", "IP Dome", "Hikvision", 1900, 2299, 2799),
+      makeCctvProduct("8MP IP Dome", "IP Dome", "Hikvision", 2900, 3399, 3999),
+    ];
+
+    const IP_BULLET_PRODUCTS = [
+      makeCctvProduct("2MP IP Bullet", "IP Bullet", "Hikvision", 1500, 1799, 2299),
+      makeCctvProduct("5MP IP Bullet", "IP Bullet", "Hikvision", 2100, 2499, 2999),
+      makeCctvProduct("8MP IP Bullet", "IP Bullet", "Hikvision", 3200, 3699, 4499),
+    ];
+
+    const POWER_SUPPLY_PRODUCTS = [
+      makeCctvProduct("4 Channel Power Supply", "Power Supply", "Generic", 500, 699, 899, { product_channel: 4 }),
+      makeCctvProduct("8 Channel Power Supply", "Power Supply", "Generic", 800, 999, 1299, { product_channel: 8 }),
+      makeCctvProduct("16 Channel Power Supply", "Power Supply", "Generic", 1500, 1799, 2199, { product_channel: 16 }),
+    ];
+
+    const STORAGE_CCTV_HDD_PRODUCTS = [
+      makeCctvProduct("WD Purple 1TB", "Storage (CCTV HDD)", "Western Digital", 2800, 3200, 3999),
+      makeCctvProduct("WD Purple 2TB", "Storage (CCTV HDD)", "Western Digital", 4800, 5400, 6499),
+      makeCctvProduct("WD Purple 4TB", "Storage (CCTV HDD)", "Western Digital", 8900, 9999, 11999),
+    ];
+
+    const BNC_PRODUCTS = [
+      makeCctvProduct("BNC Connector (Pack of 10)", "BNC Connectors", "Generic", 80, 120, 150),
+      makeCctvProduct("BNC Connector (Pack of 20)", "BNC Connectors", "Generic", 150, 220, 260),
+    ];
+
+    const DC_PRODUCTS = [
+      makeCctvProduct("DC Connector (Pack of 10)", "DC Connectors", "Generic", 40, 70, 100),
+      makeCctvProduct("DC Connector (Pack of 20)", "DC Connectors", "Generic", 70, 120, 160),
+    ];
+
+    const PVC_BOX_PRODUCTS = [
+      makeCctvProduct("PVC Junction Box", "PVC Box", "Generic", 30, 50, 70),
+      makeCctvProduct("PVC Junction Box (Heavy)", "PVC Box", "Generic", 50, 80, 120),
+    ];
+
+    const POE_SWITCH_PRODUCTS = [
+      makeCctvProduct("4 Port POE Switch", "POE Switch", "TP-Link", 2500, 2900, 3499, { product_channel: 4 }),
+      makeCctvProduct("8 Port POE Switch", "POE Switch", "TP-Link", 4200, 4900, 5999, { product_channel: 8 }),
+      makeCctvProduct("16 Port POE Switch", "POE Switch", "TP-Link", 8900, 9999, 11999, { product_channel: 16 }),
+    ];
+
+    const MICRO_SD_PRODUCTS = [
+      makeCctvProduct("32GB Micro SD", "Micro SD", "SanDisk", 300, 399, 499),
+      makeCctvProduct("64GB Micro SD", "Micro SD", "SanDisk", 500, 599, 699),
+      makeCctvProduct("128GB Micro SD", "Micro SD", "SanDisk", 900, 1099, 1299),
+      makeCctvProduct("256GB Micro SD", "Micro SD", "SanDisk", 1700, 1999, 2299),
+    ];
+
+    // OPTIONAL: Cable / Rack / Screen / Hard Disk / Cable IP categories ke liye bhi aise arrays bana sakte ho.
+    // Abhi tumne "Screen", "Rack", "Cable", "Hard Disk", "Cable IP" subCats create kiye hain,
+    // par products define nahi kiye. (Chahiye to main ready list bhi de dunga.)
+
+    const CABLE_IP_PRODUCTS = [
+      // Cat6 for IP cameras
+      makeCctvProduct("CAT6 Cable 90m (Copper)", "Cable IP", "Generic", 1200, 1499, 1799),
+      makeCctvProduct("CAT6 Cable 305m (Copper)", "Cable IP", "Generic", 3800, 4499, 4999),
+      makeCctvProduct("CAT6 Cable 90m (CCA)", "Cable IP", "Generic", 850, 999, 1299),
+      makeCctvProduct("CAT6 Cable 305m (CCA)", "Cable IP", "Generic", 2600, 2999, 3499),
+
+      // RJ45 (useful for IP but you didn't create subcat, so keep under Cable IP)
+      makeCctvProduct("RJ45 Connector (Pack of 10)", "Cable IP", "Generic", 50, 90, 120),
+      makeCctvProduct("RJ45 Connector (Pack of 20)", "Cable IP", "Generic", 90, 160, 220),
+    ];
+
+    const CABLE_PRODUCTS = [
+      // Analog CCTV RG59 / combo cables
+      makeCctvProduct("RG59 CCTV Cable 90m", "Cable", "Generic", 950, 1199, 1499),
+      makeCctvProduct("RG59 CCTV Cable 180m", "Cable", "Generic", 1800, 2199, 2599),
+      makeCctvProduct("RG59 CCTV Cable 305m", "Cable", "Generic", 3200, 3899, 4499),
+
+      // DC wire / power wire (keep under Cable)
+      makeCctvProduct("Power Wire 90m", "Cable", "Generic", 550, 699, 899),
+      makeCctvProduct("Power Wire 180m", "Cable", "Generic", 950, 1199, 1499),
+    ];
+
+    const RACK_PRODUCTS = [
+      makeCctvProduct("4U DVR/NVR Rack", "Rack", "Generic", 650, 799, 999),
+      makeCctvProduct("6U DVR/NVR Rack", "Rack", "Generic", 950, 1199, 1499),
+      makeCctvProduct("9U DVR/NVR Rack", "Rack", "Generic", 1500, 1799, 2199),
+      makeCctvProduct("12U DVR/NVR Rack", "Rack", "Generic", 2100, 2499, 2999),
+    ];
+
+    const SCREEN_PRODUCTS = [
+      makeCctvProduct("19 inch LED Monitor", "Screen", "Generic", 3200, 3799, 4499),
+      makeCctvProduct("22 inch LED Monitor", "Screen", "Generic", 4200, 4899, 5699),
+      makeCctvProduct("24 inch LED Monitor", "Screen", "Generic", 5800, 6699, 7999),
+
+      // Optional CCTV display
+      makeCctvProduct("32 inch LED TV (Display)", "Screen", "Generic", 10500, 11999, 13999),
+    ];
+
+    const cctvProductsPayload = [
+      ...DVR_PRODUCTS,
+      ...NVR_PRODUCTS,
+      ...SINGLE_CAMERA_PRODUCTS,
+      ...DOME_PRODUCTS,
+      ...BULLET_PRODUCTS,
+      ...IP_DOME_PRODUCTS,
+      ...IP_BULLET_PRODUCTS,
+      ...POWER_SUPPLY_PRODUCTS,
+      ...STORAGE_CCTV_HDD_PRODUCTS,
+      ...BNC_PRODUCTS,
+      ...DC_PRODUCTS,
+      ...PVC_BOX_PRODUCTS,
+      ...POE_SWITCH_PRODUCTS,
+      ...MICRO_SD_PRODUCTS,
+      ...CABLE_IP_PRODUCTS,
+      ...CABLE_PRODUCTS,
+      ...RACK_PRODUCTS,
+      ...SCREEN_PRODUCTS,
+    ];
+
+    await Product.bulkCreate(cctvProductsPayload, { transaction: t, ignoreDuplicates: true });
+
 
     /* =========================
       7) SLIDERS

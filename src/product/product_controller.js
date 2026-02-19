@@ -471,27 +471,28 @@ const SearchProducts = async (req, res) => {
   }
 };
 
-const filterProductsForQuotation 
- = async (req, res) => {
-  try {
-    const { category_id } = req.body;
+const filterProductsForQuotation
+  = async (req, res) => {
+    try {
+      const { category_id } = req.body;
+        console.log("category_id", category_id);
 
-    const whereConditions = [];
-    const replacements = {};
+      const whereConditions = [];
+      const replacements = {};
 
-    // ✅ ALWAYS show only active products
-    whereConditions.push("pro.product_status = 2");
+      // ✅ ALWAYS show only active products
+      whereConditions.push("pro.product_status = 2");
 
-    // ✅ ONLY MAIN CATEGORY (NO sub-category logic)
-    if (category_id) {
-      whereConditions.push("pro.product_category = :category_id");
-      replacements.category_id = Number(category_id);
-    }
+      // ✅ ONLY MAIN CATEGORY (NO sub-category logic)
+      if (category_id) {
+        whereConditions.push("pro.product_category = :category_id OR pro.product_sub_category = :category_id");
+        replacements.category_id = Number(category_id);
+      }
 
-    const whereClause = `WHERE ${whereConditions.join(" AND ")}`;
+      const whereClause = `WHERE ${whereConditions.join(" AND ")}`;
 
-    const products = await sequelize.query(
-      `
+      const products = await sequelize.query(
+        `
       SELECT 
         pro.*,
         cat.category_name,
@@ -504,26 +505,26 @@ const filterProductsForQuotation
       ${whereClause}
       ORDER BY pro.product_id DESC
       `,
-      {
-        replacements,
-        type: sequelize.QueryTypes.SELECT,
-      }
-    );
+        {
+          replacements,
+          type: sequelize.QueryTypes.SELECT,
+        }
+      );
 
-    res.status(200).json({
-      success: true,
-      totalRecords: products.length,
-      data: products,
-    });
-  } catch (error) {
-    console.error("❌ Error fetching products:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching products",
-      error: error.message,
-    });
-  }
-};
+      res.status(200).json({
+        success: true,
+        totalRecords: products.length,
+        data: products,
+      });
+    } catch (error) {
+      console.error("❌ Error fetching products:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching products",
+        error: error.message,
+      });
+    }
+  };
 
 
 
@@ -619,7 +620,7 @@ const deleted = async (req, res) => {
 module.exports = {
   store,
   AdminProductList,
-  filterProductsForQuotation ,
+  filterProductsForQuotation,
   SearchProducts,
   index,
   Get,

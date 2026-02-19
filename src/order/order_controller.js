@@ -34,6 +34,7 @@ const store = async (req, res) => {
             const childData = order_items.map((item) => ({
                 ...item,
                 order_child_master_id: orderMaster.order_master_id,
+                order_child_gst_percentage: 0,
             }));
 
             await OrderChild.bulkCreate(childData, { transaction });
@@ -139,7 +140,7 @@ const indexchild = async (req, res) => {
                 type: sequelize.QueryTypes.SELECT,
             }
         );
-        console.log("orderItems", orderItems);
+         
 
         return res.status(200).json(orderItems);
     } catch (error) {

@@ -91,53 +91,53 @@ const BrandList = () => {
                         <th style={{ width: "30%" }}>Actions</th>
                       </tr>
                     </thead>
-                   <tbody>
-  {brands && brands.length > 0 ? (
-    brands.map((brand, index) => (
-      <tr key={brand.brand_id}>
-        <td>{index + 1}</td>
-        <td>{brand.brand_name}</td>
-        <td>
-          <ul className="list-inline hstack gap-2 mb-0">
-            <li className="list-inline-item">
-              <button
-                className="text-primary border-0 bg-transparent"
-                onClick={() => {
-                  setBrandData(brand);
-                  setIsUpdateOpen(true);
-                }}
-              >
-                <i className="ri-pencil-fill fs-16"></i>
-              </button>
-            </li>
-            <li className="list-inline-item">
-              <button
-                onClick={() => onClickDelete(brand)}
-                className="text-danger border-0 bg-transparent"
-              >
-                <i className="ri-delete-bin-5-fill fs-16"></i>
-              </button>
-            </li>
-          </ul>
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="3" className="text-center py-5">
-        <lord-icon
-          src="https://cdn.lordicon.com/msoeawqm.json"
-          trigger="loop"
-          colors="primary:#405189,secondary:#0ab39c"
-          style={{ width: "72px", height: "72px" }}
-        ></lord-icon>
-        <div className="mt-4">
-          <h5>Sorry! No Result Found</h5>
-        </div>
-      </td>
-    </tr>
-  )}
-</tbody>
+                    <tbody>
+                      {brands && brands.length > 0 ? (
+                        brands.map((brand, index) => (
+                          <tr key={brand.brand_id}>
+                            <td>{index + 1}</td>
+                            <td>{brand.brand_name}</td>
+                            <td>
+                              <ul className="list-inline hstack gap-2 mb-0">
+                                <li className="list-inline-item">
+                                  <button
+                                    className="text-primary border-0 bg-transparent"
+                                    onClick={() => {
+                                      setBrandData(brand);
+                                      setIsUpdateOpen(true);
+                                    }}
+                                  >
+                                    <i className="ri-pencil-fill fs-16"></i>
+                                  </button>
+                                </li>
+                                <li className="list-inline-item">
+                                  <button
+                                    onClick={() => onClickDelete(brand)}
+                                    className="text-danger border-0 bg-transparent"
+                                  >
+                                    <i className="ri-delete-bin-5-fill fs-16"></i>
+                                  </button>
+                                </li>
+                              </ul>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="3" className="text-center py-5">
+                            <lord-icon
+                              src="https://cdn.lordicon.com/msoeawqm.json"
+                              trigger="loop"
+                              colors="primary:#405189,secondary:#0ab39c"
+                              style={{ width: "72px", height: "72px" }}
+                            ></lord-icon>
+                            <div className="mt-4">
+                              <h5>Sorry! No Result Found</h5>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
 
                   </table>
                 </div>

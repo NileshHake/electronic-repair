@@ -30,7 +30,7 @@ const HeaderTwo = ({ style_2 = false }) => {
               <div className="row align-items-center">
                 <div className="col-md-6">
                   <div className="tp-header-info d-flex align-items-center">
-                    <div className="tp-header-info-item">
+                    {/* <div className="tp-header-info-item">
                       <a href="#">
                         <span>
                           <Facebook />
@@ -42,8 +42,8 @@ const HeaderTwo = ({ style_2 = false }) => {
                         <span>
                           <PhoneTwo />
                         </span> +(880) 1622097651
-                      </a>
-                    </div>
+                      </a>          
+                    </div> */}
                   </div>
                 </div>
                 <div className="col-md-6">

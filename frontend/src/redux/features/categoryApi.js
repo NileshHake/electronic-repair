@@ -3,7 +3,8 @@ import { apiSlice } from "../api/apiSlice";
 export const categoryApi = apiSlice.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    // Add category
+
+    // ✅ Add category
     addCategory: builder.mutation({
       query: (data) => ({
         url: "/category/add",
@@ -12,19 +13,21 @@ export const categoryApi = apiSlice.injectEndpoints({
       }),
     }),
 
-    // Get main categories with subcategories
+    // ✅ Get main categories with subcategories
     getCategoriesWithSub: builder.query({
-      query: () => {
-      
-        return "/categories-with-sub"; 
-      },
+      query: () => "/categories-with-sub",
     }),
 
-
-    // Optional: Get categories by type (if needed)
+    // ✅ Get categories by type
     getProductTypeCategory: builder.query({
       query: (type) => `/category/show/${type}`,
     }),
+
+    // ✅ NEW: Get all categories list
+    getCategoryList: builder.query({
+      query: () => "/category/list",
+    }),
+
   }),
 });
 
@@ -32,4 +35,5 @@ export const {
   useAddCategoryMutation,
   useGetCategoriesWithSubQuery,
   useGetProductTypeCategoryQuery,
+  useGetCategoryListQuery, // ✅ export hook
 } = categoryApi;

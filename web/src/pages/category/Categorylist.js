@@ -119,70 +119,75 @@ const CategoryList = () => {
 
                     <tbody>
                       {categories && categories.length > 0 ? (
-                        categories.map((cat, index) => (
-                          <tr key={cat.category_id}>
-                            <td>{index + 1}</td>
+                        categories
+                          ?.filter((cat) => cat.category_main_id === null)
+                          ?.map((cat, index) => (
+                            <tr key={cat.category_id}>
+                              {/* Index */}
+                              <td>{index + 1}</td>
 
-                            {/* Image */}
-                            <td className="text-center">
-                              {cat.category_img ? (
-                                <img
-                                  src={`${api.IMG_URL}category_img/${cat.category_img}`}
-                                  alt="category"
-                                  className="category-img"
-                                  width="115px" height="115px"
-                                />
-                              ) : (
-                                <D_img width="45px" height="45px" />
-                              )}
-                            </td>
+                              {/* Image */}
+                              <td className="text-center">
+                                {cat.category_img ? (
+                                  <img
+                                    src={`${api.IMG_URL}category_img/${cat.category_img}`}
+                                    alt="category"
+                                    className="category-img"
+                                    width="115"
+                                    height="115"
+                                  />
+                                ) : (
+                                  <D_img width="45px" height="45px" />
+                                )}
+                              </td>
 
-                            {/* Category Name */}
-                            <td className="fw-semibold">{cat.category_name}</td>
+                              {/* Category Name */}
+                              <td className="fw-semibold">{cat.category_name}</td>
 
-                            {/* Sub Category Button */}
-                            <td className="text-center">
-                              <Button
-                                size="sm"
-                                color="info"
-                                onClick={() =>
-                                  navigate(`/sub-category-list/${cat.category_id}`)
-                                }
-                              >
-                                View Sub Category
-                              </Button>
-                            </td>
+                              {/* Sub Category Button */}
+                              <td className="text-center">
+                                <Button
+                                  size="sm"
+                                  color="info"
+                                  onClick={() =>
+                                    navigate(`/sub-category-list/${cat.category_id}`)
+                                  }
+                                >
+                                  View Sub Category
+                                </Button>
+                              </td>
 
-                            {/* Actions */}
-                            <td className="text-center">
-                              <ul className="list-inline hstack gap-2 mb-0 justify-content-center">
-                                <li className="list-inline-item">
-                                  <button
-                                    className="text-primary border-0 bg-transparent"
-                                    onClick={() => {
-                                      setCategoryData(cat);
-                                      setIsUpdateOpen(true);
-                                    }}
-                                  >
-                                    <i className="ri-pencil-fill fs-16"></i>
-                                  </button>
-                                </li>
-
-                                {index >= 12 && (
+                              {/* Actions */}
+                              <td className="text-center">
+                                <ul className="list-inline hstack gap-2 mb-0 justify-content-center">
+                                  {/* Edit */}
                                   <li className="list-inline-item">
                                     <button
-                                      onClick={() => onClickDelete(cat)}
-                                      className="text-danger border-0 bg-transparent"
+                                      className="text-primary border-0 bg-transparent"
+                                      onClick={() => {
+                                        setCategoryData(cat);
+                                        setIsUpdateOpen(true);
+                                      }}
                                     >
-                                      <i className="ri-delete-bin-5-fill fs-16"></i>
+                                      <i className="ri-pencil-fill fs-16"></i>
                                     </button>
                                   </li>
-                                )}
 
-                              </ul>
-                            </td>
-                          </tr>
-                        ))
+                                  {/* Delete (optional condition) */}
+                                  {index >= 12 && (
+                                    <li className="list-inline-item">
+                                      <button
+                                        onClick={() => onClickDelete(cat)}
+                                        className="text-danger border-0 bg-transparent"
+                                      >
+                                        <i className="ri-delete-bin-5-fill fs-16"></i>
+                                      </button>
+                                    </li>
+                                  )}
+                                </ul>
+                              </td>
+                            </tr>
+                          ))
                       ) : (
                         <tr>
                           <td colSpan="5" className="text-center py-5">
@@ -192,6 +197,7 @@ const CategoryList = () => {
                               colors="primary:#405189,secondary:#0ab39c"
                               style={{ width: "72px", height: "72px" }}
                             ></lord-icon>
+
                             <div className="mt-4">
                               <h5>Sorry! No Result Found</h5>
                             </div>
@@ -199,6 +205,7 @@ const CategoryList = () => {
                         </tr>
                       )}
                     </tbody>
+                      
                   </table>
                 </div>
               </CardBody>

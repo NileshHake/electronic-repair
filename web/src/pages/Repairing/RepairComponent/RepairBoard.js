@@ -98,11 +98,7 @@ const RepairBoard = ({
             </h6>
           }
           scrollableTarget={scrollDivId}
-          endMessage={
-            <p className="text-center text-muted py-3 mb-0">
-              {repairs.length > 0 ? "No more repairs" : ""}
-            </p>
-          }
+         
         >
           <div className="table-responsive">
             <table className="table align-middle table-hover mb-0">

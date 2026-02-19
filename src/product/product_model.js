@@ -36,10 +36,20 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  product_image: {
-    type: DataTypes.STRING,
+  product_category: {
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
+  
+  product_sub_category: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  product_dvr_or_nvr_channel: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  
   product_weight: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -81,6 +91,10 @@ const Product = sequelize.define("tbl_product", {
     allowNull: true,
   },
   product_delivery_charge: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  product_image: {
     type: DataTypes.STRING,
     allowNull: true,
   },

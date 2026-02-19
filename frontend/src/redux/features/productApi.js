@@ -11,10 +11,12 @@ export const productApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["Products"],
     }),
+
     getLatestProducts: builder.query({
       query: () => `product/latest-list`,
-      providesTags: ['Products']
+      providesTags: ["Products"],
     }),
+
     searchProducts: builder.query({
       query: (search) => ({
         url: "/search-products",
@@ -22,32 +24,48 @@ export const productApi = apiSlice.injectEndpoints({
         body: { search },
       }),
     }),
+
     getProductType: builder.query({
       query: ({ type, query }) => ({
         url: "/trending-product-filter",
         method: "POST",
-        body: {
-          type,
-          query,
-        },
+        body: { type, query },
       }),
       providesTags: ["ProductType"],
     }),
+
     getProductsForQuotation: builder.query({
       query: (body) => ({
-        url: "/product/quotation/filter",   // ✅ your new route
+        url: "/product/quotation/filter",
         method: "POST",
         body,
       }),
       providesTags: ["Products"],
     }),
+
+    /* ✅ CCTV Quotation Products (Main + Sub both) */
+    getCctvProductsForQuotation: builder.query({
+      query: ({ category_id, main_category_id }) => ({
+        url: "/products/cctv-quotation",
+        method: "POST",
+        body: {
+          category_id: Number(category_id),
+          main_category_id: Number(main_category_id || category_id),
+        },
+      }),
+      providesTags: ["Products"],
+    }),
   }),
 });
+
 export const {
   useGetAllProductsQuery,
   useGetLatestProductsQuery,
   useGetProductTypeQuery,
-useGetProductsForQuotationQuery,
+  useGetProductsForQuotationQuery,
   useLazySearchProductsQuery,
 
+  // ✅ CCTV hooks
+  useGetCctvProductsForQuotationQuery,
+  useLazyGetCctvProductsForQuotationQuery,
 } = productApi;
