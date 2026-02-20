@@ -5,15 +5,11 @@ import MyRepairsTable from "./MyRepairsTable";
 const RepairArea = () => {
   return (
     <div className="container mt-4">
-      <div className="row g-4">
-        {/* Left Column: Repair Form */}
+      <div className="row g-4"> 
         <div className="col-lg-4 col-md-12 pb-3">
           <RepairForm />
         </div>
-
-        {/* Right Column: Repair Orders Table (just placeholder for now) */}
         <div className="col-lg-8 col-md-12 pb-3">
-          {/* You 5can create a separate component RepairOrders.js and call it here */}
           <div className="card shadow-sm">
             <div className="card-body">
               <h5 className="mb-3 fw-bold">My Repairs</h5>
@@ -21,7 +17,7 @@ const RepairArea = () => {
             </div>
           </div>
         </div>
-      </div>  
+      </div>
     </div>
   );
 };

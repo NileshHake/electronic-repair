@@ -36,7 +36,27 @@ const QuotationMaster = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    gst_percentage: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+    gst_total: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+    gst_total: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
 
+    base_total: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
     grand_total: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,

@@ -5,56 +5,98 @@ const User = require("../auth/user_model");
 const { Op } = require("sequelize");
 const PDFDocument = require("pdfkit");
 const { generateNumber } = require("../invoice number/invoice_number_controller");
-
+const QRCode = require("qrcode");
 /* 🟢 CREATE QUOTATION (MASTER + CHILD) */
 const store = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  const t = await sequelize.transaction();
+
   try {
     const { quotation_items, ...masterData } = req.body;
 
+    const businessId = Number(masterData.business_id || 4); // ✅ keep 4 as default
+    const gst_percentage = Number(masterData.gst_percentage || 18);
 
+    // ✅ validate items
+    const itemsArr = Array.isArray(quotation_items) ? quotation_items : [];
+
+    // ✅ generate quotation number
     const quotationNo = await generateNumber({
-      businessId: 4,
+      businessId,
       type: "quotation",
     });
-    const businessId = 4;
-    const customerId = masterData.customer_id || req.currentUser?.user_id;
+
+    // ✅ grand total includes GST
+    const grandTotal = Number(masterData.grand_total || 0);
+    if (!Number.isFinite(grandTotal) || grandTotal <= 0) {
+      await t.rollback();
+      return res.status(400).json({
+        status: false,
+        message: "grand_total is required and must be a valid number",
+      });
+    }
+
+    // ✅ reverse GST from grand total
+    const baseTotalRaw = grandTotal / (1 + gst_percentage / 100);
+    const gstTotalRaw = grandTotal - baseTotalRaw;
+
+    const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+
+    const base_total = round2(baseTotalRaw);
+    const gst_total = round2(gstTotalRaw);
+    const grand_total = round2(grandTotal);
+
+    // ✅ create master
     const master = await QuotationMaster.create(
       {
         ...masterData,
         quotation_no: quotationNo,
         business_id: businessId,
-        customer_id: customerId,
-        created_by: req.currentUser?.user_id,
 
-        total_items: Array.isArray(quotation_items) ? quotation_items.length : 0,
+        gst_percentage,
+        base_total,
+        gst_total,
+        grand_total,
+
+        created_by: req.currentUser?.user_id,
+        customer_id: req.currentUser?.user_id,
+
+        total_items: itemsArr.length,
       },
-      { transaction }
+      { transaction: t }
     );
 
-    if (Array.isArray(quotation_items) && quotation_items.length > 0) {
-      const childData = quotation_items.map((item) => ({
-        ...item,
-        quotation_id: master.quotation_id,
-        price: Number(item.price || 0),
-        qty: Number(item.qty || 1),
-        total: Number(item.price || 0) * Number(item.qty || 1),
-      }));
+    // ✅ create children
+    if (itemsArr.length > 0) {
+      const childData = itemsArr.map((item) => {
+        const price = Number(item.price || 0);
+        const qty = Number(item.qty || 1);
+        const total = price * qty;
 
-      await QuotationItem.bulkCreate(childData, { transaction });
+        return {
+          ...item,
+          quotation_id: master.quotation_id,
+          price,
+          qty,
+          total: round2(total),
+        };
+      });
+
+      await QuotationItem.bulkCreate(childData, { transaction: t });
     }
 
-    await transaction.commit();
+    await t.commit();
 
     return res.status(201).json({
+      status: true,
       message: "Quotation created successfully",
-      data: master, // ✅ master contains quotation_id
+      data: master,
     });
   } catch (error) {
-    await transaction.rollback();
-    console.log(error);
+    await t.rollback();
+    console.error(error);
 
     return res.status(500).json({
+      status: false,
       message: "Error creating quotation",
       error: error.message,
     });
@@ -62,14 +104,15 @@ const store = async (req, res) => {
 };
 
 /* 🧾 PDF INVOICE */
-
 const quotationInvoicePdf = async (req, res) => {
   try {
     const { id } = req.params;
 
     const quotation = await QuotationMaster.findByPk(id);
     if (!quotation) {
-      return res.status(404).json({ status: false, message: "Quotation not found" });
+      return res
+        .status(404)
+        .json({ status: false, message: "Quotation not found" });
     }
 
     const items = await QuotationItem.findAll({
@@ -84,43 +127,67 @@ const quotationInvoicePdf = async (req, res) => {
 
     // ✅ PDF headers
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=Quotation-${id}.pdf`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Quotation-${id}.pdf`
+    );
 
     const doc = new PDFDocument({ size: "A4", margin: 40 });
     doc.pipe(res);
 
-    // ====== HEADER ======
-    doc
-      .fillColor("#111827")
-      .fontSize(24)
-      .text("QUOTATION", 40, 40);
+    // ===== HEADER =====
+    doc.fillColor("#111827").fontSize(24).text("QUOTATION", 40, 40);
 
     // Header Meta Data (Right Aligned)
     const topAlign = 45;
     doc
       .fontSize(10)
       .fillColor("#6b7280")
-      .text(`No: ${safe(quotation.quotation_no)}`, 400, topAlign, { align: "right" })
-      .text(`Date: ${safe(quotation.create_date)}`, 400, topAlign + 15, { align: "right" })
-      .text(`Expires: ${safe(quotation.expire_date)}`, 400, topAlign + 30, { align: "right" });
+      .text(`No: ${safe(quotation.quotation_no)}`, 400, topAlign, {
+        align: "right",
+      })
+      .text(`Date: ${safe(quotation.create_date)}`, 400, topAlign + 15, {
+        align: "right",
+      })
+      .text(`Expires: ${safe(quotation.expire_date)}`, 400, topAlign + 30, {
+        align: "right",
+      });
 
     drawLine(doc, 100);
 
-    // ====== BILLING SECTION ======
+    // ===== BILLING SECTION =====
     const billingTop = 130;
 
-    // Billed From (Business)
-    doc.fillColor("#111827").fontSize(10).font("Helvetica-Bold").text("FROM:", 40, billingTop);
+    doc.font("Helvetica-Bold").fontSize(10).fillColor("#111827");
+    doc.text("FROM:", 40, billingTop);
+    doc.text("BILL TO:", 320, billingTop);
 
-    // Billed To (Customer)
-    doc.fillColor("#111827").fontSize(10).font("Helvetica-Bold").text("BILL TO:", 320, billingTop);
-    doc.fillColor("#374151").font("Helvetica").fontSize(10)
-      .text(`${safe(customer?.user_name)}`, 320, billingTop + 15)
-      .text(`${safe(customer?.user_email)}`, 320, billingTop + 30)
-      .text(`${safe(customer?.user_phone_number)}`, 320, billingTop + 45);
+    doc.font("Helvetica").fontSize(10).fillColor("#374151");
 
-    // ====== TABLE HEADER ======
-    const tableTop = 230;
+    // Business Info
+    doc.text(safe(business?.user_name), 40, billingTop + 15);
+    doc.text(safe(business?.user_email), 40, billingTop + 30);
+    doc.text(safe(business?.user_phone_number), 40, billingTop + 45);
+
+    let fromY = billingTop + 60;
+    buildAddressLines(business).forEach((line) => {
+      doc.text(line, 40, fromY);
+      fromY += 14;
+    });
+
+    // Customer Info
+    doc.text(safe(customer?.user_name), 320, billingTop + 15);
+    doc.text(safe(customer?.user_email), 320, billingTop + 30);
+    doc.text(safe(customer?.user_phone_number), 320, billingTop + 45);
+
+    let toY = billingTop + 60;
+    buildAddressLines(customer).forEach((line) => {
+      doc.text(line, 320, toY);
+      toY += 14;
+    });
+
+    // ===== TABLE HEADER =====
+    const tableTop = 250;
     const colX = {
       sr: 40,
       name: 70,
@@ -129,7 +196,7 @@ const quotationInvoicePdf = async (req, res) => {
       total: 500,
     };
 
-    doc.rect(40, tableTop, 520, 25).fill("#f3f4f6"); // Header background
+    doc.rect(40, tableTop, 520, 25).fill("#f3f4f6");
 
     doc
       .fillColor("#111827")
@@ -137,11 +204,14 @@ const quotationInvoicePdf = async (req, res) => {
       .fontSize(9)
       .text("SR.", colX.sr + 5, tableTop + 8)
       .text("DESCRIPTION", colX.name, tableTop + 8)
-      .text("UNIT PRICE", colX.price, tableTop + 8, { width: 70, align: "right" })
+      .text("UNIT PRICE", colX.price, tableTop + 8, {
+        width: 70,
+        align: "right",
+      })
       .text("QTY", colX.qty, tableTop + 8, { width: 40, align: "right" })
       .text("AMOUNT", colX.total, tableTop + 8, { width: 60, align: "right" });
 
-    // ====== TABLE ROWS ======
+    // ===== TABLE ROWS =====
     let y = tableTop + 35;
     doc.font("Helvetica").fontSize(9).fillColor("#374151");
 
@@ -151,61 +221,219 @@ const quotationInvoicePdf = async (req, res) => {
         y = 50;
       }
 
-      const pName = safe(it.product_name);
       const price = Number(it.price || 0);
       const qty = Number(it.qty || 0);
       const total = Number(it.total || price * qty);
 
       doc.text(String(idx + 1), colX.sr + 5, y);
-      doc.text(pName, colX.name, y, { width: 260 });
-      doc.text(`${money(price)}`, colX.price, y, { width: 70, align: "right" });
+      doc.text(safe(it.product_name), colX.name, y, { width: 260 });
+      doc.text(moneyINR(price), colX.price, y, { width: 70, align: "right" });
       doc.text(String(qty), colX.qty, y, { width: 40, align: "right" });
-      doc.text(`${money(total)}`, colX.total, y, { width: 60, align: "right" });
+      doc.text(moneyINR(total), colX.total, y, { width: 60, align: "right" });
 
-      y += 25; // Row spacing
+      y += 25;
 
-      // Light border between items
-      doc.moveTo(40, y - 10).lineTo(560, y - 10).strokeColor("#f3f4f6").lineWidth(1).stroke();
+      doc
+        .moveTo(40, y - 10)
+        .lineTo(560, y - 10)
+        .strokeColor("#f3f4f6")
+        .lineWidth(1)
+        .stroke();
     });
 
-    // ====== TOTALS SECTION ======
-    const subTotal = items.reduce((s, it) => s + Number(it.total || 0), 0);
-    const grandTotal = Number(quotation.grand_total || subTotal);
+    // ===== GST + TOTAL SECTION =====
+    const gstPercent = Number(quotation.gst_percentage || 18);
 
-    y += 10;
-    if (y > 750) { doc.addPage(); y = 50; }
+    let baseTotal = Number(quotation.base_total || 0);
+    let gstTotal = Number(quotation.gst_total || 0);
+    let grandTotal = Number(quotation.grand_total || 0);
+
+    // If only grand_total exists and it includes GST, reverse it
+    if ((!baseTotal || !gstTotal) && grandTotal) {
+      const base = grandTotal / (1 + gstPercent / 100);
+      baseTotal = base;
+      gstTotal = grandTotal - base;
+    }
+
+    const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+    baseTotal = round2(baseTotal);
+    gstTotal = round2(gstTotal);
+    grandTotal = round2(grandTotal || baseTotal + gstTotal);
+
+    y += 15;
+    if (y > 750) {
+      doc.addPage();
+      y = 50;
+    }
 
     doc.font("Helvetica").fontSize(10).fillColor("#6b7280");
-    doc.text("Subtotal", 380, y, { width: 110, align: "right" });
-    doc.fillColor("#111827").text(`${money(subTotal)}`, 500, y, { width: 60, align: "right" });
+    doc.text("Subtotal (Base)", 380, y, { width: 110, align: "right" });
+    doc.fillColor("#111827").text(moneyINR(baseTotal), 500, y, {
+      width: 60,
+      align: "right",
+    });
+
+    y += 18;
+    doc.fillColor("#6b7280").text(`GST (${gstPercent}%)`, 380, y, {
+      width: 110,
+      align: "right",
+    });
+    doc.fillColor("#111827").text(moneyINR(gstTotal), 500, y, {
+      width: 60,
+      align: "right",
+    });
+
+    y += 22;
+    doc.rect(380, y - 6, 185, 30).fill("#f9fafb");
+    doc.fillColor("#111827").font("Helvetica-Bold").fontSize(12);
+    doc.text("Grand Total", 390, y + 2);
+    doc.text(moneyINR(grandTotal), 495, y + 2, { width: 65, align: "right" });
+
+    // ===== UPI PAY SECTION (QR + AUTO AMOUNT) =====
+    const advanceAmount = Number((grandTotal * 0.5).toFixed(2));
+    const upiId = "prashantdhaigude530@okaxis"; // ✅ default UPI ID
+    const payeeName = business?.user_name || "Business";
+    const note = `Quotation ${safe(quotation.quotation_no)}`;
+    const txnRef = `QT-${id}`;
+
+    const upiUri = buildUpiUri({
+      pa: upiId,
+      pn: payeeName,
+      am: advanceAmount, // ✅ auto-fill amount
+      tn: note,
+      tr: txnRef,
+    });
+
+    y += 55;
+    if (y > 670) {
+      doc.addPage();
+      y = 50;
+    }
+
+    doc.font("Helvetica-Bold").fontSize(11).fillColor("#111827").text("Pay via UPI", 40, y);
+    doc.font("Helvetica").fontSize(9).fillColor("#374151");
+    doc.text(`UPI ID: ${upiId}`, 40, y + 18);
+    doc.text(`Amount: ${moneyINR(advanceAmount)}`, 40, y + 34);
+    doc.text(`Note: ${note}`, 40, y + 50, { width: 260 });
+
+    const qrBuffer = await QRCode.toBuffer(upiUri, {
+      type: "png",
+      errorCorrectionLevel: "M",
+      margin: 1,
+      scale: 6,
+    });
+
+    doc.image(qrBuffer, 420, y + 5, { width: 120, height: 120 });
+
+    doc
+      .fontSize(8)
+      .fillColor("#6b7280")
+      .text("Scan & Pay (amount auto-filled)", 420, y + 130, {
+        width: 140,
+        align: "center",
+      });
+
+    y += 170;
+
+    // ===== TERMS & CONDITIONS =====
+    const terms = [
+      "This quotation is valid until the expiration date mentioned above.",
+      "Prices mentioned are exclusive of applicable taxes unless stated otherwise.",
+      "50% advance payment is required to confirm the order.",
+      "Delivery timeline will be confirmed after order confirmation.",
+      "Goods once sold will not be taken back or exchanged.",
+      "Warranty (if applicable) will be provided as per manufacturer terms.",
+      "Any additional work will be charged separately.",
+    ];
+
+    if (y > 680) {
+      doc.addPage();
+      y = 50;
+    }
+
+    doc.font("Helvetica-Bold").fontSize(11).fillColor("#111827");
+    doc.text("Terms & Conditions", 40, y);
 
     y += 20;
-    // Grand Total highlight
-    doc.rect(380, y - 5, 185, 30).fill("#f9fafb");
-    doc.fillColor("#111827").font("Helvetica-Bold").fontSize(12);
-    doc.text("Grand Total", 390, y + 2, { width: 100, align: "left" });
-    doc.text(`${money(grandTotal)}`, 495, y + 2, { width: 65, align: "right" });
+    doc.font("Helvetica").fontSize(9).fillColor("#374151");
 
-    // ====== FOOTER ======
-    const footerText = "Thank you for your business! This quotation is valid until the expiration date listed above.";
+    terms.forEach((term) => {
+      if (y > 750) {
+        doc.addPage();
+        y = 50;
+      }
+      doc.text(`• ${term}`, 50, y, { width: 500 });
+      y += 18;
+    });
+
+    // ===== FOOTER =====
     doc
       .fontSize(8)
       .fillColor("#9ca3af")
-      .text(footerText, 40, 780, { align: "center", width: 515 });
+      .text(
+        "Thank you for your business! This quotation is valid until the expiration date listed above.",
+        40,
+        780,
+        { align: "center", width: 515 }
+      );
 
     doc.end();
   } catch (err) {
     console.error("PDF generation failed:", err);
-    return res.status(500).json({ status: false, message: "Internal Server Error" });
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+    });
   }
 };
 
-// --- Helper Functions ---
-const safe = (val) => val || "N/A";
-const money = (val) => `$${Number(val).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-const drawLine = (doc, y) => {
-  doc.moveTo(40, y).lineTo(560, y).strokeColor("#e5e7eb").lineWidth(1).stroke();
+// ===== HELPERS =====
+const safe = (val) => (val ? val : "N/A");
+
+const moneyINR = (val) => {
+  const n = Number(val || 0);
+  return `₹${n.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 };
+
+const buildAddressLines = (u) => {
+  if (!u) return [];
+
+  const line1 = [u.user_address_description, u.user_address_block]
+    .filter(Boolean)
+    .join(", ");
+
+  const line2 = [u.user_address_city, u.user_address_district, u.user_address_state]
+    .filter(Boolean)
+    .join(", ");
+
+  const line3 = u.user_address_pincode ? `PIN: ${u.user_address_pincode}` : "";
+
+  return [line1, line2, line3].filter(Boolean);
+};
+
+const buildUpiUri = ({ pa, pn, am, tn, tr }) => {
+  const params = new URLSearchParams();
+  params.set("pa", pa);
+  params.set("pn", pn || "Pay");
+  params.set("am", Number(am || 0).toFixed(2)); // ✅ auto-fill amount
+  params.set("cu", "INR");
+  if (tn) params.set("tn", tn);
+  if (tr) params.set("tr", tr);
+  return `upi://pay?${params.toString()}`;
+};
+
+const drawLine = (doc, y) => {
+  doc
+    .moveTo(40, y)
+    .lineTo(560, y)
+    .strokeColor("#e5e7eb")
+    .lineWidth(1)
+    .stroke();
+};
+
 /* 🟡 READ ALL QUOTATIONS (JOIN + PAGINATION) */
 const index = async (req, res) => {
   try {
