@@ -385,7 +385,106 @@ const index = async (req, res) => {
     });
   }
 };
+const indexCustomerOnly = async (req, res) => {
+  try {
+    const userId = req.currentUser.user_id; // current logged in user
 
+    const sql = `
+      SELECT 
+        r.*,
+
+        -- =============== CUSTOMER (MAIN) ===============
+        cust.user_id                   AS customer_id,
+        cust.user_name                 AS customer_name,
+        cust.user_phone_number         AS customer_phone_number,
+        cust.user_email                AS customer_email,
+        cust.user_created_by           AS customer_created_by,
+        cust.user_address_state        AS customer_address_state,
+        cust.user_address_district     AS customer_address_district,
+        cust.user_address_block        AS customer_address_block,
+        cust.user_address_city         AS customer_address_city,
+        cust.user_address_pincode      AS customer_address_pincode,
+        cust.user_profile              AS customer_profile,
+        cust.user_address_description  AS customer_address_description,
+        cust.user_status               AS customer_status,
+
+        -- =============== REFERRED BY CUSTOMER ===============
+        ref.user_id                    AS referred_by_customer_id,
+        ref.user_name                  AS referred_by_name,
+        ref.user_phone_number          AS referred_by_phone_number,
+        ref.user_email                 AS referred_by_email,
+        ref.user_created_by            AS referred_by_created_by,
+        ref.user_address_state         AS referred_by_address_state,
+        ref.user_address_district      AS referred_by_address_district,
+        ref.user_address_block         AS referred_by_address_block,
+        ref.user_address_city          AS referred_by_address_city,
+        ref.user_address_pincode       AS referred_by_pincode,
+        ref.user_address_description   AS referred_by_address_description,
+        ref.user_status                AS referred_by_status,
+
+        -- =============== OTHER JOINS ===============
+        tech.user_name AS technician_name,
+        del.user_name AS delivery_boy_name,
+        wf.*, 
+        wf_child.*, 
+        src.*, 
+        srv.*, 
+        rtype.*, 
+        dtype.*, 
+        br.*, 
+        model.*, 
+        store.*, 
+        color.*, 
+        hw.*
+
+      FROM tbl_repairs AS r
+      LEFT JOIN tbl_users AS cust 
+        ON r.repair_customer_id = cust.user_id
+      LEFT JOIN tbl_users AS ref 
+        ON r.repair_referred_by_id = ref.user_id
+      LEFT JOIN tbl_users AS tech
+        ON r.repair_assigned_technician_to = tech.user_id
+      LEFT JOIN tbl_users AS del
+        ON r.repair_delivery_and_pickup_to = del.user_id
+      LEFT JOIN tbl_workflow_masters AS wf
+        ON r.repair_workflow_id = wf.workflow_id
+      LEFT JOIN tbl_workflow_children AS wf_child
+        ON r.repair_workflow_stage_id = wf_child.workflow_child_id
+      LEFT JOIN tbl_sources AS src
+        ON r.repair_source_id = src.source_id
+      LEFT JOIN tbl_services_types AS srv
+        ON r.repair_service_type_id = srv.service_type_id
+      LEFT JOIN tbl_repair_types AS rtype
+        ON r.repair_type_id = rtype.repair_type_id
+      LEFT JOIN tbl_device_types AS dtype
+        ON r.repair_device_type_id = dtype.device_type_id
+      LEFT JOIN tbl_brands AS br
+        ON r.repair_device_brand_id = br.brand_id
+      LEFT JOIN tbl_device_models AS model
+        ON r.repair_device_model_id = model.device_model_id
+      LEFT JOIN tbl_storage_locations AS store
+        ON r.repair_device_storage_location_id = store.storage_location_id
+      LEFT JOIN tbl_device_colors AS color
+        ON r.repair_device_color_id = color.device_color_id
+      LEFT JOIN tbl_hardware_configurations AS hw
+        ON r.repair_device_hardware_configuration_id = hw.hardware_configuration_id
+
+      WHERE r.repair_customer_id = :userId
+      ORDER BY r.repair_id ASC;
+    `;
+
+    const repairs = await sequelize.query(sql, {
+      replacements: { userId },
+      type: QueryTypes.SELECT,
+    });
+
+    // ✅ only return data
+    return res.status(200).json(repairs);
+  } catch (error) {
+    console.error("Error fetching customer repairs:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 const Get = async (req, res) => {
   try {
@@ -541,8 +640,8 @@ const update = async (req, res) => {
     const keptOldImages = Array.isArray(req.body["old_images[]"])
       ? req.body["old_images[]"]
       : req.body["old_images[]"]
-      ? [req.body["old_images[]"]]
-      : [];
+        ? [req.body["old_images[]"]]
+        : [];
 
     const removedImages = oldImagesInDB.filter(
       (img) => !keptOldImages.includes(img)
@@ -644,4 +743,5 @@ module.exports = {
   Get,
   update,
   deleted,
+  indexCustomerOnly,
 };
