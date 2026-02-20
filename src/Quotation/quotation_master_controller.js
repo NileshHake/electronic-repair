@@ -4,6 +4,7 @@ const QuotationItem = require("./quotation_master_child");
 const User = require("../auth/user_model");
 const { Op } = require("sequelize");
 const PDFDocument = require("pdfkit");
+const { generateNumber } = require("../invoice number/invoice_number_controller");
 
 /* 🟢 CREATE QUOTATION (MASTER + CHILD) */
 const store = async (req, res) => {
@@ -11,18 +12,17 @@ const store = async (req, res) => {
   try {
     const { quotation_items, ...masterData } = req.body;
 
-    // ✅ Generate quotation_no (simple)
-    const quotationNo = `Q-${Date.now()}`;
 
-    // ✅ set ids properly (do not always overwrite customer_id from payload)
-    const businessId = req.currentUser?.user_id;
+    const quotationNo = await generateNumber({
+      businessId: 4,
+      type: "quotation",
+    });
+    const businessId = 4;
     const customerId = masterData.customer_id || req.currentUser?.user_id;
-
     const master = await QuotationMaster.create(
       {
         ...masterData,
-        quotation_no: masterData.quotation_no || quotationNo,
-
+        quotation_no: quotationNo,
         business_id: businessId,
         customer_id: customerId,
         created_by: req.currentUser?.user_id,
@@ -62,7 +62,7 @@ const store = async (req, res) => {
 };
 
 /* 🧾 PDF INVOICE */
- 
+
 const quotationInvoicePdf = async (req, res) => {
   try {
     const { id } = req.params;
@@ -108,10 +108,10 @@ const quotationInvoicePdf = async (req, res) => {
 
     // ====== BILLING SECTION ======
     const billingTop = 130;
-    
+
     // Billed From (Business)
     doc.fillColor("#111827").fontSize(10).font("Helvetica-Bold").text("FROM:", 40, billingTop);
-    
+
     // Billed To (Customer)
     doc.fillColor("#111827").fontSize(10).font("Helvetica-Bold").text("BILL TO:", 320, billingTop);
     doc.fillColor("#374151").font("Helvetica").fontSize(10)
@@ -130,7 +130,7 @@ const quotationInvoicePdf = async (req, res) => {
     };
 
     doc.rect(40, tableTop, 520, 25).fill("#f3f4f6"); // Header background
-    
+
     doc
       .fillColor("#111827")
       .font("Helvetica-Bold")
@@ -146,7 +146,7 @@ const quotationInvoicePdf = async (req, res) => {
     doc.font("Helvetica").fontSize(9).fillColor("#374151");
 
     items.forEach((it, idx) => {
-      if (y > 730) { 
+      if (y > 730) {
         doc.addPage();
         y = 50;
       }
@@ -163,7 +163,7 @@ const quotationInvoicePdf = async (req, res) => {
       doc.text(`${money(total)}`, colX.total, y, { width: 60, align: "right" });
 
       y += 25; // Row spacing
-      
+
       // Light border between items
       doc.moveTo(40, y - 10).lineTo(560, y - 10).strokeColor("#f3f4f6").lineWidth(1).stroke();
     });
@@ -181,7 +181,7 @@ const quotationInvoicePdf = async (req, res) => {
 
     y += 20;
     // Grand Total highlight
-    doc.rect(380, y - 5, 185, 30).fill("#f9fafb"); 
+    doc.rect(380, y - 5, 185, 30).fill("#f9fafb");
     doc.fillColor("#111827").font("Helvetica-Bold").fontSize(12);
     doc.text("Grand Total", 390, y + 2, { width: 100, align: "left" });
     doc.text(`${money(grandTotal)}`, 495, y + 2, { width: 65, align: "right" });

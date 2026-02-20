@@ -9,13 +9,11 @@ const QuotationMaster = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-
     quotation_no: {
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: true,
     },
-
     business_id: {
       type: DataTypes.BIGINT,
       allowNull: false,

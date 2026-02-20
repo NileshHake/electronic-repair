@@ -2,6 +2,7 @@
 
 const sequelize = require("../../../config/db");
 const { getCreatedBy } = require("../../helper/CurrentUser");
+const { generateNumber } = require("../../invoice number/invoice_number_controller");
 const Repair = require("../repair_model");
 const QuotationAndBillingChild = require("./quotation_and_billing_child_model");
 const QuotationAndBillingMaster = require("./quotation_and_billing_master_model");
@@ -12,6 +13,7 @@ exports.createQuotationAndBill = async (req, res) => {
     try {
         let {
             quotation_and_billing_master_customer_id,
+
             quotation_and_billing_master_repair_id,
             quotation_and_billing_master_total,
             quotation_and_billing_master_gst_amount,
@@ -37,11 +39,14 @@ exports.createQuotationAndBill = async (req, res) => {
 
 
         const t = await sequelize.transaction();
-
+        const quotationNo = await generateNumber({
+            businessId: 4,
+            type: quotation_or_billing === "quotation" ? "repairquotation" : "repairinvoice",
+        });
         // Create Master
         const master = await QuotationAndBillingMaster.create(
             {
-                quotation_and_billing_master_invoice_number: "INV-" + Date.now(),
+                quotation_and_billing_master_invoice_number: quotationNo,
                 quotation_and_billing_master_date: new Date(),
                 quotation_and_billing_master_customer_id,
                 quotation_and_billing_master_repair_id,

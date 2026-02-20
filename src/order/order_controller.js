@@ -4,6 +4,7 @@ const User = require("../auth/user_model");
 const Customer = require("../Customer/customer_model");
 const CustomerAddress = require("../CustomerAddress/customer_address_model");
 const { getCreatedBy } = require("../helper/CurrentUser");
+const { generateNumber } = require("../invoice number/invoice_number_controller");
 const OrderChild = require("./order_model_child");
 const OrderMaster = require("./order_model_master");
 
@@ -18,13 +19,17 @@ const store = async (req, res) => {
             order_items,
             ...orderMasterData
         } = req.body;
-
+        const OrderNo = await generateNumber({
+            businessId: 4,
+            type: "orderinvoice",
+        });
         const orderMaster = await OrderMaster.create(
             {
                 ...orderMasterData,
                 order_master_customer_name: customerData.user_name,
                 order_master_delivery_phone_number: customerAddressData.customer_address_mobile ? customerAddressData.customer_address_mobile : customerData.user_phone_number || "",
                 order_master_user_id: req.currentUser.user_id,
+                order_master_invoice_number: OrderNo,
                 order_master_date: new Date(),
             },
             { transaction }
@@ -140,7 +145,7 @@ const indexchild = async (req, res) => {
                 type: sequelize.QueryTypes.SELECT,
             }
         );
-         
+
 
         return res.status(200).json(orderItems);
     } catch (error) {

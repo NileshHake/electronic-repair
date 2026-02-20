@@ -38,6 +38,10 @@ const OrderMaster = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+        order_master_invoice_number: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+        },
         order_master_customer_name: {
             type: DataTypes.STRING(100),
             allowNull: true,

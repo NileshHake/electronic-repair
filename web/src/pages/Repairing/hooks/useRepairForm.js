@@ -27,8 +27,8 @@ export const useRepairForm = ({ toggle, mode = "add", initialData = null }) => {
     repair_device_services_id: [{ service: "", cost: "" }], // ✅ array of objects
     repair_device_priority: "",
     repair_device_password: "",
-    repair_workflow_id: 0,
-    repair_workflow_stage_id: 0,
+    repair_workflow_id: 1,
+    repair_workflow_stage_id: 1,
     repair_source_id: 0,
     repair_referred_by_id: 0,
     repair_service_type_id: 0,
