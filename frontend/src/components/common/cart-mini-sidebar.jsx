@@ -1,13 +1,82 @@
-import React, { useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useSelector, useDispatch } from 'react-redux';
-import empty_cart_img from '@assets/img/product/cartmini/empty-cart.png';
-import { closeCartMini } from '@/redux/features/cartSlice';
-import { api } from '../../../config';
-import { useGetCartListQuery, useDeleteCartItemMutation } from '@/redux/features/cartApi';
-import { useRouter } from 'next/router';
-import Cookies from 'js-cookie';
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSelector, useDispatch } from "react-redux";
+import empty_cart_img from "@assets/img/product/cartmini/empty-cart.png";
+import { closeCartMini } from "@/redux/features/cartSlice";
+import { api } from "../../../config";
+import {
+  useGetCartListQuery,
+  useDeleteCartItemMutation,
+} from "@/redux/features/cartApi";
+import { useRouter } from "next/router";
+import Cookies from "js-cookie";
+import defaultIMG from "../../../public/assets/img/istockphoto-1055079680-612x612.jpg";
+
+const safeParseImages = (v) => {
+  try {
+    const arr = typeof v === "string" ? JSON.parse(v || "[]") : v;
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+};
+
+const MiniCartRow = ({ item, onRemove }) => {
+  const images = safeParseImages(item?.product_image);
+  const firstImage = images?.[0];
+
+  const initialSrc = firstImage
+    ? `${api.IMG_URL}product_images/${firstImage}`
+    : defaultIMG;
+
+  const [imgSrc, setImgSrc] = useState(initialSrc);
+
+  useEffect(() => {
+    setImgSrc(initialSrc);
+  }, [initialSrc]);
+
+  const price = Number(item?.product_sale_price || 0);
+  const qty = Number(item?.add_to_card_product_qty || 1);
+
+  return (
+    <div className="cartmini__widget-item d-flex align-items-center">
+      <div className="cartmini__thumb me-3">
+        <Link href={`/product-details/${item?.add_to_card_id}`}>
+          <Image
+            src={imgSrc}
+            width={70}
+            height={60}
+            alt={item?.product_name || "product"}
+            style={{ objectFit: "cover" }}
+            onError={() => setImgSrc(defaultIMG)}
+          />
+        </Link>
+      </div>
+
+      <div className="cartmini__content flex-grow-1">
+        <h5 className="cartmini__title">
+          <Link href={`/product-details/${item?.add_to_card_id}`}>
+            {item?.product_name || "-"}
+          </Link>
+        </h5>
+
+        <div className="cartmini__price-wrapper">
+          <span className="cartmini__price">₹{(price * qty).toFixed(2)}</span>
+          <span className="cartmini__quantity"> x{qty}</span>
+        </div>
+      </div>
+
+      <button
+        onClick={() => onRemove(item?.add_to_card_id)}
+        className="cartmini__del cursor-pointer btn p-0 border-0 bg-transparent"
+        type="button"
+      >
+        <i className="fa-regular fa-xmark"></i>
+      </button>
+    </div>
+  );
+};
 
 const CartMiniSidebar = () => {
   const dispatch = useDispatch();
@@ -30,7 +99,7 @@ const CartMiniSidebar = () => {
   const [deleteCartItem] = useDeleteCartItemMutation();
 
   const cart_products = data?.items || [];
-  const subtotal = data?.grand_total || 0;
+  const subtotal = Number(data?.grand_total || 0);
 
   // Close mini cart
   const handleCloseCartMini = () => dispatch(closeCartMini());
@@ -40,22 +109,29 @@ const CartMiniSidebar = () => {
     try {
       await deleteCartItem(id).unwrap();
     } catch (err) {
-      console.error('Failed to remove cart item:', err);
+      console.error("Failed to remove cart item:", err);
     }
   };
 
   return (
     <>
-      <div className={`cartmini__area tp-all-font-roboto ${cartMiniOpen ? 'cartmini-opened' : ''}`}>
+      <div
+        className={`cartmini__area tp-all-font-roboto ${
+          cartMiniOpen ? "cartmini-opened" : ""
+        }`}
+      >
         <div className="cartmini__wrapper d-flex justify-content-between flex-column">
-          
           <div className="cartmini__top-wrapper">
             <div className="cartmini__top p-relative">
               <div className="cartmini__top-title">
                 <h4>Shopping cart</h4>
               </div>
               <div className="cartmini__close">
-                <button onClick={handleCloseCartMini} type="button" className="cartmini__close-btn">
+                <button
+                  onClick={handleCloseCartMini}
+                  type="button"
+                  className="cartmini__close-btn"
+                >
                   <i className="fal fa-times"></i>
                 </button>
               </div>
@@ -69,48 +145,19 @@ const CartMiniSidebar = () => {
               <div className="cartmini__empty text-center">
                 <Image src={empty_cart_img} alt="empty-cart-img" />
                 <p>Your Cart is empty</p>
-                <Link href="/shop" className="tp-btn">Go to Shop</Link>
+                <Link href="/shop" className="tp-btn" onClick={handleCloseCartMini}>
+                  Go to Shop
+                </Link>
               </div>
             ) : (
               <div className="cartmini__widget">
-                {cart_products.map((item) => {
-                  let images = [];
-                  try {
-                    images = JSON.parse(item.product_image);
-                    if (!Array.isArray(images)) images = [];
-                  } catch (err) {
-                    images = [];
-                  }
-                  const firstImage = images.length > 0 ? images[0] : 'default.jpg';
-                  const imgUrl = `${api.IMG_URL}product_images/${firstImage}`;
-                  const price = item.product_sale_price || 0;
-                  const qty = item.add_to_card_product_qty || 1;
-
-                  return (
-                    <div key={item.add_to_card_id} className="cartmini__widget-item d-flex align-items-center">
-                      <div className="cartmini__thumb me-3">
-                        <Link href={`/product-details/${item.add_to_card_id}`}>
-                          <Image src={imgUrl} width={70} height={60} alt={item.product_name} />
-                        </Link>
-                      </div>
-                      <div className="cartmini__content flex-grow-1">
-                        <h5 className="cartmini__title">
-                          <Link href={`/product-details/${item.add_to_card_id}`}>{item.product_name}</Link>
-                        </h5>
-                        <div className="cartmini__price-wrapper">
-                          <span className="cartmini__price">₹{(price * qty).toFixed(2)}</span>
-                          <span className="cartmini__quantity"> x{qty}</span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleRemovePrd(item.add_to_card_id)}
-                        className="cartmini__del cursor-pointer btn p-0 border-0 bg-transparent"
-                      >
-                        <i className="fa-regular fa-xmark"></i>
-                      </button>
-                    </div>
-                  );
-                })}
+                {cart_products.map((item) => (
+                  <MiniCartRow
+                    key={item.add_to_card_id}
+                    item={item}
+                    onRemove={handleRemovePrd}
+                  />
+                ))}
               </div>
             )}
           </div>
@@ -122,8 +169,20 @@ const CartMiniSidebar = () => {
                 <span>₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="cartmini__checkout-btn d-flex flex-column gap-2">
-                <Link href="/cart" onClick={handleCloseCartMini} className="tp-btn w-100">View Cart</Link>
-                <Link href="/checkout" onClick={handleCloseCartMini} className="tp-btn tp-btn-border w-100">Checkout</Link>
+                <Link
+                  href="/cart"
+                  onClick={handleCloseCartMini}
+                  className="tp-btn w-100"
+                >
+                  View Cart
+                </Link>
+                <Link
+                  href="/checkout"
+                  onClick={handleCloseCartMini}
+                  className="tp-btn tp-btn-border w-100"
+                >
+                  Checkout
+                </Link>
               </div>
             </div>
           )}
@@ -131,7 +190,10 @@ const CartMiniSidebar = () => {
       </div>
 
       {/* overlay */}
-      <div onClick={handleCloseCartMini} className={`body-overlay ${cartMiniOpen ? 'opened' : ''}`}></div>
+      <div
+        onClick={handleCloseCartMini}
+        className={`body-overlay ${cartMiniOpen ? "opened" : ""}`}
+      ></div>
     </>
   );
 };
