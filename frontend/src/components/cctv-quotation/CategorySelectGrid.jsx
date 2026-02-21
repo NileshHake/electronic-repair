@@ -114,7 +114,7 @@ const CCTVCategorySelectGrid = ({
   const [selectedIdByCategory, setSelectedIdByCategory] = useState({});
   const [selectedOptionByCategory, setSelectedOptionByCategory] = useState({});
   const [qtyByCategory, setQtyByCategory] = useState({});
-const [customerName, setCustomerName] = useState("");
+  const [customerName, setCustomerName] = useState("");
 
   // ✅ manual override flags
   const [manualQty, setManualQty] = useState({}); // { [cid]: true/false }
@@ -536,25 +536,6 @@ const [customerName, setCustomerName] = useState("");
       };
     }
 
-    if (qt === 2 || qt === 3) {
-      const qty = Number(cameraCount || 0);
-      return {
-        index: rows.length + 1,
-        category_id: "INSTALL_PER_CAMERA",
-        category_name: "Camera Installation Charges",
-        selectedId: "INSTALL_PER_CAMERA",
-        product: {
-          product_id: "INSTALL_PER_CAMERA",
-          product_name: "Installation (₹400 per camera)",
-          product_sale_price: 400,
-        },
-        price: 400,
-        qty,
-        total: qty * 400,
-        isStatic: true,
-        staticType: "INSTALL_PER_CAMERA",
-      };
-    }
 
     return null;
   }, [quoteType, cameraCount, rows.length]);
@@ -563,63 +544,14 @@ const [customerName, setCustomerName] = useState("");
      ✅ NEW: Indoor / Outdoor Cable rows
      - not staticType old cable logic
   ========================= */
-  const indoorCableRow = useMemo(() => {
-    const qt = Number(quoteType);
-    if (qt === 1) return null;
 
-    const qty = Number(indoorCableMeters || 0);
-    const price = Number(INDOOR_CABLE_PER_M);
-
-    return {
-      index: rows.length + (installationRow ? 2 : 1),
-      category_id: "INDOOR_CABLE",
-      category_name: "Indoor Cable + Fitting",
-      selectedId: "INDOOR_CABLE",
-      product: {
-        product_id: "INDOOR_CABLE",
-        product_name: `Indoor Cable (₹${price}/m)`,
-        product_sale_price: price,
-      },
-      price,
-      qty,
-      total: price * qty,
-      isStatic: true,
-      staticType: "INDOOR_CABLE",
-    };
-  }, [quoteType, indoorCableMeters, rows.length, installationRow]);
-
-  const outdoorCableRow = useMemo(() => {
-    const qt = Number(quoteType);
-    if (qt === 1) return null;
-
-    const qty = Number(outdoorCableMeters || 0);
-    const price = Number(OUTDOOR_CABLE_PER_M);
-
-    return {
-      index: rows.length + (installationRow ? 3 : 2),
-      category_id: "OUTDOOR_CABLE",
-      category_name: "Outdoor Cable + Fitting",
-      selectedId: "OUTDOOR_CABLE",
-      product: {
-        product_id: "OUTDOOR_CABLE",
-        product_name: `Outdoor Cable (₹${price}/m)`,
-        product_sale_price: price,
-      },
-      price,
-      qty,
-      total: price * qty,
-      isStatic: true,
-      staticType: "OUTDOOR_CABLE",
-    };
-  }, [quoteType, outdoorCableMeters, rows.length, installationRow]);
 
   const finalRows = useMemo(() => {
     const list = [...rows];
     if (installationRow) list.push(installationRow);
-    if (indoorCableRow) list.push(indoorCableRow);
-    if (outdoorCableRow) list.push(outdoorCableRow);
+
     return list;
-  }, [rows, installationRow, indoorCableRow, outdoorCableRow]);
+  }, [rows, installationRow,]);
 
   const selectedRows = useMemo(
     () => finalRows.filter((r) => !!r.product && Number(r.qty || 0) > 0),
@@ -733,7 +665,7 @@ const [customerName, setCustomerName] = useState("");
             <li  >
               <label>Created For</label>
               <input
-              style={{height:"10px" }}
+                style={{ height: "10px" }}
                 type="text"
                 className="form-control form-control-sm"
                 placeholder="Customer Name"
@@ -949,15 +881,29 @@ const [customerName, setCustomerName] = useState("");
               />
             );
           })}
+          {console.log(quoteType)}
 
           <tr className="table-light">
-            <td colSpan="5" className="text-end fw-bold">
+            {([2, 3].includes(Number(quoteType))) && (
+              <td className="text-start text-muted" colSpan="4">
+                Wire charges will be applied based on actual usage.
+                Indoor wiring: ₹50 per meter.
+                Outdoor wiring: ₹70 per meter.
+              </td>
+            )}
+
+            <td
+              className="text-end fw-bold"
+              colSpan={[2, 3].includes(Number(quoteType)) ? null : 5}
+            >
               Grand Total
             </td>
+
             <td className="text-end fw-bold">₹{money(grandTotal)}</td>
           </tr>
         </tbody>
       </table>
+
 
       {/* ✅ Preview Modal */}
       {previewOpen && (

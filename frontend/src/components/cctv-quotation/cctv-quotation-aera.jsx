@@ -1,6 +1,7 @@
 /* =========================
    CCTVQuotationArea.jsx
    ✅ FIX: NVR list me Power Supply (19) remove
+   ✅ FIX: Only ORDER manage (NVR -> Camera -> POE etc.)
 ========================= */
 
 import React, { useMemo, useState } from "react";
@@ -24,7 +25,7 @@ export const DVR_CAMERA = [
   22, // DC
   23, // Screen (Optional)
   24, // Rack (Optional)
-  25, // Cable (static)
+  
   31, // PVC
 ];
 
@@ -38,13 +39,29 @@ export const NVR_CAMERA = [
   23, // Screen (Optional)
   24, // Rack (Optional)
   31, // PVC (Optional)
-  32, // Cable IP (static)
+  
 ];
 
 const getCctvIdsByType = (quoteType) => {
   if (Number(quoteType) === 1) return SINGLE_CAMERA;
   if (Number(quoteType) === 2) return DVR_CAMERA;
   if (Number(quoteType) === 3) return NVR_CAMERA;
+  return [];
+};
+
+// ✅ ORDER define here
+const getOrderByType = (quoteType) => {
+  const t = Number(quoteType);
+
+  // ONLY CAMERA: Camera -> Micro SD
+  if (t === 1) return [16, 26];
+
+  // DVR: DVR -> Cameras -> Power -> HDD -> BNC/DC -> Screen/Rack -> Cable/PVC
+  if (t === 2) return [15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 31];
+
+  // NVR: NVR -> IP Cameras -> POE -> HDD -> Screen/Rack -> PVC -> Cable IP
+  if (t === 3) return [14, 27, 28, 29, 20, 23, 24, 31,  ];
+
   return [];
 };
 
@@ -59,9 +76,25 @@ const CCTVQuotationArea = ({ businessId = null, customerId = null }) => {
 
   const filteredCategoryList = useMemo(() => {
     const allowedIds = getCctvIdsByType(quoteType);
-    return (cctvChildCategories || []).filter((c) =>
+    const order = getOrderByType(quoteType);
+
+    const filtered = (cctvChildCategories || []).filter((c) =>
       allowedIds.includes(Number(c.category_id))
     );
+
+    // ✅ sort by custom order
+    const orderIndex = new Map(order.map((id, idx) => [Number(id), idx]));
+    filtered.sort((a, b) => {
+      const ai = orderIndex.has(Number(a.category_id))
+        ? orderIndex.get(Number(a.category_id))
+        : 9999;
+      const bi = orderIndex.has(Number(b.category_id))
+        ? orderIndex.get(Number(b.category_id))
+        : 9999;
+      return ai - bi;
+    });
+
+    return filtered;
   }, [cctvChildCategories, quoteType]);
 
   if (isLoading) return <div className="container mt-4">Loading categories...</div>;
