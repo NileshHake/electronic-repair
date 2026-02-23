@@ -39,6 +39,7 @@ export const useRepairForm = ({ toggle, mode = "add", initialData = null }) => {
     repair_device_storage_location_id: 0,
     repair_device_hardware_configuration_id: 0,
     repair_device_color_id: 0,
+    repair_image: [],
   });
 
   const [galleryFiles, setGalleryFiles] = useState([]); // existing + new Files
@@ -205,7 +206,7 @@ export const useRepairForm = ({ toggle, mode = "add", initialData = null }) => {
     // ✅ images: old + new
     for (const item of galleryFiles) {
       if (item?.isExisting) fd.append("old_images[]", item.name);
-      else fd.append("repair_images[]", item); // item is File
+      else fd.append("repair_image[]", item); // item is File
     }
 
     if (mode === "update") dispatch(updateRepair(fd));

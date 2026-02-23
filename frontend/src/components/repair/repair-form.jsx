@@ -1,8 +1,8 @@
 // components/RepairForm.js
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useGetallBrandsQuery } from "@/redux/features/brandApi";
 import { useGetallDeviceTypeQuery } from "@/redux/features/devicetypeApi";
-import { useStoreRepairMutation } from "@/redux/features/repairApi"; // ✅ your store endpoint hook
+import { useStoreRepairMutation } from "@/redux/features/repairApi";
 
 const RepairForm = () => {
   const { data: brands = [] } = useGetallBrandsQuery();
@@ -10,31 +10,40 @@ const RepairForm = () => {
 
   const [storeRepair, { isLoading }] = useStoreRepairMutation();
 
-  const [formData, setFormData] = useState({
+  const getToday = () => new Date().toISOString().split("T")[0];
+
+  const initialForm = {
     repair_device_type_id: "",
     repair_device_brand_id: "",
     repair_device_password: "",
     repair_problem_description: "",
     repair_workflow_id: 1,
     repair_workflow_stage_id: 1,
-    repair_received_date: new Date(),
-    repair_images: [], // multiple images
-    repair_video: null, // one video
-    repair_created_by: 1, // vendor id
-  });
+    repair_received_date: getToday(),
+    repair_image: [], 
+    repair_video: null,
+    repair_created_by: "1", 
+  };
+
+  const [formData, setFormData] = useState(initialForm);
 
   const [previewImages, setPreviewImages] = useState([]);
   const [previewVideo, setPreviewVideo] = useState(null);
   const [vendors, setVendors] = useState([]);
+
+  // ✅ refs to clear file inputs
+  const imagesInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   useEffect(() => {
     async function fetchVendors() {
       try {
         const response = await fetch("/api/vendors/nearby");
         const data = await response.json();
-        setVendors(data);
+        setVendors(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Failed to fetch vendors:", error);
+        setVendors([]);
       }
     }
     fetchVendors();
@@ -47,33 +56,77 @@ const RepairForm = () => {
 
   // ✅ multiple images
   const handleImagesChange = (e) => {
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     setFormData((prev) => ({
       ...prev,
-      repair_images: [...prev.repair_images, ...files],
+      repair_image: [...prev.repair_image, ...files],
     }));
 
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreviewImages((prev) => [...prev, ...newPreviews]);
+
+    // ✅ allow selecting same file again
+    e.target.value = "";
   };
 
   const removeImage = (index) => {
     setFormData((prev) => ({
       ...prev,
-      repair_images: prev.repair_images.filter((_, i) => i !== index),
+      repair_image: prev.repair_image.filter((_, i) => i !== index),
     }));
-    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+
+    setPreviewImages((prev) => {
+      // ✅ revoke object url
+      const toRemove = prev[index];
+      if (toRemove) URL.revokeObjectURL(toRemove);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   // ✅ one video
   const handleVideoChange = (e) => {
     const file = e.target.files?.[0] || null;
+
+    // ✅ revoke old preview
+    setPreviewVideo((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return null;
+    });
+
     setFormData((prev) => ({ ...prev, repair_video: file }));
     setPreviewVideo(file ? URL.createObjectURL(file) : null);
+
+    // ✅ allow selecting same video again
+    e.target.value = "";
   };
 
-  // ✅ SUBMIT + call store API with FormData append
+  const resetAll = () => {
+    // ✅ revoke all image previews
+    previewImages.forEach((u) => {
+      try {
+        URL.revokeObjectURL(u);
+      } catch {}
+    });
+
+    // ✅ revoke video preview
+    if (previewVideo) {
+      try {
+        URL.revokeObjectURL(previewVideo);
+      } catch {}
+    }
+
+    // ✅ reset state
+    setFormData({ ...initialForm, repair_received_date: getToday() });
+    setPreviewImages([]);
+    setPreviewVideo(null);
+
+    // ✅ clear file inputs
+    if (imagesInputRef.current) imagesInputRef.current.value = "";
+    if (videoInputRef.current) videoInputRef.current.value = "";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,7 +143,6 @@ const RepairForm = () => {
     try {
       const fd = new FormData();
 
-      // ✅ normal fields
       fd.append("repair_device_type_id", formData.repair_device_type_id);
       fd.append("repair_device_brand_id", formData.repair_device_brand_id);
       fd.append("repair_device_password", formData.repair_device_password || "");
@@ -100,9 +152,9 @@ const RepairForm = () => {
       fd.append("repair_workflow_id", formData.repair_workflow_id);
       fd.append("repair_workflow_stage_id", formData.repair_workflow_stage_id);
 
-      // ✅ multiple images (send as repair_images[])
-      formData.repair_images.forEach((file) => {
-        fd.append("repair_images[]", file);
+      // ✅ multiple images (repair_image[])
+      formData.repair_image.forEach((file) => {
+        fd.append("repair_image[]", file);
       });
 
       // ✅ single video
@@ -110,25 +162,13 @@ const RepairForm = () => {
         fd.append("repair_video", formData.repair_video);
       }
 
-      // ✅ API call
       const res = await storeRepair(fd).unwrap();
       console.log("✅ STORE SUCCESS:", res);
 
-      // ✅ reset after success
-      setFormData({
-        repair_device_type_id: "",
-        repair_device_brand_id: "",
-        repair_device_password: "",
-        repair_problem_description: "",
-        repair_images: [],
-        repair_video: null,
-        repair_created_by: "",
-      });
-      setPreviewImages([]);
-      setPreviewVideo(null);
+      // ✅ clear all fields after success
+      resetAll();
     } catch (err) {
       console.error("❌ STORE ERROR:", err);
-      // toast already handled in endpoint if you added it there
       alert("Failed to store repair!");
     }
   };
@@ -239,6 +279,7 @@ const RepairForm = () => {
           <div>
             <label className="form-label fw-bold">Upload Images</label>
             <input
+              ref={imagesInputRef}
               type="file"
               multiple
               accept="image/*"
@@ -272,6 +313,7 @@ const RepairForm = () => {
           <div>
             <label className="form-label fw-bold">Upload Video</label>
             <input
+              ref={videoInputRef}
               type="file"
               accept="video/*"
               onChange={handleVideoChange}
@@ -291,6 +333,16 @@ const RepairForm = () => {
           {/* Submit */}
           <button type="submit" className="btn btn-primary mt-2" disabled={isLoading}>
             {isLoading ? "Saving..." : "Add Repair Order"}
+          </button>
+
+          {/* Optional: manual reset */}
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={resetAll}
+            disabled={isLoading}
+          >
+            Clear
           </button>
         </form>
       </div>
