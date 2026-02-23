@@ -5,6 +5,7 @@ import { Modal, ModalBody, ModalHeader, Button } from "reactstrap";
 import { useGetMyRecoveriesQuery } from "@/redux/features/recoveryApi";
 import { api } from "../../../config";
 import RecoveryViewModal from "./RecoveryViewModal";
+import { formatDateTime } from "@/helpers/date_and_time";
 
 // ✅ string -> array safe parse
  
@@ -80,7 +81,7 @@ const MyRecoveriesTable = () => {
                                     </div>
                                 </td>
 
-                                <td>{toText(r.recovery_received_date)}</td>
+                                <td>{formatDateTime(r.recovery_received_date)}</td>
 
                                 {/* because your SQL joins wf.* and wf_child.* */}
                                 <td>{toText(r.workflow_name ?? r.workflow_title ?? r.workflow_id)}</td>
