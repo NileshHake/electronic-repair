@@ -31,7 +31,7 @@ export const repairApi = apiSlice.injectEndpoints({
     // =============================
     getMyRepairs: builder.query({
       query: () => ({
-        url: "/repairs/my",   // <-- your GET route
+        url: "/repairs/my",
         method: "GET",
       }),
       providesTags: ["Repair"],
@@ -45,10 +45,37 @@ export const repairApi = apiSlice.injectEndpoints({
       },
     }),
 
+    // =============================
+    // ✅ DOWNLOAD QUOTATION/BILL PDF
+    // URL: /quotationAndBill/pdf/:id
+    // =============================
+    downloadQuotationBillPdf: builder.query({
+      query: (id) => ({
+        url: `/quotationAndBill/pdf/${id}`,
+        method: "GET",
+        // ✅ IMPORTANT for PDF
+        responseHandler: (response) => response.blob(),
+      }),
+      // don't cache blob results too aggressively
+      keepUnusedDataFor: 0,
+
+      async onQueryStarted(arg, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (err) {
+          toast.error("Failed to download PDF!");
+        }
+      },
+    }),
+
   }),
 });
 
 export const {
   useStoreRepairMutation,
   useGetMyRepairsQuery,
+
+  // ✅ export hook
+  useLazyDownloadQuotationBillPdfQuery,
+  useDownloadQuotationBillPdfQuery,
 } = repairApi;

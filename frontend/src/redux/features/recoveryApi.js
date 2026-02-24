@@ -14,7 +14,7 @@ export const recoveryApi = apiSlice.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Recovery"],  
+      invalidatesTags: ["Recovery"],
 
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
@@ -45,10 +45,36 @@ export const recoveryApi = apiSlice.injectEndpoints({
       },
     }),
 
+    // =============================
+    // ✅ DOWNLOAD QUOTATION / BILL PDF
+    // URL: /quotationAndBill/pdf/:id
+    // =============================
+    downloadQuotationBillPdf: builder.query({
+      query: (id) => ({
+        url: `/quotationAndBill/pdf/${id}`,
+        method: "GET",
+        // ✅ IMPORTANT: PDF response
+        responseHandler: (response) => response.blob(),
+      }),
+      keepUnusedDataFor: 0,
+
+      async onQueryStarted(arg, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (err) {
+          toast.error("Failed to download PDF!");
+        }
+      },
+    }),
+
   }),
 });
 
 export const {
   useStoreRecoveryMutation,
   useGetMyRecoveriesQuery,
+
+  // ✅ PDF hooks
+  useLazyDownloadQuotationBillPdfQuery,
+  useDownloadQuotationBillPdfQuery,
 } = recoveryApi;
