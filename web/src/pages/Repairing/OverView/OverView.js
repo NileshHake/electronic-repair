@@ -80,11 +80,6 @@ const OverView = () => {
     }
   };
 
-  const toggleActivityTab = (tab) => {
-    if (activityTab !== tab) {
-      setActivityTab(tab);
-    }
-  };
   const { repair_id } = useParams();
   useEffect(() => {
     if (repair_id) {
@@ -278,7 +273,7 @@ const OverView = () => {
                         className={classnames({ active: activeTab === "3" })}
                         onClick={() => toggleTab("3")}
                       >
-   Video
+                        Video
                       </NavLink>
                     </NavItem>
                   </Nav>
@@ -384,6 +379,8 @@ const OverView = () => {
           isOpen={isQuotationPreviewModalOpen}
           toggle={() => setIsQuotationPreviewModalOpen(false)}
           type="Quotation"
+          mode="repair"
+
         />
       )}
       {isBillingPreviewModalOpen && (
@@ -391,6 +388,7 @@ const OverView = () => {
           RepairData={singleRepair}
           isOpen={isBillingPreviewModalOpen}
           toggle={() => setIsBillingPreviewModalOpen(false)}
+          mode="repair"
           type="Billing"
         />
       )}

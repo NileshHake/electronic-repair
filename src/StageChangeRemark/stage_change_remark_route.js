@@ -10,7 +10,7 @@ router.post("/stage-remark/store", verifyToken, controller.store);
 router.get("/stage-remark/list", verifyToken, controller.index);
 
 // 🔵 READ SINGLE
-router.get("/stage-remark/single/:id", verifyToken, controller.Get);
+router.post("/stage-remark", verifyToken, controller.Get);
 
 // 🟠 UPDATE
 router.put("/stage-remark/update", verifyToken, controller.update);

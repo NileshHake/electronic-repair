@@ -20,9 +20,15 @@ import { formatRemarkDateTime } from "../../../helpers/date_and_time_format";
 import avatar2 from "../../../assets/images/users/avatar-2.jpg";
 import { video } from "../../../common/data";
 
-const RecentStatus = ({ activityTab }) => {
+const RecentStatus = ({ activityTab, module = "repair" }) => {
   const dispatch = useDispatch();
-  const { repair_id } = useParams();
+
+  // ✅ take both ids from params
+  const { repair_id, recovery_id } = useParams();
+
+  // ✅ pick correct id based on module
+  const id = String(module).toLowerCase() === "recovery" ? recovery_id : repair_id;
+
   const { singleStageRemark = [] } = useSelector(
     (state) => state.StageRemarkReducer || {}
   );
@@ -36,21 +42,20 @@ const RecentStatus = ({ activityTab }) => {
   });
 
   const openModal = (type, urls, videoname) => {
-    console.log(urls);
-
     setModalContent({ type, urls, videoname });
     setModalOpen(true);
   };
 
   useEffect(() => {
-    if (repair_id) dispatch(getSingleStageRemark(repair_id));
-  }, [dispatch, repair_id]);
-const [openIndex, setOpenIndex] = useState(0); // first item open by default
+    if (id) dispatch(getSingleStageRemark(id, module)); // ✅ repair / recovery
+  }, [dispatch, id, module]);
 
-// Toggle function
-const toggleAccordion = (index) => {
-  setOpenIndex((prevIndex) => (prevIndex === index ? -1 : index));
-};
+  const [openIndex, setOpenIndex] = useState(0); // first item open by default
+
+  // Toggle function
+  const toggleAccordion = (index) => {
+    setOpenIndex((prevIndex) => (prevIndex === index ? -1 : index));
+  };
 
   return (
     <Row>
@@ -116,9 +121,7 @@ const toggleAccordion = (index) => {
                                   {item.stage_remark_date && (
                                     <>
                                       on{" "}
-                                      {formatRemarkDateTime(
-                                        item.stage_remark_date
-                                      )}
+                                      {formatRemarkDateTime(item.stage_remark_date)}
                                     </>
                                   )}
                                 </small>
@@ -131,15 +134,13 @@ const toggleAccordion = (index) => {
                           className="accordion-collapse"
                           toggler={`#${togglerId}`}
                           onClick={() => toggleAccordion(index)}
-                          defaultOpen={index ===  openIndex}
+                          defaultOpen={index === openIndex}
                         >
                           <div className="accordion-body ms-2 ps-5">
                             {item.stage_remark ? (
                               <span>{item.stage_remark}</span>
                             ) : (
-                              <span className="text-muted">
-                                No remark added.
-                              </span>
+                              <span className="text-muted">No remark added.</span>
                             )}
 
                             <div className="row mt-2">
@@ -171,11 +172,7 @@ const toggleAccordion = (index) => {
                                   <div
                                     className="d-flex border border-dashed p-2 rounded position-relative shadow cursor-pointer"
                                     onClick={() =>
-                                      openModal(
-                                        "video",
-                                        [],
-                                        item.stage_remark_video
-                                      )
+                                      openModal("video", [], item.stage_remark_video)
                                     }
                                   >
                                     <div className="flex-shrink-0">
@@ -207,9 +204,7 @@ const toggleAccordion = (index) => {
                   size="lg"
                 >
                   <ModalHeader toggle={() => setModalOpen(false)}>
-                    <h5>
-                      {modalContent.type === "image" ? "Images" : "Video"}
-                    </h5>
+                    <h5>{modalContent.type === "image" ? "Images" : "Video"}</h5>
                   </ModalHeader>
                   <ModalBody className="text-center">
                     <Card className="border card-border-success p-3 shadow-lg">
@@ -229,6 +224,7 @@ const toggleAccordion = (index) => {
                             </Col>
                           ))}
                       </Row>
+
                       {modalContent.type === "video" && (
                         <video
                           src={`${

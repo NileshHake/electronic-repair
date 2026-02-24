@@ -281,6 +281,8 @@ import ReqToSupplierList from "../pages/Requests/ReqToSupplierList";
 import GenerationList from "../pages/Generation/GenerationList";
 import RamList from "../pages/Ram/Ramlist";
 import InquiryList from "../pages/Inquiry/InquiryList";
+import RecoveryList from "../pages/Recovery/RecoveryList";
+import RecoveryOverView from "../pages/Recovery/component/RecoveryOverView";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -323,7 +325,8 @@ const authProtectedRoutes = [
   { path: "/role-list", component: <RoleList /> },
   { path: "/service-list", component: <ServiceList /> },
   { path: "/business-list", component: <BusinessList /> },
-  { path: "/repairing-list", component: <RepairList /> },
+  { path: "/repairing-list", component: <RepairList /> }, 
+  { path: "/recovery-list", component: <RecoveryList /> }, 
   { path: "/work-flow-list", component: <WorkflowList /> },
   { path: "/accessories-list", component: <AccessoriesList /> },
   { path: "/device-type-list", component: <DeviceTypeList /> },
@@ -335,6 +338,7 @@ const authProtectedRoutes = [
   { path: "/device-color-list", component: <DeviceColorList /> },
   { path: "/sub-category-list/:category_id", component: <SubCategoryList /> },
   { path: "/repair/overview/:repair_id", component: <OverView /> },
+  { path: "/recovery/overview/:recovery_id", component: <RecoveryOverView  /> },
   { path: "/slider-list", component: <SliderList /> },
   { path: "/supplier-list", component: <SupplierList /> }, 
   { path: "/inquiry-list", component: <InquiryList /> }, 

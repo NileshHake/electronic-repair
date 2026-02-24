@@ -4,6 +4,7 @@ const { getCreatedBy } = require("../helper/CurrentUser");
 const { saveImage, saveVideo } = require("../helper/fileUpload");
 const Repair = require("../Repair/repair_model");
 const StageRemark = require("./stage_change_remark_model");
+const Recovery = require("../recovery/recovery_model");
 
 // 🟢 CREATE
 const store = async (req, res) => {
@@ -19,9 +20,7 @@ const store = async (req, res) => {
         req.files.stage_remark_img || req.files["stage_remark_img[]"] || null;
 
       if (images) {
-        if (!Array.isArray(images)) {
-          images = [images];
-        }
+        if (!Array.isArray(images)) images = [images];
 
         for (const imgFile of images) {
           const savedName = await saveImage(imgFile, "stage_remark_img");
@@ -39,14 +38,19 @@ const store = async (req, res) => {
 
     /* --------- CREATE STAGE REMARK ---------- */
     const {
-      stage_remark_repair_id,
+      stage_remark_repair_id,     // ✅ used for repair OR recovery id (keep same key)
+      stage_remark_recovery_id,   // ✅ optional if you decide to send separately
       stage_remark_stage_next_id,
-      // any other body fields...
+      stage_remark_module,        // ✅ "repair" | "recovery"
     } = req.body;
+    const targetId = stage_remark_recovery_id || stage_remark_repair_id;
 
+    const moduleType = String(stage_remark_module || "repair").toLowerCase();
     const payload = {
       ...req.body,
       stage_remark_created_by: createdBy,
+      stage_remark_recovery_id: moduleType === "recovery" ? stage_remark_recovery_id : null,
+      stage_remark_repair_id: moduleType === "repair" ? stage_remark_repair_id : null,
       stage_remark_change_by_id: req.currentUser.user_id,
       stage_remark_img: imageNames.length ? JSON.stringify(imageNames) : null,
       stage_remark_video: videoName || null,
@@ -54,19 +58,30 @@ const store = async (req, res) => {
 
     const stageRemark = await StageRemark.create(payload);
 
-    /* --------- UPDATE REPAIR STAGE ---------- */
-    if (stageRemark && stage_remark_repair_id && stage_remark_stage_next_id) {
-      const repair = await Repair.findByPk(stage_remark_repair_id);
+    /* --------- UPDATE STAGE (REPAIR / RECOVERY) ---------- */
+    if (stageRemark && targetId && stage_remark_stage_next_id) {
 
-      if (repair) {
-        // update field on the instance
-        repair.repair_workflow_stage_id = stage_remark_stage_next_id;
-        await repair.save();
+
+      if (moduleType === "recovery") {
+        // ✅ UPDATE RECOVERY STAGE
+        const recovery = await Recovery.findByPk(targetId);
+
+        if (recovery) {
+          recovery.recovery_workflow_stage_id = stage_remark_stage_next_id;
+          await recovery.save();
+        } else {
+          console.warn("Recovery not found for id:", targetId);
+        }
       } else {
-        console.warn(
-          "Repair not found for stage_remark_repair_id:",
-          stage_remark_repair_id
-        );
+        // ✅ UPDATE REPAIR STAGE (default)
+        const repair = await Repair.findByPk(targetId);
+
+        if (repair) {
+          repair.repair_workflow_stage_id = stage_remark_stage_next_id;
+          await repair.save();
+        } else {
+          console.warn("Repair not found for id:", targetId);
+        }
       }
     }
 
@@ -103,7 +118,13 @@ const index = async (req, res) => {
 // 🔵 READ SINGLE
 const Get = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id, moduleType = "repair" } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "ID is required",
+      });
+    }
 
     const stageRemarks = await sequelize.query(
       `
@@ -127,22 +148,22 @@ const Get = async (req, res) => {
         ON sr.stage_remark_stage_next_id = nextStage.workflow_child_id
       LEFT JOIN tbl_users AS u
         ON sr.stage_remark_change_by_id = u.user_id
+
       WHERE sr.stage_remark_repair_id = :id
+        AND sr.stage_remark_module = :moduleType
+
       ORDER BY sr.stage_remark_id ASC;
       `,
       {
-        replacements: { id },
+        replacements: { id, moduleType },
         type: QueryTypes.SELECT,
       }
     );
 
-     
-    
-
-    res.status(200).json(stageRemarks);
+    return res.status(200).json(stageRemarks);
   } catch (error) {
     console.error("Error fetching stage remark:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error fetching stage remark",
       error: error.message,
     });

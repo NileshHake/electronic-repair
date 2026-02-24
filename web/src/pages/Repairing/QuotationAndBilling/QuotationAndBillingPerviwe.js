@@ -1,297 +1,346 @@
-import { useRef } from "react";
-import AuthUser from "../../../helpers/AuthType/AuthUser";
-import { Button, Form, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
-import { ToastContainer } from "react-toastify";
-import { useEffect } from "react";
+/* =========================================================
+   ✅ ONE PREVIEW MODAL FOR BOTH (REPAIR + RECOVERY)
+   - Same UI (simple table style)
+   - Items table in Product/Image/Price/Qty/Total format
+   - Fetches singleQuotationBilling using correct masterId
+   - Download PDF button calls downloadQuotationBillingPdf(masterId)
+   - No "Save" button
+========================================================= */
+
+import React, { useEffect, useMemo } from "react";
+import {
+  Button,
+  Form,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { getSingleQuotationBilling } from "../../../store/QuotationAndBilling";
-import { formatDateTime } from "../../../helpers/date_and_time_format";
-import { api } from "../../../config";
+import AuthUser from "../../../helpers/AuthType/AuthUser";
 import QRCode from "react-qr-code";
 
-const QuotationAndBillingPerviwe = ({ isOpen, toggle, RepairData, type }) => {
-    const printRef = useRef(null);
-    const { singleQuotationBilling } = useSelector((state) => state.QuotationBillingReducer);
-    const { BusinessData } = AuthUser();
-    const dispatch = useDispatch();
-    console.log(RepairData?.repair_quotation_id);
-    console.log(RepairData?.RepairData?.repair_bill_id);
+import {
+  getSingleQuotationBilling,
+  downloadQuotationBillingPdf,
+} from "../../../store/QuotationAndBilling";
 
-    useEffect(() => {
-        dispatch(getSingleQuotationBilling(type === "Quotation" ? RepairData?.repair_quotation_id : RepairData?.repair_bill_id));
-    }, [dispatch])
-    // ================================ PRINT START ================================
-    const handlePrint = () => {
-        const printContents = printRef.current.innerHTML;
-        const originalContents = document.body.innerHTML;
-        document.body.innerHTML = printContents;
-        window.print();
-        document.body.innerHTML = originalContents;
-        window.location.reload();
-    };
-    // ================================ PRINT END ================================
-    const upiLink = `upi://pay?pa=${BusinessData?.user_upi_id}&pn=${BusinessData?.user_name}&am=${singleQuotationBilling?.quotation_and_billing_master_grand_total}&cu=INR`;
+import { formatDateTime } from "../../../helpers/date_and_time_format";
+import { api } from "../../../config";
 
-    return (
-        <>
-            <style>{`
-                @media print {
-                    body * { visibility: hidden; }
-                    .print-area, .print-area * { visibility: visible; }
-                    .modal, .modal-content { position: static !important; }
-                    .modal-footer, .modal-header, button { display: none !important; }
-                    .print-area {
-                        width: 210mm !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        border: none !important;
-                        box-shadow: none !important;
-                    }
-                }
-            `}</style>
-            <Modal size="" style={{ maxWidth: "230mm", width: "230mm" }} isOpen={isOpen} centered>
-                <ModalHeader toggle={toggle}>
-                    Print
-                </ModalHeader>
+const QuotationAndBillingPreviewModal = ({
+  isOpen,
+  toggle,
+  RepairData, // ✅ pass singleRepair OR singleRecovery
+  mode = "repair", // ✅ "repair" | "recovery"
+  type = "Quotation", // ✅ "Quotation" | "Billing"
+}) => {
+  const dispatch = useDispatch();
+  const { BusinessData } = AuthUser();
 
-                <Form>
-                    <ModalBody  >
-                        <div ref={printRef} className="print-area">
+  const { singleQuotationBilling, loading } = useSelector(
+    (state) => state.QuotationBillingReducer
+  );
 
+  // ✅ Decide which master id to fetch
+  const masterId = useMemo(() => {
+    if (!RepairData) return null;
 
-                            <div className="quotation-container" style={{ width: '210mm', margin: '20px auto', backgroundColor: 'white', padding: 30, boxShadow: '0 0 10px rgba(0,0,0,0.1)', border: '1px solid #ccc' }}>
-                                {/* Header */}
-                                <header style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', paddingBottom: 10, marginBottom: 20 }}>
-                                    <div style={{ width: '50%', display: 'flex', alignItems: 'center' }}>
-                                        {BusinessData.user_profile ? (
-                                            <img
-                                                src={`${api.IMG_URL}user_profile/${BusinessData.user_profile}`}
-                                                alt={BusinessData.user_name}
-                                                style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover" }}
-                                            />
-                                        ) : (
-                                            <div
-                                                style={{
-                                                    width: 80,
-                                                    height: 80,
-                                                    borderRadius: "50%",
-                                                    backgroundColor: '#f0f0f0',
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    fontSize: "35px",
-                                                    fontWeight: "bold",
-                                                    color: "black",
-                                                    textTransform: "uppercase"
-                                                }}
-                                            >
-                                                {BusinessData?.user_name?.charAt(0)}
-                                            </div>
-                                        )}
+    const isRecovery = String(mode) === "recovery";
 
-                                        <p style={{ fontSize: '12pt', margin: 0, paddingLeft: 10 }}>
-                                            {BusinessData.user_name}
-                                        </p>
-                                    </div>
+    if (isRecovery) {
+      return type === "Quotation"
+        ? RepairData?.recovery_quotation_id
+        : RepairData?.recovery_bill_id;
+    }
 
-                                    <div style={{ width: '45%', textAlign: 'right', fontSize: '10pt', lineHeight: '1.4' }}>
-                                        <p style={{ margin: 0 }}><strong>{BusinessData?.user_name || "N/A"} </strong></p>
-                                        <p style={{ margin: 0 }}>GST No: {BusinessData?.user_gst_number || "N/A"} </p>
-                                        <p style={{ margin: 0 }}>Phone: {BusinessData?.user_phone_number || "N/A"} </p>
-                                        <p style={{ margin: 0 }}>Email: {BusinessData?.user_email || "N/A"} </p>
-                                    </div>
-                                    <div style={{ width: '100%', textAlign: 'center', margin: '15px 0', padding: 8, border: '1px solid black', backgroundColor: '#f0f0f0' }}>
-                                        <h2 style={{ margin: 0, fontSize: '14pt' }}>{singleQuotationBilling.quotation_or_billing === "Quotation" ? "QUOTATION" : "BILL"}</h2>
-                                    </div>
-                                    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '10pt', borderTop: '1px solid #ccc', borderBottom: '1px solid #ccc', padding: '10px 0' }}>
-                                        <div style={{ width: '48%' }}>
-                                            <p style={{ margin: 0 }}>
-                                                <strong>QU No:</strong> {`QU-${singleQuotationBilling?.quotation_and_billing_master_id || ""}`}
-                                            </p>
+    // repair
+    return type === "Quotation"
+      ? RepairData?.repair_quotation_id
+      : RepairData?.repair_bill_id;
+  }, [RepairData, mode, type]);
 
-                                        </div>
-                                        <div style={{ width: '48%', textAlign: 'right' }}>
-                                            <p style={{ margin: 0 }}><strong>QU Date:</strong>  {formatDateTime(singleQuotationBilling.quotation_and_billing_master_date)}</p>
-                                        </div>
-                                    </div>
-                                </header>
-                                {/* Billing & Shipping */}
-                                <section style={{
-                                    display: 'flex',
+  // ✅ Customer Name (from your master data object)
+  const customerName = useMemo(() => {
+    return RepairData?.customer_name || "-";
+  }, [RepairData]);
 
-                                    marginBottom: 20,
-                                    minHeight: 130
-                                }}>
+  // ✅ Fetch single quotation/billing when modal opens
+  useEffect(() => {
+    if (isOpen && masterId) {
+      dispatch(getSingleQuotationBilling(masterId));
+    }
+  }, [dispatch, isOpen, masterId]);
 
-                                    <div style={{
-                                        width: '50%',
-                                        padding: 10,
-                                        fontSize: '10pt',
-                                        lineHeight: '1.5',
-                                        borderRight: '1px solid #000'
-                                    }}>
-                                        <strong style={{ textDecoration: 'underline' }}>Bill To:</strong>
+  const handleDownloadPdf = () => {
+    if (masterId) dispatch(downloadQuotationBillingPdf(masterId));
+  };
 
-                                        <p style={{ margin: 0 }}><strong>{BusinessData?.user_name || "N/A"}</strong></p>
+  const grandTotal = Number(
+    singleQuotationBilling?.quotation_and_billing_master_grand_total || 0
+  );
 
-                                        <p style={{ margin: 0 }}>
-                                            {BusinessData?.user_address_block ? BusinessData.user_address_block + ', ' : ''}
-                                            {BusinessData?.user_address_district ? BusinessData.user_address_district + ', ' : ''}
-                                            {BusinessData?.user_address_city ? BusinessData.user_address_city + ', ' : ''}
-                                            {BusinessData?.user_address_state || ''}
-                                        </p>
+  const upiLink = `upi://pay?pa=${BusinessData?.user_upi_id || ""}&pn=${
+    BusinessData?.user_name || ""
+  }&am=${grandTotal.toFixed(2)}&cu=INR`;
 
-                                        <p style={{ margin: 0 }}>Pincode: {BusinessData?.user_address_pincode || "N/A"}</p>
-                                        <p style={{ margin: 0 }}>Email: {BusinessData?.user_email || "N/A"}</p>
-                                        <p style={{ margin: 0 }}>Contact No: {BusinessData?.user_phone_number || "N/A"}</p>
-                                    </div>
+  return (
+    <Modal isOpen={isOpen} toggle={toggle} centered size="xl">
+      <ModalHeader toggle={toggle} className="bg-light p-3">
+        <div className="d-flex align-items-center justify-content-between w-100" >
+          <h5 className="mb-0">
+            {type} Preview{" "}
+            <span className="text-muted fs-12">
+              ({mode === "recovery" ? "Recovery" : "Repair"})
+            </span>
+          </h5>
+        </div>
+      </ModalHeader>
 
-                                    <div style={{
-                                        width: '50%',
-                                        padding: 10,
-                                        fontSize: '10pt',
-                                        lineHeight: '1.5'
-                                    }}>
-                                        <strong style={{ textDecoration: 'underline' }}>Ship To:</strong>
+      <Form>
+        <ModalBody>
+          {/* ✅ Top summary table */}
+          <div
+            className="table-responsive"
+            style={{ maxHeight: 240, overflowY: "auto" }}
+          >
+            <table className="table align-middle table-hover">
+              <thead className="table-light text-uppercase text-muted">
+                <tr>
+                  <th>#</th>
+                  <th>{type} No</th>
+                  <th>Customer</th>
+                  <th>Total</th>
+                  <th>Date</th>
+                  <th className="text-center">Type</th>
+                </tr>
+              </thead>
 
-                                        <p style={{ margin: 0 }}><strong>{RepairData?.customer_name || "N/A"}</strong></p>
+              <tbody>
+                {!masterId && !loading && (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4 text-muted">
+                      No {type} found.
+                    </td>
+                  </tr>
+                )}
 
-                                        <p style={{ margin: 0 }}>
-                                            {RepairData?.customer_address_block ? RepairData?.customer_address_block + ', ' : ''}
-                                            {RepairData?.customer_address_district ? RepairData?.customer_address_district + ', ' : ''}
-                                            {RepairData?.customer_address_city ? RepairData?.customer_address_city + ', ' : ''}
-                                            {RepairData?.customer_address_state || ''}
-                                        </p>
+                {masterId && (
+                  <tr>
+                    <td>1</td>
 
-                                        <p style={{ margin: 0 }}>Pincode: {RepairData?.customer_address_pincode || "N/A"}</p>
-                                        <p style={{ margin: 0 }}>Email: {RepairData?.customer_email || "N/A"}</p>
-                                        <p style={{ margin: 0 }}>Contact No: {RepairData?.customer_phone_number || "N/A"}</p>
-                                    </div>
+                    <td className="fw-semibold text-primary">
+                      {singleQuotationBilling?.quotation_and_billing_master_invoice_number ||
+                        `#${singleQuotationBilling?.quotation_and_billing_master_id || "-"}`}
+                    </td>
 
-                                </section>
+                    <td>{customerName}</td>
 
-                                {/* Item Details Table */}
-                                <section style={{ marginBottom: 20 }}>
-                                    <p style={{ fontSize: '11pt', marginBottom: 5 }}><strong>Item Details</strong></p>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt', borderBottom: '1px solid black' }}>
-                                        <thead>
-                                            <tr style={{ backgroundColor: '#f0f0f0' }}>
-                                                {['Sr. No.', 'Item Description', 'Qty', 'MRP', 'Sale Price', 'GST %', 'Taxable Value', 'Total'].map((h, i) => (
-                                                    <th key={i} style={{ border: '1px solid black', padding: 5 }}>{h}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
+                    <td className="fw-bold">₹ {grandTotal.toFixed(2)}</td>
 
-                                        <tbody>
-                                            {singleQuotationBilling?.items?.map((item, index) => (
-                                                <tr key={index}>
-                                                    <td style={{ borderLeft: '1px solid black', borderRight: '1px solid black', padding: 5 }}>{index + 1}</td>
-                                                    <td style={{ borderLeft: '1px solid black', borderRight: '1px solid black', padding: 5 }}>{item.quotation_and_billing_item_name}</td>
-                                                    <td style={{ borderLeft: '1px solid black', borderRight: '1px solid black', padding: 5 }}>{item.quotation_and_billing_qty}</td>
-                                                    <td style={{ borderLeft: '1px solid black', borderRight: '1px solid black', padding: 5 }}>{item.quotation_and_billing_product_mrp}</td>
-                                                    <td style={{ borderLeft: '1px solid black', borderRight: '1px solid black', padding: 5 }}>{item.quotation_and_billing_product_sale_price}</td>
-                                                    <td style={{ borderLeft: '1px solid black', borderRight: '1px solid black', padding: 5 }}>{item.quotation_and_billing_tax_percentage}</td>
-                                                    <td style={{ borderLeft: '1px solid black', borderRight: '1px solid black', padding: 5 }}>{item.quotation_and_billing_tax_value}</td>
-                                                    <td style={{ borderLeft: '1px solid black', borderRight: '1px solid black', padding: 5 }}>{item.quotation_and_billing_child_total}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
+                    <td>
+                      {singleQuotationBilling?.quotation_and_billing_master_date
+                        ? formatDateTime(
+                            singleQuotationBilling.quotation_and_billing_master_date
+                          )
+                        : "-"}
+                    </td>
 
+                    <td className="text-center">
+                      {singleQuotationBilling?.quotation_or_billing || type}
+                    </td>
+                  </tr>
+                )}
 
-                                    </table>
+                {loading && (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4 text-muted">
+                      Loading...
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
+          {/* ✅ Items table (Product/Image/Price/Qty/Total) */}
+          <div className="table-responsive mt-3">
+            <table className="table align-middle table-hover">
+              <thead className="table-light text-uppercase text-muted">
+                <tr>
+                  <th>#</th>
+                  <th>Product</th>
+                  <th>Image</th>
+                  <th>Price</th>
+                  <th>Qty</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
 
-                                </section>
-                                {/* Tax Summary */}
-                                <section
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center', // <-- vertical center for QR & totals
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="text-center py-3">
+                      Loading items...
+                    </td>
+                  </tr>
+                ) : Array.isArray(singleQuotationBilling?.items) &&
+                  singleQuotationBilling.items.length > 0 ? (
+                  singleQuotationBilling.items.map((item, index) => {
+                    // ✅ Support multiple possible field names
+                    const productName =
+                      item.product_name ||
+                      item.product?.product_name ||
+                      item.quotation_and_billing_item_name ||
+                      "-";
 
-                                        fontSize: '10pt'
-                                    }}
-                                >
-                                    {/* QR Code Section */}
-                                    {type !== "Quotation" ? <div style={{
-                                        marginLeft: "200px",
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',  // horizontal center
-                                        justifyContent: 'center' // vertical center inside div
-                                    }}>
-                                        <p style={{ margin: '0 0 5px 0', fontSize: '9pt' }}>Scan To Pay (UPI)</p>
+                    const price =
+                      Number(
+                        item.price ??
+                          item.product_price ??
+                          item.quotation_and_billing_product_sale_price ??
+                          item.quotation_and_billing_product_mrp ??
+                          0
+                      ) || 0;
 
-                                        <QRCode
-                                            size={120}
-                                            value={upiLink} // upiLink = `upi://pay?pa=xxx@upi&pn=Name&am=Amount&cu=INR`
-                                        />
+                    const qty =
+                      Number(
+                        item.qty ??
+                          item.product_qty ??
+                          item.quotation_and_billing_qty ??
+                          0
+                      ) || 0;
 
-                                        <p style={{ margin: '5px 0 0 0', fontSize: '9pt' }}>
-                                            UPI ID: {BusinessData?.user_upi_id || "N/A"}
-                                        </p>
-                                    </div> : <div></div>}
+                    const total =
+                      Number(
+                        item.total ??
+                          item.product_total ??
+                          item.quotation_and_billing_child_total ??
+                          price * qty ??
+                          0
+                      ) || 0;
 
-                                    {/* Totals Section */}
-                                    <div style={{ width: '25%' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                                            <p style={{ margin: 0 }}>Total Amount</p>
-                                            <p style={{ margin: 0 }}>{singleQuotationBilling?.quotation_and_billing_master_total || 0}</p>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                                            <p style={{ margin: 0 }}>Total Tax Amount : GST</p>
-                                            <p style={{ margin: 0 }}>{singleQuotationBilling?.quotation_and_billing_master_gst_amount || 0}</p>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid black', paddingTop: 5 }}>
-                                            <p style={{ margin: 0, fontSize: '12pt', fontWeight: 'bold' }}>Grand Total</p>
-                                            <p style={{ margin: 0, fontSize: '12pt', fontWeight: 'bold' }}>
-                                                {singleQuotationBilling?.quotation_and_billing_master_grand_total || 0}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </section>
+                    const productImage =
+                      item.product_image ||
+                      item.product?.product_image ||
+                      item.quotation_and_billing_product_image ||
+                      null;
 
+                    return (
+                      <tr
+                        key={
+                          item.quotation_and_billing_child_id ||
+                          item.quotation_child_id ||
+                          index
+                        }
+                      >
+                        <td>{index + 1}</td>
 
-                                {/* Terms & Conditions */}
-                                <section style={{ marginTop: 25, fontSize: '10pt', lineHeight: '1.5' }}>
-                                    <h3 style={{ margin: '0 0 10px 0', fontSize: '12pt', textDecoration: 'underline' }}>Terms &amp; Conditions</h3>
-                                    <ul style={{ margin: 0, paddingLeft: 18 }}>
-                                        <li>Quotation valid for <strong>7 days</strong> from the date of issue.</li>
-                                        <li>Prices are subject to change without prior notice.</li>
-                                        <li>Delivery period will be confirmed at the time of order placement.</li>
-                                        <li>GST applicable as per Government norms.</li>
-                                        <li>Payment terms: <strong>50% advance</strong>, balance before delivery.</li>
-                                        <li>No return or exchange once the order is confirmed.</li>
-                                        <li>Any dispute will be subject to <strong>Ahmednagar jurisdiction</strong>.</li>
-                                    </ul>
-                                </section>
-                                {/* Footer */}
-                                <footer style={{ marginTop: 30, textAlign: 'center', paddingTop: 10, borderTop: '1px solid #ccc' }}>
-                                    <p style={{ margin: 0, fontSize: '10pt' }}>Thank you for giving us the opportunity to serve you!</p>
-                                    <p style={{ margin: 0, fontSize: '10pt', fontWeight: 'bold' }}>{BusinessData?.user_name || "N/A"} </p>
-                                </footer>
-                            </div>
-                        </div>
-                    </ModalBody>
+                        <td>{productName}</td>
 
-                    <ModalFooter>
-                        <Button color="success" onClick={handlePrint}>
-                            Print / Download PDF
-                        </Button>
+                        <td>
+                          {productImage ? (
+                            <img
+                              src={`${api.IMG_URL}product_images/${productImage}`}
+                              alt={productName}
+                              style={{
+                                width: "50px",
+                                height: "50px",
+                                objectFit: "cover",
+                                borderRadius: "4px",
+                              }}
+                            />
+                          ) : (
+                            "N/A"
+                          )}
+                        </td>
 
-                        <Button color="primary" type="submit">
-                            Save
-                        </Button>
+                        <td>₹ {price.toFixed(2)}</td>
 
-                        <Button color="danger" onClick={toggle}>
-                            Close
-                        </Button>
-                    </ModalFooter>
-                </Form>
-            </Modal>
+                        <td>
+                          <span>{qty}</span>
+                        </td>
 
-        </>
-    )
-}
+                        <td>₹ {total.toFixed(2)}</td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center py-5">
+                      <lord-icon
+                        src="https://cdn.lordicon.com/msoeawqm.json"
+                        trigger="loop"
+                        colors="primary:#405189,secondary:#0ab39c"
+                        style={{ width: "72px", height: "72px" }}
+                      ></lord-icon>
+                      <div className="mt-4">
+                        <h5>No items found</h5>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-export default QuotationAndBillingPerviwe
+          {/* ✅ Totals + QR */}
+          <div className="d-flex justify-content-between align-items-center mt-3">
+            {type !== "Quotation" ? (
+              <div className="d-flex flex-column align-items-center">
+                <div className="small mb-1">Scan To Pay (UPI)</div>
+                <QRCode size={110} value={upiLink} />
+                <div className="small mt-1">
+                  UPI: {BusinessData?.user_upi_id || "N/A"}
+                </div>
+              </div>
+            ) : (
+              <div />
+            )}
+
+            <div style={{ minWidth: 320 }}>
+              <div className="d-flex justify-content-between">
+                <span>Total Amount</span>
+                <strong>
+                  ₹{" "}
+                  {Number(
+                    singleQuotationBilling?.quotation_and_billing_master_total || 0
+                  ).toFixed(2)}
+                </strong>
+              </div>
+              <div className="d-flex justify-content-between">
+                <span>GST Amount</span>
+                <strong>
+                  ₹{" "}
+                  {Number(
+                    singleQuotationBilling?.quotation_and_billing_master_gst_amount || 0
+                  ).toFixed(2)}
+                </strong>
+              </div>
+              <div className="d-flex justify-content-between border-top pt-2 mt-2">
+                <span className="fw-bold">Grand Total</span>
+                <span className="fw-bold">₹ {grandTotal.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button
+            color="success"
+            onClick={handleDownloadPdf}
+            disabled={!masterId}
+          >
+            Print / Download PDF
+          </Button>
+
+          <Button color="danger" onClick={toggle}>
+            Close
+          </Button>
+        </ModalFooter>
+      </Form>
+    </Modal>
+  );
+};
+
+export default QuotationAndBillingPreviewModal;

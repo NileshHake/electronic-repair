@@ -67,6 +67,11 @@ const createSuperAdmin = async () => {
       { permission_name: "Update", permission_path: 3, permission_category: "REPAIRING" },
       { permission_name: "Delete", permission_path: 4, permission_category: "REPAIRING" },
 
+      { permission_name: "List", permission_path: 1, permission_category: "RECOVERY" },
+      { permission_name: "Create", permission_path: 2, permission_category: "RECOVERY" },
+      { permission_name: "Update", permission_path: 3, permission_category: "RECOVERY" },
+      { permission_name: "Delete", permission_path: 4, permission_category: "RECOVERY" },
+
       { permission_name: "List", permission_path: 1, permission_category: "QUOTATION_BILLING" },
       { permission_name: "Create", permission_path: 2, permission_category: "QUOTATION_BILLING" },
       { permission_name: "Update", permission_path: 3, permission_category: "QUOTATION_BILLING" },

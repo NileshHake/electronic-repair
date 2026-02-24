@@ -103,9 +103,9 @@ const QuotationAndBillingList = () => {
                                         <h5 className="mb-0 fw-bold">Quotation & Billing List</h5>
                                     </div>
                                     <div className="col-sm-auto">
-                                        <Button color="success" onClick={() => setIsAddOpen(true)}>
+                                        {/* <Button color="success" onClick={() => setIsAddOpen(true)}>
                                             + Add Quotation
-                                        </Button>
+                                        </Button> */}
                                     </div>
                                 </Row>
                             </CardHeader>

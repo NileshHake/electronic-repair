@@ -51,6 +51,10 @@ const QuotationAndBillingMaster = sequelize.define(
             type: DataTypes.STRING,
             allowNull: true,
         },
+        recovery_or_repair: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         quotation_and_billing_master_status: {
             type: DataTypes.TINYINT,
             allowNull: true,

@@ -1,3 +1,4 @@
+// ✅ src/pages/Repairing/StageChangeModals/ChangeStage.jsx
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -14,42 +15,40 @@ import {
 import classnames from "classnames";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useDispatch, useSelector } from "react-redux";
 
 import StageTabContent from "./StageTabContent";
 import AttachmentTabContent from "./AttachmentTabContent";
 import OtpVerificationTabContent from "./OtpVerificationTabContent";
 import { formatDateTime } from "../../../helpers/date_and_time_format";
-import {
-  addStageRemark,
-  resetAddStageRemarkResponse,
-} from "../../../store/StageRemarkData";
-import { getRepairList } from "../../../store/Repairing";
 
 const ChangeStage = ({
   isOpen = false,
   toggle = () => {},
   workflowStages = [],
   isSelectedData,
-}) => {
-  const dispatch = useDispatch();
 
-  // ⚙️ Redux state
-  const { addStageRemarkResponse, loading: stageRemarkLoading } = useSelector(
-    (state) => state.StageRemarkReducer || {}
-  );
+  /* ✅ REUSE SUPPORT (Repair + Recovery) */
+  entityId = "", // repair_id OR recovery_id
+  pastStageId = "", // repair_workflow_stage_id OR recovery_workflow_stage_id
+  entityKey = "stage_remark_repair_id", // backend key for id
+  moduleType = "repair", // "repair" | "recovery"
 
+  onSubmit = () => {},
+  onRefresh = () => {},
+  success = false,
+  resetSuccess = () => {},
+  loading = false,
+}) => { 
+  
   const [selectedStage, setSelectedStage] = useState(null);
   const [activeTab, setActiveTab] = useState("1");
 
-  // Remark & attachment state
   const [remark, setRemark] = useState("");
   const [remarkError, setRemarkError] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState([]); // images
-  const [selectedVideo, setSelectedVideo] = useState(null); // single video
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const [otpVerified, setOtpVerified] = useState(false);
 
-  // ---------- RESET ALL LOCAL STATE ----------
   const resetLocalState = () => {
     setSelectedStage(null);
     setActiveTab("1");
@@ -60,23 +59,23 @@ const ChangeStage = ({
     setOtpVerified(false);
   };
 
-  // Close handler: reset + call parent toggle
   const handleClose = () => {
     resetLocalState();
     toggle();
   };
 
-  // Initialize selectedStage when modal opens or selected repair changes
   useEffect(() => {
     if (isOpen) {
       if (workflowStages.length && isSelectedData?.workflow_child_id) {
         const currentIndex = workflowStages.findIndex(
-          (s) => s.workflow_child_id === isSelectedData.workflow_child_id
+          (s) => String(s.workflow_child_id) === String(isSelectedData.workflow_child_id)
         );
+
         const nextStage =
           currentIndex >= 0 && currentIndex < workflowStages.length - 1
             ? workflowStages[currentIndex + 1]
             : workflowStages[currentIndex];
+
         setSelectedStage(nextStage || workflowStages[0]);
       } else if (workflowStages.length) {
         setSelectedStage(workflowStages[0]);
@@ -84,18 +83,15 @@ const ChangeStage = ({
         setSelectedStage(null);
       }
 
-      // reset each time it opens
       setOtpVerified(false);
       setRemarkError("");
       setActiveTab("1");
     } else {
-      // when modal is closed from parent, also clear data
       resetLocalState();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflowStages, isSelectedData, isOpen]);
 
-  // Auto-switch active tab if stage doesn't support that feature
   useEffect(() => {
     if (!selectedStage) return;
 
@@ -112,9 +108,8 @@ const ChangeStage = ({
     if (activeTab !== tab) setActiveTab(tab);
   };
 
-  // Handle image attachments
   const handleAcceptedFiles = (files) => {
-    const mappedFiles = files.map((file) =>
+    const mappedFiles = (files || []).map((file) =>
       Object.assign(file, {
         preview: URL.createObjectURL(file),
         formattedSize: (file.size / 1024).toFixed(2) + " KB",
@@ -127,10 +122,10 @@ const ChangeStage = ({
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Handle video (single)
   const handleAcceptedVideo = (files) => {
-    const file = files[0];
+    const file = files?.[0];
     if (!file) return;
+
     const mapped = Object.assign(file, {
       preview: URL.createObjectURL(file),
       formattedSize: (file.size / 1024).toFixed(2) + " KB",
@@ -145,19 +140,19 @@ const ChangeStage = ({
     toast.success("OTP verified successfully!");
   };
 
-  // 🔄 Close modal when addStageRemarkResponse becomes true
   useEffect(() => {
-    if (addStageRemarkResponse) {
-      // success from API
+    if (success) {
       handleClose();
-      // reset flag in Redux
-      dispatch(getRepairList());
-      dispatch(resetAddStageRemarkResponse());
+      onRefresh?.();
+      resetSuccess?.();
     }
-  }, [addStageRemarkResponse, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [success]);
 
-  // 🟢 Final submit
-  const handleMoveRepair = () => {
+  const handleMove = () => {
+    // Debug: remove later if you want
+    // console.log("MOVE CLICK =>", { moduleType, entityKey, entityId, pastStageId, onSubmitType: typeof onSubmit });
+
     if (!remark.trim()) {
       setRemarkError("Remark is required.");
       setActiveTab("1");
@@ -170,7 +165,6 @@ const ChangeStage = ({
       selectedFiles.length === 0 &&
       !selectedVideo
     ) {
-      // you can decide: only images required OR images/video any one
       setRemarkError("");
       setActiveTab("2");
       toast.error("Please upload at least one attachment (image or video)!");
@@ -179,39 +173,38 @@ const ChangeStage = ({
 
     if (selectedStage?.workflow_stage_otp && !otpVerified) {
       setActiveTab("3");
-      toast.error("Please verify OTP before moving repair!");
+      toast.error("Please verify OTP before moving!");
       return;
     }
 
-    // All validations passed
     setRemarkError("");
 
-    // Build FormData for backend
     const formData = new FormData();
     formData.append("stage_remark", remark);
-    formData.append("stage_remark_repair_id", isSelectedData?.repair_id ?? "");
+
+    // ✅ dynamic key
+    formData.append(entityKey, entityId ?? "");
+
+    // ✅ backend uses this to decide repair vs recovery
+    formData.append("stage_remark_module", moduleType);
+
     formData.append("stage_remark_date", formatDateTime(new Date()));
-    formData.append(
-      "stage_remark_stage_past_id",
-      isSelectedData?.repair_workflow_stage_id ?? ""
-    );
+    formData.append("stage_remark_stage_past_id", pastStageId ?? "");
     formData.append(
       "stage_remark_stage_next_id",
       selectedStage?.workflow_child_id ?? ""
     );
 
-    // Multiple images: append as array
-    selectedFiles.forEach((file, index) => {
-      formData.append("stage_remark_img[]", file); // backend reads array
+    selectedFiles.forEach((file) => {
+      formData.append("stage_remark_img[]", file);
     });
 
-    // Single video: optional
     if (selectedVideo) {
       formData.append("stage_remark_video", selectedVideo);
     }
 
-    // Fire API (saga) – do NOT close modal here
-    dispatch(addStageRemark(formData));
+    // ✅ Dispatch/API call comes from wrapper
+    onSubmit(formData);
   };
 
   return (
@@ -219,8 +212,11 @@ const ChangeStage = ({
       <ToastContainer />
       <Modal isOpen={isOpen} toggle={handleClose} centered size="lg">
         <ModalHeader toggle={handleClose} className="border-0 pb-0">
-          <span className="fw-bold">Move Repair</span>
+          <span className="fw-bold">
+            Move {moduleType === "recovery" ? "Recovery" : "Repair"}
+          </span>
         </ModalHeader>
+
         <ModalBody className="pt-2">
           <Card className="border card-border-success shadow-lg">
             <Nav className="nav-tabs nav-tabs-custom nav-success pb-0 bg-light">
@@ -302,10 +298,10 @@ const ChangeStage = ({
           <Button
             type="button"
             color="primary"
-            onClick={handleMoveRepair}
-            disabled={!selectedStage || stageRemarkLoading}
+            onClick={handleMove}
+            disabled={!selectedStage || loading}
           >
-            {stageRemarkLoading ? "Saving..." : "Move Repair"}
+            {loading ? "Saving..." : "Move"}
           </Button>
           <Button type="button" color="danger" onClick={handleClose}>
             Close

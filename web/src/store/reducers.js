@@ -106,6 +106,7 @@ import { RequestsReducer } from "./Requests";
 import { GenerationReducer } from "./Generation";
 import { RamReducer } from "./Ram";
 import { QuotationReducer } from "./Inquiry";
+import { RecoveryReducer } from "./recovery";
 
 const rootReducer = combineReducers({
   // public
@@ -148,6 +149,7 @@ const rootReducer = combineReducers({
   SliderReducer,
   PaymentTypeReducer,
   StatusReducer,
+  RecoveryReducer,
   CustomerAddressReducer,
   DeviceTypeReducer,
   RepairTypeReducer,

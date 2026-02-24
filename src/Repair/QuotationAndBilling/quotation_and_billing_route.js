@@ -11,7 +11,11 @@ router.post("/quotationAndBill/list", verifyToken, quotationAndBillController.ge
 
 // Get single QuotationAndBill by ID
 router.get("/quotationAndBill/single/:id", verifyToken, quotationAndBillController.getQuotationAndBill);
-
+router.get(
+  "/quotationAndBill/pdf/:id",
+  verifyToken,
+  quotationAndBillController.quotationInvoicePdf
+);
 // Update QuotationAndBill
 router.put("/quotationAndBill/updated", verifyToken, quotationAndBillController.updateQuotationAndBill);
 

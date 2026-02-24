@@ -20,7 +20,8 @@ export const API_RESPONSE_SUCCESS_QUOTATION_BILLING =
     "API_RESPONSE_SUCCESS_QUOTATION_BILLING";
 export const API_RESPONSE_ERROR_QUOTATION_BILLING =
     "API_RESPONSE_ERROR_QUOTATION_BILLING";
-
+export const DOWNLOAD_QUOTATION_BILLING_PDF =
+    "DOWNLOAD_QUOTATION_BILLING_PDF";
 // ===================== ACTIONS =====================
 export const quotationBillingApiResponseSuccess = (actionType, data) => ({
     type: API_RESPONSE_SUCCESS_QUOTATION_BILLING,
@@ -63,7 +64,10 @@ export const deleteQuotationBilling = (id) => ({
     type: DELETE_QUOTATION_BILLING,
     payload: { id },
 });
-
+export const downloadQuotationBillingPdf = (id) => ({
+    type: DOWNLOAD_QUOTATION_BILLING_PDF,
+    payload: { id },
+});
 // ===================== INITIAL STATE =====================
 
 const INIT_STATE = {
@@ -171,6 +175,10 @@ const updateQuotationBillingApi = (invoiceData) =>
 const deleteQuotationBillingApi = (id) =>
     api.delete(`/quotationAndBill/delete/${id}`);
 
+const downloadQuotationBillingPdfApi = (id) =>
+    api.get(`/quotationAndBill/pdf/${id}`, {
+        responseType: "blob",
+    });
 function* getQuotationBillingSaga() {
     try {
         const res = yield call(getQuotationBillingApi);
@@ -208,7 +216,44 @@ function* addQuotationBillingSaga({ payload }) {
         toast.error("Failed to add Quotation & Billing!");
     }
 }
+function* downloadQuotationBillingPdfSaga({ payload }) {
+  try {
+    const res = yield call(downloadQuotationBillingPdfApi, payload.id);
 
+    // APIClient may return res.data OR direct blob
+    const fileData = res?.data ?? res;
+
+    // Force blob
+    const blob =
+      fileData instanceof Blob
+        ? new Blob([fileData], { type: "application/pdf" })
+        : new Blob([fileData], { type: "application/pdf" });
+
+    if (!blob || blob.size < 500) {
+      toast.error("Invalid PDF file.");
+      return;
+    }
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+
+    // ✅ FIXED (no type variable)
+    link.download = `Quotation-${payload.id}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("PDF Downloaded Successfully!");
+  } catch (error) {
+    toast.error("Failed to download PDF!");
+    console.log(error);
+  }
+}
 function* updateQuotationBillingSaga({ payload }) {
     try {
         const { invoiceData } = payload;
@@ -276,6 +321,12 @@ function* watchQuotationBilling() {
             yield takeEvery(
                 DELETE_QUOTATION_BILLING,
                 deleteQuotationBillingSaga
+            );
+        }),
+        fork(function* () {
+            yield takeEvery(
+                DOWNLOAD_QUOTATION_BILLING_PDF,
+                downloadQuotationBillingPdfSaga
             );
         }),
     ]);

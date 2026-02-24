@@ -19,7 +19,15 @@ const StageRemark = sequelize.define("tbl_stage_remark", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  stage_remark_module: {
+  type: DataTypes.STRING,
+    allowNull: true,
+  },
   stage_remark_repair_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  stage_remark_recovery_id: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },

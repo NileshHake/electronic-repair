@@ -12,6 +12,7 @@ const Navdata = () => {
   const [isProducts, setIsProducts] = useState(false);
   const [isBusiness, setIsBusiness] = useState(false);
   const [isRepairing, setIsRepairing] = useState(false);
+  const [isRecovery, setIsRecovery] = useState(false);
   const [isCustomers, setIsCustomers] = useState(false);
   const [isOrderTracking, setIsOrderTracking] = useState(false);
   const [isSettings, setIsSettings] = useState(false);
@@ -101,6 +102,9 @@ const Navdata = () => {
     if (iscurrentState !== "Repairing") {
       setIsRepairing(false);
     }
+    if (iscurrentState !== "Recovery") {
+      setIsRecovery(false);
+    }
     if (iscurrentState !== "Customers") {
       setIsCustomers(false);
     }
@@ -189,47 +193,10 @@ const Navdata = () => {
       },
     },
     // 1️⃣ Dashboard - Customer
-    {
-      id: "DASHBOARDCUSTOMER",
-      label: "Dashboard  ",
-      icon: "mdi mdi-view-dashboard-outline",
-      link: "/#",
-      stateVariables: isDashboardCustomer,
-      click: function (e) {
-        e.preventDefault();
-        setIsDashboardCustomer(!isDashboardCustomer);
-        setIscurrentState("DashboardCustomer");
-        updateIconSidebar(e);
-      },
-    },
 
-    {
-      id: "REPAIRINGCUSTOMER",
-      label: "Repairing  ",
-      icon: "mdi mdi-tools",        // change icon if you want
-      link: "/repairing-list",
-      stateVariables: isRepairingCustomer,
-      click: function (e) {
-        e.preventDefault();
-        setIsRepairingCustomer(!isRepairingCustomer);
-        setIscurrentState("RepairingCustomer");
-        updateIconSidebar(e);
-      },
-    },
 
-    {
-      id: "CUSTOMERSALES",
-      label: "  Sales",
-      icon: "mdi mdi-cash-multiple",
-      link: "/apps-ecommerce-products",
-      stateVariables: isCustomerSales,
-      click: function (e) {
-        e.preventDefault();
-        setIsCustomerSales(!isCustomerSales);
-        setIscurrentState("CustomerSales");
-        updateIconSidebar(e);
-      },
-    },
+
+
 
     {
       id: "BUSINESS",
@@ -255,6 +222,20 @@ const Navdata = () => {
         e.preventDefault();
         setIsRepairing(!isRepairing);
         setIscurrentState("Repairing");
+        updateIconSidebar(e);
+      },
+    },
+
+    {
+      id: "RECOVERY",
+      label: "Recovery",
+      icon: "mdi mdi-cash-multiple",
+      link: "/recovery-list",
+      stateVariables: isRecovery,
+      click: function (e) {
+        e.preventDefault();
+        setIsRecovery(!isRecovery);
+        setIscurrentState("Recovery");
         updateIconSidebar(e);
       },
     },
@@ -639,37 +620,37 @@ const Navdata = () => {
             },
           ]
           : []),
-...(permissions.find(
-  (p) =>
-    p.permission_category === "SETTINGS" &&
-    p.permission_path === "17" // Generation permission
-)
-  ? [
-      {
-        id: "generation",
-        label: "Generation",
-        icon: "mdi mdi-chip",
-        link: "/generation-list",
-        parentId: "SETTINGS",
-      },
-    ]
-  : []),
+        ...(permissions.find(
+          (p) =>
+            p.permission_category === "SETTINGS" &&
+            p.permission_path === "17" // Generation permission
+        )
+          ? [
+            {
+              id: "generation",
+              label: "Generation",
+              icon: "mdi mdi-chip",
+              link: "/generation-list",
+              parentId: "SETTINGS",
+            },
+          ]
+          : []),
 
-...(permissions.find(
-  (p) =>
-    p.permission_category === "SETTINGS" &&
-    p.permission_path === "18" // RAM permission
-)
-  ? [
-      {
-        id: "ram",
-        label: "RAM",
-        icon: "mdi mdi-memory",
-        link: "/ram-list",
-        parentId: "SETTINGS",
-      },
-    ]
-  : []),
+        ...(permissions.find(
+          (p) =>
+            p.permission_category === "SETTINGS" &&
+            p.permission_path === "18" // RAM permission
+        )
+          ? [
+            {
+              id: "ram",
+              label: "RAM",
+              icon: "mdi mdi-memory",
+              link: "/ram-list",
+              parentId: "SETTINGS",
+            },
+          ]
+          : []),
 
         ...(permissions.find(
           (p) =>

@@ -23,11 +23,15 @@ const QuotationAndBillingUpdate = ({ isOpen, toggle, quotationData }) => {
     const [invoiceData, setInvoiceData] = useState({
         quotation_and_billing_master_customer_id: quotationData?.customer_id || null,
         quotation_and_billing_master_repair_id: quotationData?.repair_id || null,
-        quotation_and_billing_master_total: 0,
+        quotation_and_billing_master_total: 0, // ✅ taxable/base
         quotation_and_billing_master_gst_amount: 0,
         quotation_and_billing_master_grand_total: 0,
         quotation_or_billing: quotationData?.quotation_or_billing || "Quotation",
     });
+
+    // ✅ Product GST inclusive fixed 18%
+    const PRODUCT_GST_PERCENT = 18;
+    const PRODUCT_GST_FACTOR = 1 + PRODUCT_GST_PERCENT / 100; // 1.18
 
     // Fetch categories, brands, and single quotation details
     useEffect(() => {
@@ -52,7 +56,12 @@ const QuotationAndBillingUpdate = ({ isOpen, toggle, quotationData }) => {
                     quotation_and_billing_qty: isService ? "-" : Number(item.quotation_and_billing_qty),
                     quotation_and_billing_product_mrp: Number(item.quotation_and_billing_product_mrp),
                     quotation_and_billing_product_sale_price: Number(item.quotation_and_billing_product_sale_price),
-                    quotation_and_billing_tax_percentage: Number(item.quotation_and_billing_tax_percentage),
+
+                    // ✅ for product use fixed 18; for service use stored %
+                    quotation_and_billing_tax_percentage: isService
+                        ? Number(item.quotation_and_billing_tax_percentage)
+                        : PRODUCT_GST_PERCENT,
+
                     quotation_and_billing_tax_value: Number(item.quotation_and_billing_tax_value),
                     quotation_and_billing_child_total: Number(item.quotation_and_billing_child_total),
                     quotation_and_billing_service_or_product: item.quotation_and_billing_service_or_product,
@@ -76,88 +85,134 @@ const QuotationAndBillingUpdate = ({ isOpen, toggle, quotationData }) => {
 
     // Fetch filtered products
     useEffect(() => {
+        if (!isOpen) return;
         dispatch(filterProductforRepair(filterData));
-    }, [filterData, dispatch]);
+    }, [filterData, dispatch, isOpen]);
 
     // Recalculate totals whenever invoiceItems change
+    // ✅ Product: sale price includes 18% GST -> split base + gst
+    // ✅ Service: base + gst added on top
     useEffect(() => {
-        let total = 0;
+        let taxableTotal = 0;
         let gstAmount = 0;
+        let grandTotal = 0;
 
-        invoiceItems.forEach((item) => {
+        const recalculated = invoiceItems.map((item) => {
+            const isServiceRow = item.quotation_and_billing_service_or_product === "Service";
+
             const qty = item.quotation_and_billing_qty === "-" ? 1 : Number(item.quotation_and_billing_qty);
-            const price = Number(item.quotation_and_billing_product_sale_price);
-            const gst = Number(item.quotation_and_billing_tax_percentage);
+            const price = Number(item.quotation_and_billing_product_sale_price || 0);
+            const gross = qty * price;
 
-            const base = qty * price;
-            const gstValue = (base * gst) / 100;
+            if (!isServiceRow) {
+                const base = gross / PRODUCT_GST_FACTOR;
+                const gstValue = gross - base;
 
-            total += base;
+                taxableTotal += base;
+                gstAmount += gstValue;
+                grandTotal += gross;
+
+                return {
+                    ...item,
+                    quotation_and_billing_tax_percentage: PRODUCT_GST_PERCENT,
+                    quotation_and_billing_tax_value: gstValue,
+                    quotation_and_billing_child_total: gross,
+                };
+            }
+
+            const gst = Number(item.quotation_and_billing_tax_percentage || 0);
+            const gstValue = (gross * gst) / 100;
+            const total = gross + gstValue;
+
+            taxableTotal += gross;
             gstAmount += gstValue;
+            grandTotal += total;
+
+            return {
+                ...item,
+                quotation_and_billing_tax_value: gstValue,
+                quotation_and_billing_child_total: total,
+            };
         });
+
+        const changed =
+            recalculated.length !== invoiceItems.length ||
+            recalculated.some((it, i) => {
+                const old = invoiceItems[i];
+                if (!old) return true;
+                return (
+                    Number(old.quotation_and_billing_tax_value || 0) !== Number(it.quotation_and_billing_tax_value || 0) ||
+                    Number(old.quotation_and_billing_child_total || 0) !== Number(it.quotation_and_billing_child_total || 0) ||
+                    Number(old.quotation_and_billing_tax_percentage || 0) !== Number(it.quotation_and_billing_tax_percentage || 0)
+                );
+            });
+
+        if (changed) setInvoiceItems(recalculated);
 
         setInvoiceData((prev) => ({
             ...prev,
-            quotation_and_billing_master_total: total.toFixed(2),
+            quotation_and_billing_master_total: taxableTotal.toFixed(2),
             quotation_and_billing_master_gst_amount: gstAmount.toFixed(2),
-            quotation_and_billing_master_grand_total: (total + gstAmount).toFixed(2),
+            quotation_and_billing_master_grand_total: grandTotal.toFixed(2),
         }));
     }, [invoiceItems]);
 
     // Add product to invoice with qty update if already exists
- const handleProductAdd = (product) => {
-    setInvoiceItems((prev) => {
-        const now = new Date().toISOString();
-        const taxPercent = Number(product.tax_percentage || 0);
-        const salePrice = Number(product.product_sale_price || 0);
+    // ✅ Product GST inclusive 18%
+    const handleProductAdd = (product) => {
+        setInvoiceItems((prev) => {
+            const now = new Date().toISOString();
+            const salePrice = Number(product.product_sale_price || 0);
 
-        // Check if product already exists
-        const index = prev.findIndex(
-            (item) => !item.isService && item.quotation_and_billing_child_product_id === product.product_id
-        );
+            // Check if product already exists
+            const index = prev.findIndex(
+                (item) => !item.isService && item.quotation_and_billing_child_product_id === product.product_id
+            );
 
-        if (index !== -1) {
-            // Increment quantity for existing product
-            const updated = [...prev];
-            const newQty = Number(updated[index].quotation_and_billing_qty) + 1;
+            if (index !== -1) {
+                const updated = [...prev];
+                const newQty = Number(updated[index].quotation_and_billing_qty) + 1;
 
-            const base = newQty * salePrice;
-            const taxValue = (base * taxPercent) / 100;
+                const gross = newQty * salePrice;
+                const base = gross / PRODUCT_GST_FACTOR;
+                const gstValue = gross - base;
 
-            updated[index] = {
-                ...updated[index],
-                quotation_and_billing_qty: newQty,
-                quotation_and_billing_tax_value: taxValue,
-                quotation_and_billing_child_total: base + taxValue,
+                updated[index] = {
+                    ...updated[index],
+                    quotation_and_billing_qty: newQty,
+                    quotation_and_billing_tax_percentage: PRODUCT_GST_PERCENT,
+                    quotation_and_billing_tax_value: gstValue,
+                    quotation_and_billing_child_total: gross,
+                    updated_at: now,
+                };
+
+                return updated;
+            }
+
+            const gross = 1 * salePrice;
+            const base = gross / PRODUCT_GST_FACTOR;
+            const gstValue = gross - base;
+
+            const newItem = {
+                product_id: product.product_id,
+                quotation_and_billing_child_product_id: product.product_id,
+                quotation_and_billing_product_name: product.product_name,
+                quotation_and_billing_qty: 1,
+                quotation_and_billing_product_mrp: product.product_mrp,
+                quotation_and_billing_product_sale_price: salePrice,
+                quotation_and_billing_tax_percentage: PRODUCT_GST_PERCENT,
+                quotation_and_billing_tax_value: gstValue,
+                quotation_and_billing_child_total: gross,
+                quotation_and_billing_service_or_product: "Product",
+                raw: product,
+                isService: false,
+                created_at: now,
                 updated_at: now,
             };
 
-            return updated;
-        }
-
-        // Add new product row
-        const newItem = {
-            product_id: product.product_id,
-            quotation_and_billing_child_product_id: product.product_id, 
-            quotation_and_billing_product_name: product.product_name,
-            quotation_and_billing_qty: 1,
-            quotation_and_billing_product_mrp: product.product_mrp,
-            quotation_and_billing_product_sale_price: salePrice,
-            quotation_and_billing_tax_percentage: taxPercent,
-            quotation_and_billing_tax_value: (salePrice * taxPercent) / 100,
-            quotation_and_billing_child_total: salePrice + (salePrice * taxPercent) / 100,
-            quotation_and_billing_service_or_product: "Product",
-            raw: product,
-            isService: false,
-            created_at: now,
-            updated_at: now,
-        };
-
-        return [...prev, newItem];
-    });
-};
-
-
+            return [...prev, newItem];
+        });
+    };
 
     // Add manual service
     const addManualService = () => {
@@ -181,10 +236,15 @@ const QuotationAndBillingUpdate = ({ isOpen, toggle, quotationData }) => {
     };
 
     // Update row and auto-remove if qty <= 0
+    // ✅ also set updated_at properly
+    // ✅ Product: fixed 18% split
+    // ✅ Service: gst editable
     const updateRow = (index, field, value) => {
         let updated = [...invoiceItems];
+        const now = new Date().toISOString();
 
         updated[index][field] = value;
+        updated[index].updated_at = now;
 
         if (field === "quotation_and_billing_qty") {
             if (Number(value) <= 0 && !updated[index].isService) {
@@ -194,15 +254,29 @@ const QuotationAndBillingUpdate = ({ isOpen, toggle, quotationData }) => {
             }
         }
 
-        const qty = updated[index].quotation_and_billing_qty === "-" ? 1 : Number(updated[index].quotation_and_billing_qty);
-        const price = Number(updated[index].quotation_and_billing_product_sale_price);
-        const gst = Number(updated[index].quotation_and_billing_tax_percentage);
+        const isServiceRow = updated[index].quotation_and_billing_service_or_product === "Service";
 
-        const base = qty * price;
-        const taxValue = (base * gst) / 100;
+        const qty = updated[index].quotation_and_billing_qty === "-" ? 1 : Number(updated[index].quotation_and_billing_qty);
+        const price = Number(updated[index].quotation_and_billing_product_sale_price || 0);
+        const gross = qty * price;
+
+        if (!isServiceRow) {
+            const base = gross / PRODUCT_GST_FACTOR;
+            const gstValue = gross - base;
+
+            updated[index].quotation_and_billing_tax_percentage = PRODUCT_GST_PERCENT;
+            updated[index].quotation_and_billing_tax_value = gstValue;
+            updated[index].quotation_and_billing_child_total = gross;
+
+            setInvoiceItems(updated);
+            return;
+        }
+
+        const gst = Number(updated[index].quotation_and_billing_tax_percentage || 0);
+        const taxValue = (gross * gst) / 100;
 
         updated[index].quotation_and_billing_tax_value = taxValue;
-        updated[index].quotation_and_billing_child_total = base + taxValue;
+        updated[index].quotation_and_billing_child_total = gross + taxValue;
 
         setInvoiceItems(updated);
     };
@@ -219,11 +293,9 @@ const QuotationAndBillingUpdate = ({ isOpen, toggle, quotationData }) => {
             quotation_and_billing_master_id: quotationData.quotation_and_billing_master_id,
             items: invoiceItems,
         };
-        
-        
+
         dispatch(updateQuotationBilling(body));
-         
-    };  
+    };
 
     return (
         <Modal isOpen={isOpen} centered size="xl">
@@ -260,7 +332,7 @@ const QuotationAndBillingUpdate = ({ isOpen, toggle, quotationData }) => {
                                 <label>Product</label>
                                 <Select
                                     options={filterProducts?.map((p) => ({
-                                        label: `${p.product_name} (MRP: ₹${p.product_mrp}, Sale: ₹${p.product_sale_price})`,
+                                        label: `${p.product_name} (Price incl GST: ₹${p.product_sale_price})`,
                                         value: p.product_id,
                                         data: p,
                                     }))}
@@ -283,56 +355,117 @@ const QuotationAndBillingUpdate = ({ isOpen, toggle, quotationData }) => {
                                         <th>Sr.</th>
                                         <th>Item / Service</th>
                                         <th>Qty</th>
-                                        <th>MRP</th>
-                                        <th>Sale Price</th>
+
+                                        {/* ✅ MRP removed */}
+                                        <th>Price</th>
+                                        <th>Base Amount</th>
+
                                         <th>GST %</th>
                                         <th>GST Value</th>
                                         <th>Total</th>
+
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {invoiceItems.length ? invoiceItems.map((item, index) => (
-                                        <tr key={index}>
-                                            <td>{index + 1}</td>
-                                            {item.isService ? (
-                                                <>
-                                                    <td><Input value={item.quotation_and_billing_product_name}
-                                                        onChange={(e) => updateRow(index, "quotation_and_billing_product_name", e.target.value)}
-                                                        placeholder="Service Name" /></td>
-                                                    <td>-</td>
-                                                    <td>0</td>
-                                                    <td><Input type="number" value={item.quotation_and_billing_product_sale_price}
-                                                        onChange={(e) => updateRow(index, "quotation_and_billing_product_sale_price", Number(e.target.value))} /></td>
-                                                    <td>0</td>
-                                                    <td>0</td>
-                                                    <td>{item.quotation_and_billing_product_sale_price}</td>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <td>{item.quotation_and_billing_product_name}</td>
-                                                    <td>
-                                                        <div className="input-group" style={{ width: "120px" }}>
-                                                            <button className="btn btn-outline-secondary" type="button"
-                                                                onClick={() => updateRow(index, "quotation_and_billing_qty", Number(item.quotation_and_billing_qty) - 1)}>–</button>
-                                                            <input type="number" className="form-control text-center border-secondary"
-                                                                value={item.quotation_and_billing_qty} readOnly />
-                                                            <button className="btn btn-outline-secondary" type="button"
-                                                                onClick={() => updateRow(index, "quotation_and_billing_qty", Number(item.quotation_and_billing_qty) + 1)}>+</button>
-                                                        </div>
-                                                    </td>
-                                                    <td><Input readOnly value={item.quotation_and_billing_product_mrp} /></td>
-                                                    <td><Input type="number" value={item.quotation_and_billing_product_sale_price}
-                                                        onChange={(e) => updateRow(index, "quotation_and_billing_product_sale_price", Number(e.target.value))} /></td>
-                                                    <td><Input type="number" value={item.quotation_and_billing_tax_percentage}
-                                                        onChange={(e) => updateRow(index, "quotation_and_billing_tax_percentage", Number(e.target.value))} /></td>
-                                                    <td>{item.quotation_and_billing_tax_value}</td>
-                                                    <td>{item.quotation_and_billing_child_total}</td>
-                                                </>
-                                            )}
-                                            <td><Button color="danger" size="sm" onClick={() => removeRow(index)}>Delete</Button></td>
-                                        </tr>
-                                    )) : (
+                                    {invoiceItems.length ? invoiceItems.map((item, index) => {
+                                        const isServiceRow = item.isService;
+                                        const qty = item.quotation_and_billing_qty === "-" ? 1 : Number(item.quotation_and_billing_qty);
+                                        const price = Number(item.quotation_and_billing_product_sale_price || 0);
+                                        const gross = qty * price;
+
+                                        const base = isServiceRow ? gross : gross / PRODUCT_GST_FACTOR;
+                                        const gstValue = isServiceRow
+                                            ? Number(item.quotation_and_billing_tax_value || 0)
+                                            : gross - base;
+
+                                        return (
+                                            <tr key={index}>
+                                                <td>{index + 1}</td>
+                                                {isServiceRow ? (
+                                                    <>
+                                                        <td>
+                                                            <Input
+                                                                value={item.quotation_and_billing_product_name}
+                                                                onChange={(e) => updateRow(index, "quotation_and_billing_product_name", e.target.value)}
+                                                                placeholder="Service Name"
+                                                            />
+                                                        </td>
+                                                        <td>-</td>
+
+                                                        <td>
+                                                            <Input
+                                                                type="number"
+                                                                value={item.quotation_and_billing_product_sale_price}
+                                                                onChange={(e) => updateRow(index, "quotation_and_billing_product_sale_price", Number(e.target.value))}
+                                                            />
+                                                        </td>
+
+                                                        <td>{Number(base || 0).toFixed(2)}</td>
+
+                                                        <td style={{ width: 110 }}>
+                                                            <Input
+                                                                type="number"
+                                                                value={item.quotation_and_billing_tax_percentage}
+                                                                onChange={(e) => updateRow(index, "quotation_and_billing_tax_percentage", Number(e.target.value))}
+                                                            />
+                                                        </td>
+
+                                                        <td>{Number(gstValue || 0).toFixed(2)}</td>
+                                                        <td>{Number(item.quotation_and_billing_child_total || 0).toFixed(2)}</td>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <td>{item.quotation_and_billing_product_name}</td>
+                                                        <td>
+                                                            <div className="input-group" style={{ width: "120px" }}>
+                                                                <button
+                                                                    className="btn btn-outline-secondary"
+                                                                    type="button"
+                                                                    onClick={() => updateRow(index, "quotation_and_billing_qty", Number(item.quotation_and_billing_qty) - 1)}
+                                                                >
+                                                                    –
+                                                                </button>
+                                                                <input
+                                                                    type="number"
+                                                                    className="form-control text-center border-secondary"
+                                                                    value={item.quotation_and_billing_qty}
+                                                                    readOnly
+                                                                />
+                                                                <button
+                                                                    className="btn btn-outline-secondary"
+                                                                    type="button"
+                                                                    onClick={() => updateRow(index, "quotation_and_billing_qty", Number(item.quotation_and_billing_qty) + 1)}
+                                                                >
+                                                                    +
+                                                                </button>
+                                                            </div>
+                                                        </td>
+
+                                                        <td>
+                                                            <Input
+                                                                type="number"
+                                                                value={item.quotation_and_billing_product_sale_price}
+                                                                onChange={(e) => updateRow(index, "quotation_and_billing_product_sale_price", Number(e.target.value))}
+                                                            />
+                                                        </td>
+
+                                                        <td>{Number(base || 0).toFixed(2)}</td>
+
+                                                        <td style={{ width: 110 }}>
+                                                            <Input type="number" value={PRODUCT_GST_PERCENT} readOnly />
+                                                        </td>
+
+                                                        <td>{Number(gstValue || 0).toFixed(2)}</td>
+                                                        <td>{Number(item.quotation_and_billing_child_total || 0).toFixed(2)}</td>
+                                                    </>
+                                                )}
+                                                <td>
+                                                    <Button color="danger" size="sm" onClick={() => removeRow(index)}>Delete</Button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    }) : (
                                         <tr>
                                             <td colSpan="9" className="text-center py-3">No Items Added</td>
                                         </tr>
@@ -343,7 +476,7 @@ const QuotationAndBillingUpdate = ({ isOpen, toggle, quotationData }) => {
 
                         {/* TOTALS */}
                         <div className="d-flex justify-content-end mt-3 gap-4">
-                            <div><strong>Total:</strong> ₹{invoiceData.quotation_and_billing_master_total}</div>
+                            <div><strong>Taxable (Base) Total:</strong> ₹{invoiceData.quotation_and_billing_master_total}</div>
                             <div><strong>GST Amount:</strong> ₹{invoiceData.quotation_and_billing_master_gst_amount}</div>
                             <div><strong>Grand Total:</strong> ₹{invoiceData.quotation_and_billing_master_grand_total}</div>
                         </div>

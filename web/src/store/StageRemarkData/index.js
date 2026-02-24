@@ -42,11 +42,10 @@ export const getStageRemarks = () => ({
 });
 
 // 🔹 Get single stage remark
-export const getSingleStageRemark = (id) => ({
+export const getSingleStageRemark = (id, moduleType = "repair") => ({
   type: GET_SINGLE_STAGE_REMARK,
-  payload: { id },
+  payload: { id, moduleType },
 });
-
 // 🔹 Add stage remark (FormData)
 export const addStageRemark = (formData) => ({
   type: ADD_STAGE_REMARK,
@@ -168,9 +167,8 @@ const api = new APIClient();
 const getStageRemarksApi = () => api.get("/stage-remark/list");
 
 // single
-const getSingleStageRemarkApi = (id) =>
-  api.get(`/stage-remark/single/${id}`);
-
+const getSingleStageRemarkApi = (data) =>
+  api.create("/stage-remark", data);
 // add (FormData: images + video + other fields)
 const addStageRemarkApi = (formData) =>
   api.create("/stage-remark/store", formData);
@@ -192,21 +190,21 @@ function* getStageRemarksSaga() {
     yield put(stageRemarkApiResponseSuccess(GET_STAGE_REMARKS, response));
   } catch (error) {
     yield put(stageRemarkApiResponseError(GET_STAGE_REMARKS, error));
-  
+
   }
 }
 
 // Get single stage remark
 function* getSingleStageRemarkSaga({ payload }) {
   try {
-    const { id } = payload;
-    const response = yield call(getSingleStageRemarkApi, id);
-    yield put(
-      stageRemarkApiResponseSuccess(GET_SINGLE_STAGE_REMARK, response)
-    );
+    const { id, moduleType } = payload;
+
+    // ✅ send both to API
+    const response = yield call(getSingleStageRemarkApi, { id, moduleType });
+
+    yield put(stageRemarkApiResponseSuccess(GET_SINGLE_STAGE_REMARK, response));
   } catch (error) {
     yield put(stageRemarkApiResponseError(GET_SINGLE_STAGE_REMARK, error));
- 
   }
 }
 

@@ -19,9 +19,10 @@ const store = async (req, res) => {
       recovery_expected_delivery_date,
       recovery_assigned_technician_to,
       recovery_delivery_and_pickup_to,
-      recovery_quotation_amt,
-      recovery_bill_amt,
+      recovery_quotation_id,
+      recovery_bill_id,
       recovery_status,
+      recovery_customer_id,
     } = req.body;
 
     // ✅ MULTIPLE IMAGES
@@ -37,7 +38,7 @@ const store = async (req, res) => {
     }
 
     const recoveryData = {
-      recovery_customer_id: req.currentUser.user_id,
+      recovery_customer_id: req.currentUser.user_type != 6 ? recovery_customer_id : req.currentUser.user_id,
       recovery_problem_description,
       recovery_estimated_cost,
       recovery_received_date,
@@ -46,13 +47,13 @@ const store = async (req, res) => {
       recovery_delivery_and_pickup_to,
       recovery_workflow_id,
       recovery_workflow_stage_id,
-      recovery_quotation_amt,
-      recovery_bill_amt,
+      recovery_quotation_id,
+      recovery_bill_id,
       recovery_status: recovery_status ?? 1,
 
       recovery_image: JSON.stringify(recovery_images),
 
-      recovery_created_by: recovery_created_by,
+      recovery_created_by: recovery_created_by || getCreatedBy(req.currentUser),
     };
 
     const newRecovery = await Recovery.create(recoveryData);
@@ -406,8 +407,8 @@ const update = async (req, res) => {
       recovery_delivery_and_pickup_to,
       recovery_workflow_id,
       recovery_workflow_stage_id,
-      recovery_quotation_amt,
-      recovery_bill_amt,
+      recovery_quotation_id,
+      recovery_bill_id,
       recovery_status,
     } = req.body;
 
@@ -458,7 +459,7 @@ const update = async (req, res) => {
     const finalImages = [...keptOldImages, ...newUploadedImages];
 
     await recovery.update({
-      recovery_customer_id,
+      recovery_customer_id: req.currentUser.user_type != 6 ? recovery_customer_id : req.currentUser.user_id,
       recovery_problem_description,
       recovery_estimated_cost,
       recovery_received_date,
@@ -467,8 +468,8 @@ const update = async (req, res) => {
       recovery_delivery_and_pickup_to,
       recovery_workflow_id,
       recovery_workflow_stage_id,
-      recovery_quotation_amt,
-      recovery_bill_amt,
+      recovery_quotation_id,
+      recovery_bill_id,
       recovery_status,
 
       recovery_image: JSON.stringify(finalImages),

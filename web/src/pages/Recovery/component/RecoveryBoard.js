@@ -1,23 +1,14 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-} from "reactstrap";
-
-import InfiniteScroll from "react-infinite-scroll-component"; // ✅ ADDED
- 
+/* eslint-disable react-hooks/exhaustive-deps */
+// src/pages/Recovery/RecoveryComponent/RecoveryBoard.js
+import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { formatDateTime } from "../../../helpers/date_and_time_format";
-import ChangeStageRepair from "../StageChangeModals/ChangeStageRepair";
+import ChangeStageRecovery from "../StageChangeModals/ChangeStageRecovery";
 
 /* ===== helpers ===== */
 const getStageMeta = (workflowStages = [], stageId) => {
-  const s = workflowStages.find(
+  const s = (workflowStages || []).find(
     (x) => Number(x?.workflow_child_id) === Number(stageId)
   );
   return {
@@ -26,27 +17,26 @@ const getStageMeta = (workflowStages = [], stageId) => {
   };
 };
 
-const RepairBoard = ({
-  repairs = [],
+const RecoveryBoard = ({
+  recoveries = [],
   workflowStages = [],
   permissions = [],
   canUpdate,
   canDelete,
-  setSelectedRepair,
+  setSelectedRecovery,
   setIsUpdateModalOpen,
   onClickDelete,
 
-  // ✅ ADDED (ONLY for infinite scroll)
+  // ✅ Infinite scroll
   fetchNextPage,
   hasMore = false,
   loading = false,
 }) => {
-  // ✅ FIXED: correct precedence
-  const hasRepairPermission = useMemo(() => {
+  const hasRecoveryPermission = useMemo(() => {
     return permissions?.some(
       (p) =>
-        (p?.permission_category === "REPAIRING" ||
-          p?.permission_category === "REPAIRINGCUSTOMER") &&
+        (p?.permission_category === "RECOVERY" ||
+          p?.permission_category === "RECOVERYCUSTOMER") &&
         String(p?.permission_path) === "1"
     );
   }, [permissions]);
@@ -55,8 +45,8 @@ const RepairBoard = ({
   const [isOpenStageModal, setIsOpenStageModal] = useState(false);
   const [selectedForStage, setSelectedForStage] = useState(null);
 
-  const openStageModal = (repairRow) => {
-    setSelectedForStage(repairRow);
+  const openStageModal = (row) => {
+    setSelectedForStage(row);
     setIsOpenStageModal(true);
   };
 
@@ -65,22 +55,11 @@ const RepairBoard = ({
     setSelectedForStage(null);
   };
 
-  const totalAmount = useMemo(() => {
-    return (repairs || []).reduce(
-      (sum, r) => sum + Number(r?.repair_estimated_cost || 0),
-      0
-    );
-  }, [repairs]);
-
-  const totalCount = repairs?.length || 0;
   const navigate = useNavigate();
-
-  // ✅ ADDED: keep scrollbar div stable for InfiniteScroll
-  const scrollDivId = "scrollableRepairDiv";
+  const scrollDivId = "scrollableRecoveryDiv";
 
   return (
     <>
-      {/* ✅ ADDED: scroll container for InfiniteScroll */}
       <div
         id={scrollDivId}
         style={{
@@ -88,9 +67,8 @@ const RepairBoard = ({
           overflow: "auto",
         }}
       >
-        {/* ✅ ADDED: InfiniteScroll wrapper */}
         <InfiniteScroll
-          dataLength={repairs.length}
+          dataLength={recoveries.length}
           next={fetchNextPage}
           hasMore={hasMore}
           loader={
@@ -99,61 +77,62 @@ const RepairBoard = ({
             </h6>
           }
           scrollableTarget={scrollDivId}
-         
         >
           <div className="table-responsive">
             <table className="table align-middle table-hover mb-0">
               <thead className="table-light text-uppercase text-muted">
                 <tr>
                   <th style={{ width: "5%" }}>#</th>
-                  <th style={{ width: "10%" }}>Repair ID</th>
-                  <th style={{ width: "20%" }}>Device</th>
+                  <th style={{ width: "10%" }}>Recovery ID</th>
+                  <th style={{ width: "25%" }}>Problem</th>
                   <th style={{ width: "20%" }}>Customer</th>
                   <th style={{ width: "12%" }}>Stage</th>
-                  <th style={{ width: "10%" }}>Est. Cost</th>
                   <th style={{ width: "13%" }}>Received</th>
-                  <th style={{ width: "13%" }}>Expected</th>
                   <th style={{ width: "12%" }} className="text-end">
                     Actions
                   </th>
                 </tr>
               </thead>
+
               <tbody>
-                {hasRepairPermission && repairs?.length > 0 ? (
-                  repairs.map((item, index) => {
+                {hasRecoveryPermission && recoveries?.length > 0 ? (
+                  recoveries.map((item, index) => {
                     const { name: stageName, color: stageColor } = getStageMeta(
                       workflowStages,
-                      item?.repair_workflow_stage_id
+                      item?.recovery_workflow_stage_id
                     );
 
                     return (
                       <tr
-                        key={item?.repair_id || index}
+                        key={item?.recovery_id || index}
                         onClick={() =>
-                          navigate(`/repair/overview/${item?.repair_id}`)
+                          navigate(`/recovery/overview/${item?.recovery_id}`)
                         }
                       >
                         <td>{index + 1}</td>
 
                         <td>
                           <span className="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
-                            R-{item?.repair_id}
+                            RC-{item?.recovery_id}
                           </span>
                         </td>
 
-                        <td title={item?.device_type_name || ""}>
-                          <div className="fw-bold">
-                            {item?.device_type_name || "Unnamed Product"}
-                          </div>
-                          <div className="text-muted small">
-                            {item?.repair_problem || "-"}
-                          </div>
+                        <td title={item?.recovery_problem_description || ""}>
+                          <div className="fw-bold">Recovery</div>
+                          <div
+                            className="text-muted small"
+                            dangerouslySetInnerHTML={{
+                              __html: item?.recovery_problem_description || "-",
+                            }}
+                          />
                         </td>
 
                         <td>
                           <div className="fw-bold">{item?.customer_name || "-"}</div>
                           <div className="text-muted small">
-                            {item?.customer_phone || "-"}
+                            {item?.customer_phone_number ||
+                              item?.customer_phone ||
+                              "-"}
                           </div>
                           <div className="text-muted small">
                             {item?.customer_email || "-"}
@@ -166,16 +145,8 @@ const RepairBoard = ({
                           </span>
                         </td>
 
-                        <td className="fw-bold text-success">
-                          ₹{Number(item?.repair_estimated_cost || 0)}
-                        </td>
-
                         <td className="text-muted small">
-                          {formatDateTime(item?.repair_received_date) || "-"}
-                        </td>
-
-                        <td className="text-warning small">
-                          {item?.repair_expected_delivery_date || "-"}
+                          {formatDateTime(item?.recovery_received_date) || "-"}
                         </td>
 
                         <td className="text-center">
@@ -185,10 +156,10 @@ const RepairBoard = ({
                               <li className="list-inline-item">
                                 <button
                                   className="text-primary border-0 bg-transparent"
-                                  title="Edit Repair"
+                                  title="Edit Recovery"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setSelectedRepair(item);
+                                    setSelectedRecovery(item);
                                     setIsUpdateModalOpen(true);
                                   }}
                                 >
@@ -202,7 +173,7 @@ const RepairBoard = ({
                               <li className="list-inline-item">
                                 <button
                                   className="text-danger border-0 bg-transparent"
-                                  title="Delete Repair"
+                                  title="Delete Recovery"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     onClickDelete(item);
@@ -213,6 +184,7 @@ const RepairBoard = ({
                               </li>
                             )}
 
+                            {/* MOVE STAGE */}
                             <li className="list-inline-item">
                               <button
                                 className="text-success border-0 bg-transparent"
@@ -232,7 +204,7 @@ const RepairBoard = ({
                   })
                 ) : (
                   <tr>
-                    <td colSpan="9" className="text-center py-5">
+                    <td colSpan="7" className="text-center py-5">
                       <lord-icon
                         src="https://cdn.lordicon.com/msoeawqm.json"
                         trigger="loop"
@@ -240,7 +212,7 @@ const RepairBoard = ({
                         style={{ width: "72px", height: "72px" }}
                       ></lord-icon>
                       <div className="mt-4">
-                        <h5>Sorry! No Repair Found</h5>
+                        <h5>Sorry! No Recovery Found</h5>
                       </div>
                     </td>
                   </tr>
@@ -252,12 +224,10 @@ const RepairBoard = ({
       </div>
 
       {isOpenStageModal && (
-        <ChangeStageRepair
+        <ChangeStageRecovery
           isOpen={isOpenStageModal}
-          workflowStages={workflowStages}
           toggle={closeStageModal}
-          currentStageName={selectedForStage?.current_stage_name || "Current"}
-          nextStageName={selectedForStage?.next_stage_name || "Next"}
+          workflowStages={workflowStages}
           isSelectedData={selectedForStage}
         />
       )}
@@ -265,4 +235,4 @@ const RepairBoard = ({
   );
 };
 
-export default RepairBoard;
+export default RecoveryBoard;

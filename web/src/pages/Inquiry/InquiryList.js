@@ -31,10 +31,10 @@ const filterStatusOptions = [
 ];
 
 const rowStatusOptions = [
-  { label: "New", value: 1 },
-  { label: "Accept", value: 2 },
-  { label: "Final", value: 3 },
-  { label: "Reject", value: 4 },
+    { label: "New", value: 1 },
+    { label: "Accept", value: 2 },
+    { label: "Final", value: 3 },
+    { label: "Reject", value: 4 },
 ];
 
 
@@ -113,32 +113,32 @@ const InquiryList = () => {
     };
 
     /* ✅✅ FIXED: UPDATE ONLY (NO immediate list call here) */
-const onChangeRowStatus = (q, selected) => {
-  if (!selected?.value) return;
+    const onChangeRowStatus = (q, selected) => {
+        if (!selected?.value) return;
 
-  const newStatus = Number(selected.value);
-  const oldStatus = Number(q.quotation_status);
+        const newStatus = Number(selected.value);
+        const oldStatus = Number(q.quotation_status);
 
-  // ✅ 1. If same status selected → do nothing (prevent 409)
-  if (oldStatus === newStatus) {
-    return;
-  }
+        // ✅ 1. If same status selected → do nothing (prevent 409)
+        if (oldStatus === newStatus) {
+            return;
+        }
 
-  // ✅ 2. Call update API
-  dispatch(updateQuotationMaster({
-    quotation_id: q.quotation_id,
-    quotation_status: newStatus,
-  }));
+        // ✅ 2. Call update API
+        dispatch(updateQuotationMaster({
+            quotation_id: q.quotation_id,
+            quotation_status: newStatus,
+        }));
 
-  // ✅ 3. If filtered list (not All) and status changed → remove instantly
-  const currentFilter = Number(statusFilter?.value || 0);
+        // ✅ 3. If filtered list (not All) and status changed → remove instantly
+        const currentFilter = Number(statusFilter?.value || 0);
 
-  if (currentFilter !== 0 && currentFilter !== newStatus) {
-    setRows((prev) =>
-      prev.filter((x) => x.quotation_id !== q.quotation_id)
-    );
-  }
-};
+        if (currentFilter !== 0 && currentFilter !== newStatus) {
+            setRows((prev) =>
+                prev.filter((x) => x.quotation_id !== q.quotation_id)
+            );
+        }
+    };
 
 
 

@@ -361,12 +361,12 @@ const RepairDetailsLayout = ({
                       {singleRepair?.storage_location_name || "N/A"}
                     </span>
                   </Col>
- 
+
                   <Col sm={6}>
                     <small className="text-muted d-block">Estimated Cost</small>
                     <span className="fw-semibold d-block">
                       {singleRepair?.repair_estimated_cost
-                        ? `₹${singleRepair.repair_estimated_cost}` 
+                        ? `₹${singleRepair.repair_estimated_cost}`
                         : "-"}
                     </span>
                   </Col>
@@ -425,38 +425,38 @@ const RepairDetailsLayout = ({
               </CardBody>
             </Card>
 
-           <Card className="shadow-sm border-0">
-  <CardBody>
-    <div className="d-flex justify-content-between align-items-center mb-3">
-      <h5 className="card-title mb-0 fw-semibold">Problems</h5>
-      <span className="badge bg-soft-secondary text-secondary">
-        Issues Selected
-      </span>
-    </div>
-   <div className="d-flex flex-wrap gap-3">
-  {singleRepair?.repair_device_services_id ? (
-    (() => {
-      const servicesArray = JSON.parse(singleRepair.repair_device_services_id);
-      if (servicesArray.length === 0)
-        return <span className="text-muted fs-5">No problems selected</span>;
+            <Card className="shadow-sm border-0">
+              <CardBody>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="card-title mb-0 fw-semibold">Problems</h5>
+                  <span className="badge bg-soft-secondary text-secondary">
+                    Issues Selected
+                  </span>
+                </div>
+                <div className="d-flex flex-wrap gap-3">
+                  {singleRepair?.repair_device_services_id ? (
+                    (() => {
+                      const servicesArray = JSON.parse(singleRepair.repair_device_services_id);
+                      if (servicesArray.length === 0)
+                        return <span className="text-muted fs-5">No problems selected</span>;
 
-      return servicesArray.map((service, index) => (
-        <div
-          key={index}
-          className="px-3 py-2 bg-primary-subtle text-primary rounded fw-semibold"
-          style={{ fontSize: "15px" }} // make it bigger
-        >
-          {index + 1}. Service: {service.service} 
-        </div>
-      ));
-    })()
-  ) : (
-    <span className="text-muted fs-5">No problems selected</span>
-  )}
-</div>
+                      return servicesArray.map((service, index) => (
+                        <div
+                          key={index}
+                          className="px-3 py-2 bg-primary-subtle text-primary rounded fw-semibold"
+                          style={{ fontSize: "15px" }} // make it bigger
+                        >
+                          {index + 1}. Service: {service.service}
+                        </div>
+                      ));
+                    })()
+                  ) : (
+                    <span className="text-muted fs-5">No problems selected</span>
+                  )}
+                </div>
 
-  </CardBody>
-</Card>
+              </CardBody>
+            </Card>
 
           </Col>
         </Row>
@@ -485,7 +485,7 @@ const RepairDetailsLayout = ({
           </CardBody>
         </Card>
 
-        <RecentStatus singleRepair={singleRepair} activityTab={activityTab} />
+        <RecentStatus singleRepair={singleRepair} activityTab={activityTab} module="repair" />
       </Col>
     </Row>
   );

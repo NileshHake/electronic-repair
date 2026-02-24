@@ -55,11 +55,11 @@ const Recovery = sequelize.define("tbl_recovery", {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
-    recovery_quotation_amt: {
+    recovery_quotation_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
-    recovery_bill_amt: {
+    recovery_bill_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
