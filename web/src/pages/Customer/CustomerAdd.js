@@ -27,7 +27,7 @@ const CustomerAdd = ({ isOpen, toggle }) => {
   const [userData, setUserData] = useState({
     user_name: "",
     user_email: "",
-    user_password: "",
+  
     user_type: 6,
     user_phone_number: "",
     user_role_id: 3, // static 3
@@ -81,7 +81,7 @@ const CustomerAdd = ({ isOpen, toggle }) => {
 
     if (!userData.user_name) newErrors.user_name = "Name is required";
     if (!userData.user_email) newErrors.user_email = "Email is required";
-    if (!userData.user_password) newErrors.user_password = "Password is required";
+     
     if (!userData.user_phone_number)
       newErrors.user_phone_number = "Phone Number is required";
 
@@ -98,8 +98,7 @@ const CustomerAdd = ({ isOpen, toggle }) => {
     const formData = new FormData();
     formData.append("user_name", userData.user_name);
     formData.append("user_type", userData.user_type);
-    formData.append("user_email", userData.user_email);
-    formData.append("user_password", userData.user_password);
+    formData.append("user_email", userData.user_email); 
     formData.append("user_phone_number", userData.user_phone_number);
     formData.append("user_role_id", userData.user_role_id);
     formData.append("user_address_pincode", userData.user_address_pincode || "");
@@ -125,7 +124,7 @@ const CustomerAdd = ({ isOpen, toggle }) => {
       user_name: "",
       user_email: "",
       user_type: 6,
-      user_password: "",
+      
       user_phone_number: "",
       user_role_id: 3,
       user_address_pincode: "",
@@ -225,26 +224,7 @@ const CustomerAdd = ({ isOpen, toggle }) => {
                   <span className="text-danger text-sm">
                     {errors.user_email}
                   </span>
-                </Col>
-
-                {/* Password */}
-                <Col lg={4}>
-                  <Label className="form-label fw-bold">
-                    Password <span className="text-danger">*</span>
-                  </Label>
-                  <Input
-                    name="user_password"
-                    type="password"
-                    placeholder="Enter Password"
-                    value={userData.user_password}
-                    onChange={handleInputChange}
-                  />
-                  <span className="text-danger text-sm">
-                    {errors.user_password}
-                  </span>
-                </Col>
-
-                {/* Pincode */}
+                </Col> 
                 <Col lg={4}>
                   <Label className="form-label fw-bold d-flex justify-content-between">
                     <span>Pincode</span>

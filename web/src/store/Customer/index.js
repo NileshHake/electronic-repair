@@ -166,6 +166,7 @@ function* updateCustomerSaga({ payload }) {
   try {
     const response = yield call(updateCustomerApi, payload);
     yield put(customerApiResponseSuccess(UPDATE_CUSTOMER, response));
+     yield put({ type: GET_CUSTOMERS });
     toast.success(" Customer updated successfully!");
   } catch (error) {
     yield put(customerApiResponseError(UPDATE_CUSTOMER, error));
@@ -177,7 +178,8 @@ function* deleteCustomerSaga({ payload }) {
   try {
     yield call(deleteCustomerApi, payload);
     yield put(customerApiResponseSuccess(DELETE_CUSTOMER, payload));
-    toast.success("🗑️ Customer deleted successfully!");
+     yield put({ type: GET_CUSTOMERS });
+    toast.success("  Customer deleted successfully!");
   } catch (error) {
     yield put(customerApiResponseError(DELETE_CUSTOMER, error));
     toast.error("❌ Failed to delete customer!");

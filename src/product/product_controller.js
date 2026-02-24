@@ -132,32 +132,74 @@ const AdminProductList = async (req, res) => {
       ? `WHERE ${whereParts.join(" AND ")}`
       : ""; // ✅ empty => no WHERE => all products
 
-    const products = await sequelize.query(
-      `
-      SELECT 
-        pro.*,
-        tx.tax_id,
-        tx.tax_name,
-        tx.tax_percentage,
-        cat.category_id,
-        cat.category_name,
-        br.brand_id,
-        br.brand_name
-      FROM tbl_products AS pro
-      LEFT JOIN tbl_taxes AS tx 
-        ON pro.product_tax = tx.tax_id
-      LEFT JOIN tbl_categories AS cat 
-        ON pro.product_category = cat.category_id
-      LEFT JOIN tbl_brands AS br 
-        ON pro.product_brand = br.brand_id
-      ${whereCondition}
-      ORDER BY pro.product_id ASC
-      `,
-      {
-        replacements,
-        type: sequelize.QueryTypes.SELECT,
-      }
-    );
+   const products = await sequelize.query(
+  `
+  SELECT 
+    pro.*,
+
+    tx.tax_id,
+    tx.tax_name,
+    tx.tax_percentage,
+
+    cat.category_id,
+    cat.category_name,
+
+    subcat.category_id AS sub_category_id,
+    subcat.category_name AS sub_category_name,
+
+    ram.ram_id,
+    ram.ram_name,
+
+    br.brand_id,
+    br.brand_name,
+
+    -- ✅ Single generation name
+    genSingle.generations_name AS generation_name,
+
+    -- ✅ Multiple support generation names
+    GROUP_CONCAT(
+      DISTINCT genMulti.generations_name 
+      ORDER BY genMulti.generations_id 
+      SEPARATOR ', '
+    ) AS generations_names
+
+  FROM tbl_products AS pro
+
+  LEFT JOIN tbl_taxes AS tx 
+    ON pro.product_tax = tx.tax_id
+
+  LEFT JOIN tbl_categories AS cat 
+    ON pro.product_category = cat.category_id
+
+  LEFT JOIN tbl_categories AS subcat 
+    ON pro.product_sub_category = subcat.category_id
+
+  LEFT JOIN tbl_rams AS ram 
+    ON pro.product_ram_id = ram.ram_id
+
+  LEFT JOIN tbl_brands AS br 
+    ON pro.product_brand = br.brand_id
+
+  -- ✅ Join for SINGLE generation
+  LEFT JOIN tbl_generations AS genSingle
+    ON pro.product_generation_id = genSingle.generations_id
+
+  -- ✅ Join for MULTIPLE generations [2,4,6]
+  LEFT JOIN tbl_generations AS genMulti
+    ON FIND_IN_SET(
+      genMulti.generations_id,
+      REPLACE(REPLACE(REPLACE(pro.product_support_generations,'[',''),']',''), ' ', '')
+    )
+
+  ${whereCondition}
+  GROUP BY pro.product_id
+  ORDER BY pro.product_id ASC
+  `,
+  {
+    replacements,
+    type: sequelize.QueryTypes.SELECT,
+  }
+);
 
     return res.status(200).json(products
 
@@ -500,7 +542,7 @@ const filterProductsForQuotation
   = async (req, res) => {
     try {
       const { category_id } = req.body;
-     const whereConditions = [];
+      const whereConditions = [];
       const replacements = {};
 
       // ✅ ALWAYS show only active products

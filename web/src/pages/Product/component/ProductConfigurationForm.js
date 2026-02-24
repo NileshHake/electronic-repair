@@ -304,6 +304,7 @@ export const UsageField = ({ productData, setField, usageOptions }) => (
     </Col>
 );
 
+ 
 export const BasicAttributes = ({ productData, setField }) => (
     <>
         {/* Product Color */}
@@ -325,6 +326,15 @@ export const BasicAttributes = ({ productData, setField }) => (
                 placeholder="Enter Material (e.g., Cotton, Steel)"
                 value={productData.product_material}
                 onChange={(e) => setField("product_material", e.target.value)}
+            />
+        </Col>
+        <Col lg={4} className="mt-2">
+            <Label className="form-label fw-bold">Product HSN Code </Label>
+            <Input
+                type="text"
+                placeholder="Enter Material (e.g., Cotton, Steel)"
+                value={productData.product_hsn_code}
+                onChange={(e) => setField("product_hsn_code", e.target.value)}
             />
         </Col>
 

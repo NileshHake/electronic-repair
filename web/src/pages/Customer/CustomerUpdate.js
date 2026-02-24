@@ -27,7 +27,7 @@ const CustomerUpdate = ({ isOpen, toggle, customerDataToEdit }) => {
   const [userData, setUserData] = useState({
     user_name: "",
     user_email: "",
-    user_password: "",
+   
     user_phone_number: "",
     user_role_id: 3,
     user_address_pincode: "",
@@ -49,7 +49,7 @@ const CustomerUpdate = ({ isOpen, toggle, customerDataToEdit }) => {
         ...prev,
         user_name: customerDataToEdit?.user_name || "",
         user_email: customerDataToEdit?.user_email || "",
-        user_password: customerDataToEdit?.user_password || "", // blank on edit
+      
         user_phone_number: customerDataToEdit?.user_phone_number || "",
         user_role_id: customerDataToEdit?.user_role_id || 3,
         user_address_pincode: customerDataToEdit?.user_address_pincode || "",
@@ -222,18 +222,7 @@ const CustomerUpdate = ({ isOpen, toggle, customerDataToEdit }) => {
                 <span className="text-danger">{errors.user_email}</span>
               </Col>
 
-              {/* Password (optional) */}
-              <Col lg={4}>
-                <Label className="form-label fw-bold">Password</Label>
-                <Input
-                  name="user_password"
-                  type="password"
-                  placeholder="Enter new password (optional)"
-                  value={userData.user_password}
-                  onChange={handleInputChange}
-                />
-                <span className="text-danger">{errors.user_password}</span>
-              </Col>
+           
 
               {/* Pincode */}
               <Col lg={4}>

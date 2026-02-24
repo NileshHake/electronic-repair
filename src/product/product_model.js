@@ -19,6 +19,10 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+   product_hsn_code: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   product_description: {
     type: DataTypes.TEXT("long"),
     allowNull: true,
@@ -36,10 +40,7 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  product_category: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
+ 
   
   product_sub_category: {
     type: DataTypes.INTEGER,
