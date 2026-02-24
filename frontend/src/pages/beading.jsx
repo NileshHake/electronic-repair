@@ -10,22 +10,36 @@ import Cookies from "js-cookie";
 
 export default function BeadingPage() {
   const router = useRouter();
-  const [isAllowed, setIsAllowed] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const userInfo = Cookies.get("userInfo");
+    const cookie = Cookies.get("userInfo");
 
-    if (!userInfo) {
-      router.replace("/login"); // ✅ better than push
+    // ✅ Not logged in
+    if (!cookie) {
+      router.replace("/login");
       return;
     }
 
-    setIsAllowed(true);
+    // ✅ Parse user info
+    let userInfo;
+    try {
+      userInfo = JSON.parse(cookie);
+    } catch (e) {
+      router.replace("/login");
+      return;
+    }
+
+    // ✅ If phone number missing → redirect to profile
+    if (!userInfo?.user_phone_number) {
+      router.replace("/profile#nav-information");
+      return;
+    }
+
+    setReady(true);
   }, [router]);
 
-  // ✅ Avoid render until auth check done
-  if (!isAllowed) return null; // or loader
-
+  if (!ready) return null;
   return (
     <Wrapper>
       <SEO pageTitle="Beading" />

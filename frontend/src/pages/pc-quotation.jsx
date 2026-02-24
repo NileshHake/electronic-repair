@@ -11,24 +11,36 @@ import PCQuotationArea from "@/components/pc-quotation/pc-quotation-aera";
 
 const PCQuotationPage = () => {
   const router = useRouter();
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    // ✅ runs only in browser
-    const userInfo = Cookies.get("userInfo");
-
-    if (!userInfo) {
-        
-      router.replace("/login"); // replace is better than push for auth redirect
-      return;
-    }
-
-    setReady(true);
-  }, [router]);
-
-  // ✅ while checking cookie, show nothing (or loader)
-  if (!ready) return null;
-
+   const [ready, setReady] = useState(false);
+ 
+   useEffect(() => {
+     const cookie = Cookies.get("userInfo");
+ 
+     // ✅ Not logged in
+     if (!cookie) {
+       router.replace("/login");
+       return;
+     }
+ 
+     // ✅ Parse user info
+     let userInfo;
+     try {
+       userInfo = JSON.parse(cookie);
+     } catch (e) {
+       router.replace("/login");
+       return;
+     }
+ 
+     // ✅ If phone number missing → redirect to profile
+     if (!userInfo?.user_phone_number) {
+       router.replace("/profile#nav-information");
+       return;
+     }
+ 
+     setReady(true);
+   }, [router]);
+ 
+   if (!ready) return null;
   return (
     <Wrapper>
       <SEO pageTitle="Repair" />

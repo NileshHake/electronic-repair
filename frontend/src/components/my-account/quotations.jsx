@@ -38,29 +38,27 @@ const QuotationTab = () => {
       toast.error("Download failed");
     }
   };
-const getStatusBadge = (status) => {
-  const s = Number(status);
 
-  switch (s) {
-    case 0:
-      return <span className="badge bg-warning text-dark">Pending</span>;
+  const getStatusBadge = (status) => {
+    const s = Number(status);
 
-    case 1:
-      return <span className="badge bg-secondary">New</span>;
-
-    case 2:
-      return <span className="badge bg-primary">Accept</span>;
-
-    case 3:
-      return <span className="badge bg-success">Final</span>;
-
-    case 4:
-      return <span className="badge bg-danger">Reject</span>;
-
-    default:
-      return <span className="badge bg-dark">Unknown</span>;
-  }
-};
+    switch (s) {
+      case 0:
+        return <span className="badge bg-warning text-dark">Pending</span>;
+      case 1:
+        return <span className="badge bg-secondary">New</span>;
+      case 2:
+        return <span className="badge bg-primary">Accept</span>;
+      case 3:
+        return <span className="badge bg-success">Final</span>;
+      case 4:
+        return <span className="badge bg-danger">Reject</span>;
+      case 5:
+        return <span className="badge bg-info text-dark">In Progress</span>;
+      default:
+        return <span className="badge bg-dark">Unknown</span>;
+    }
+  };
 
   if (isLoading) return <p>Loading quotations...</p>;
 
@@ -77,10 +75,7 @@ const getStatusBadge = (status) => {
       {/* Header */}
       <div className="card-header bg-white d-flex justify-content-between align-items-center">
         <h5 className="mb-0 fw-semibold">My Quotations</h5>
-        <button
-          className="btn btn-outline-primary btn-sm"
-          onClick={refetch}
-        >
+        <button className="btn btn-outline-primary btn-sm" onClick={refetch}>
           Refresh
         </button>
       </div>
@@ -115,31 +110,45 @@ const getStatusBadge = (status) => {
 
           <tbody>
             {Array.isArray(list) && list.length > 0 ? (
-              list.map((q, idx) => (
-                <tr key={q.quotation_id || idx}>
-                  <td>{idx + 1}</td>
-                  <td className="fw-semibold text-primary">
-                    {q.quotation_no}
-                  </td>
-                  <td>{q.create_date}</td>
-                  <td>{q.expire_date}</td>
-                  <td className="fw-bold text-success">
-                    ₹ {Number(q.grand_total || 0).toFixed(2)}
-                  </td>
-                  <td>{getStatusBadge(q.quotation_status)}</td>
-                  <td className="text-center">
-                    <button
-                      className="btn btn-sm btn-success px-3"
-                      disabled={isDownloading}
-                      onClick={() =>
-                        downloadPdf(q.quotation_id)
-                      }
-                    >
-                      {isDownloading ? "..." : "Download"}
-                    </button>
-                  </td>
-                </tr>
-              ))
+              list.map((q, idx) => {
+                const status = Number(q.quotation_status);
+
+                // ✅ show download only after Accept (2) / In Progress (5) / Final (3)
+                const canDownload = [2, 5, 3].includes(status);
+
+                return (
+                  <tr key={q.quotation_id || idx}>
+                    <td>{idx + 1}</td>
+
+                    <td className="fw-semibold text-primary">{q.quotation_no}</td>
+
+                    <td>{q.create_date}</td>
+                    <td>{q.expire_date}</td>
+
+                    <td className="fw-bold text-success">
+                      ₹ {Number(q.grand_total || 0).toFixed(2)}
+                    </td>
+
+                    <td>{getStatusBadge(status)}</td>
+
+                    <td className="text-center">
+                      {canDownload ? (
+                        <button
+                          className="btn btn-sm btn-success px-3"
+                          disabled={isDownloading}
+                          onClick={() => downloadPdf(q.quotation_id)}
+                        >
+                          {isDownloading ? "..." : "Download"}
+                        </button>
+                      ) : (
+                        <span className="badge bg-light text-muted border">
+                          Not Available
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan="7" className="text-center py-4">

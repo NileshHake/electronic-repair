@@ -14,19 +14,32 @@ const RepairPage = () => {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // ✅ runs only in browser
-    const userInfo = Cookies.get("userInfo");
+    const cookie = Cookies.get("userInfo");
 
-    if (!userInfo) {
-        
-      router.replace("/login"); // replace is better than push for auth redirect
+    // ✅ Not logged in
+    if (!cookie) {
+      router.replace("/login");
+      return;
+    }
+
+    // ✅ Parse user info
+    let userInfo;
+    try {
+      userInfo = JSON.parse(cookie);
+    } catch (e) {
+      router.replace("/login");
+      return;
+    }
+
+    // ✅ If phone number missing → redirect to profile
+    if (!userInfo?.user_phone_number) {
+      router.replace("/profile#nav-information");
       return;
     }
 
     setReady(true);
   }, [router]);
 
-  // ✅ while checking cookie, show nothing (or loader)
   if (!ready) return null;
 
   return (
@@ -34,7 +47,7 @@ const RepairPage = () => {
       <SEO pageTitle="Recovery" />
       <HeaderTwo style_2={true} />
       <CommonBreadcrumb title="Add Recovery Order" center={true} subtitle="Recovery" />
-      <RecoveryArea  />
+      <RecoveryArea />
       <Footer primary_style={true} />
     </Wrapper>
   );
