@@ -14,14 +14,13 @@ const ElectronicCategory = () => {
   const router = useRouter();
 
   // handle category route
-  const handleCategoryRoute = (title) => {
-    router.push(
-      `/shop?category=${title
-        .toLowerCase()
-        .replace("&", "")
-        .split(" ")
-        .join("-")}`
-    );
+  const handleCategoryRoute = (data) => {
+    router.push({
+      pathname: "/shop",
+      query: {
+        category_id: data.category_id,
+      },
+    });
   };
 
   // decide what to render
@@ -40,7 +39,7 @@ const ElectronicCategory = () => {
           <div className="tp-product-category-thumb fix">
             <a
               className="cursor-pointer"
-              onClick={() => handleCategoryRoute(item.category_name)}
+              onClick={() => handleCategoryRoute(item)}
             >
               <Image
                 src={
