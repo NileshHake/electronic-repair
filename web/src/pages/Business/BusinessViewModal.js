@@ -92,7 +92,7 @@
 
               <tr>
                 <th>GST Number</th>
-                <td>{business?.user_gst_number || "-"}</td>
+                <td>{business?.user_gst_id || "-"}</td>
               </tr>
 
               <tr>

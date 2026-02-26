@@ -9,6 +9,7 @@ const {
   createDefaultWorkflow,
 } = require("../CreateData/create_data_for_business");
 const sequelize = require("../../config/db");
+const { QueryTypes } = require("sequelize");
 
 const googleCustomerLogin = async (req, res) => {
   try {
@@ -247,13 +248,44 @@ const Deliveryindex = async (req, res) => {
 };
 const Get = async (req, res) => {
   try {
-    const user = await User.findByPk(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.status(200).json(user);
+    const { id } = req.params;
+
+    const rows = await sequelize.query(
+      `
+      SELECT 
+        u.*,   -- all user columns
+        g.*    -- all gst columns
+
+      FROM tbl_users u
+      LEFT JOIN tbl_gst g
+        ON g.gst_id = u.user_gst_id
+
+      WHERE u.user_id = :id
+      LIMIT 1
+      `,
+      {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    const result = rows[0];
+
+    if (!result) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "User fetched successfully",
+      data: result,
+    });
+
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching user", error: error.message });
+    console.log(error);
+    return res.status(500).json({
+      message: "Error fetching user",
+      error: error.message,
+    });
   }
 };
 
@@ -312,7 +344,7 @@ const update = async (req, res) => {
 const CustomerUpdate = async (req, res) => {
   try {
     const { user_id } = req.body;
-    console.log(req.body);
+    
 
     const user = await User.findByPk(user_id);
     if (!user) {

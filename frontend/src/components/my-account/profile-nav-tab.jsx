@@ -49,7 +49,11 @@ const ProfileNavTab = () => {
           title="Quotation"
           icon="fa-light fa-clipboard-list-check"
         />
-         
+         <SingleNav
+  id="gst"
+  title="GST Verification"
+  icon="fa-light fa-file-invoice"
+ />
       </div>
     </nav>
   );

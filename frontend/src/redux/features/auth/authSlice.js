@@ -4,6 +4,9 @@ import Cookies from "js-cookie";
 const initialState = {
   accessToken: undefined,
   user: undefined,
+
+  // ✅ new
+  singleUser: undefined,
 };
 
 const authSlice = createSlice({
@@ -17,10 +20,19 @@ const authSlice = createSlice({
     userLoggedOut: (state) => {
       state.accessToken = undefined;
       state.user = undefined;
-      Cookies.remove('userInfo');
+
+      // ✅ new
+      state.singleUser = undefined;
+
+      Cookies.remove("userInfo");
+    },
+
+    // ✅ new reducer
+    setSingleUser: (state, { payload }) => {
+      state.singleUser = payload;
     },
   },
 });
 
-export const { userLoggedIn, userLoggedOut } = authSlice.actions;
+export const { userLoggedIn, userLoggedOut, setSingleUser } = authSlice.actions;
 export default authSlice.reducer;

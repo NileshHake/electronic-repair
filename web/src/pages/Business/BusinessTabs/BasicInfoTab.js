@@ -130,9 +130,9 @@ const BasicInfoTab = ({
       <Col lg={4}>
         <Label>GST Number</Label>
         <Input
-          name="user_gst_number"
+          name="user_gst_id"
           type="text"
-          value={businessData?.user_gst_number || ""}
+          value={businessData?.user_gst_id || ""}
           onChange={handleInputChange}
           placeholder="Enter GST number"
         />

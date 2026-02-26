@@ -31,7 +31,7 @@ export default function BeadingPage() {
     }
 
     // ✅ If phone number missing → redirect to profile
-    if (!userInfo?.user_phone_number) {
+     if (!userInfo?.user?.user_phone_number) {
       router.replace("/profile#nav-information");
       return;
     }

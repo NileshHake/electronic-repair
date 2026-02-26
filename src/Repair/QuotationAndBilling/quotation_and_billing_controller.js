@@ -284,7 +284,7 @@ module.exports.quotationInvoicePdf = async (req, res) => {
             const y0 = PAGE().top;
 
             const businessName = business?.user_name || "Your Business Name";
-            const gstNo = business?.user_gst_number || business?.user_gst || "N/A"; // 👈 adjust field name if different
+            const gstNo = business?.user_gst_id || business?.user_gst || "N/A"; // 👈 adjust field name if different
 
             doc
                 .font("Helvetica-Bold")

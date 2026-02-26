@@ -40,11 +40,11 @@ const User = sequelize.define("tbl_user", {
     allowNull: true,
   },
 
-  user_upi_id: {
+  user_gst_id: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  user_gst_number: {
+  user_upi_id: {
     type: DataTypes.STRING,
     allowNull: true,
   },

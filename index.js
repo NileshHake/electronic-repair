@@ -197,6 +197,10 @@ const Recovery = require("./src/recovery/recovery_route");
 app.use("/api", Recovery);
 
 
+const ORCGst = require("./src/orcgst/gst_routes");
+app.use("/api", ORCGst);
+
+
 
 
 const PORT = process.env.PORT || 5000;

@@ -8,6 +8,7 @@ import ProfileInfo from "./profile-info";
 import ChangePassword from "./change-password";
 import MyOrders from "./my-orders";
 import QuotationTab from "./quotations";
+import GSTVerification from "./gst-verification";
 
 const ProfileArea = ({ orderData, quotationData }) => {
   const router = useRouter();
@@ -22,8 +23,8 @@ const ProfileArea = ({ orderData, quotationData }) => {
       // Find the tab button that targets this hash
       const triggerEl = document.querySelector(
         `[data-bs-toggle="tab"][data-bs-target="${hash}"],` +
-          `[data-toggle="tab"][data-target="${hash}"],` + // old bootstrap support
-          `a[href="${hash}"]`
+        `[data-toggle="tab"][data-target="${hash}"],` + // old bootstrap support
+        `a[href="${hash}"]`
       );
 
       if (triggerEl && bs?.Tab) {
@@ -109,6 +110,15 @@ const ProfileArea = ({ orderData, quotationData }) => {
                     aria-labelledby="nav-password-tab"
                   >
                     <ChangePassword />
+                  </div>
+                  {/* GST Verification */}
+                  <div
+                    className="tab-pane fade"
+                    id="nav-gst"
+                    role="tabpanel"
+                    aria-labelledby="nav-gst-tab"
+                  >
+                    <GSTVerification />
                   </div>
                 </div>
               </div>

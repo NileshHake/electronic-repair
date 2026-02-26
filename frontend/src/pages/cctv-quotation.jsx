@@ -14,13 +14,11 @@ const PCQuotationPage = () => {
   useEffect(() => {
     const cookie = Cookies.get("userInfo");
 
-    // ✅ Not logged in
     if (!cookie) {
       router.replace("/login");
       return;
     }
 
-    // ✅ Parse user info
     let userInfo;
     try {
       userInfo = JSON.parse(cookie);
@@ -29,8 +27,10 @@ const PCQuotationPage = () => {
       return;
     }
 
-    // ✅ If phone number missing → redirect to profile
-    if (!userInfo?.user_phone_number) {
+
+
+    // ✅ Correct check
+    if (!userInfo?.user?.user_phone_number) {
       router.replace("/profile#nav-information");
       return;
     }

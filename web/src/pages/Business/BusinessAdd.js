@@ -44,7 +44,7 @@ const BusinessAdd = ({ isOpen, toggle, status }) => {
     user_email: "",
     user_password: "",
     user_phone_number: "",
-    user_gst_number: "",
+    user_gst_id: "",
     user_upi_id: "",
     user_bank_name: "",
     user_ifsc_code: "",
