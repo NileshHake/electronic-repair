@@ -31,7 +31,7 @@ app.use(
     useTempFiles: true,
     tempFileDir: "/tmp/",
     createParentPath: true,
-  })  
+  })
 );
 
 app.use("/public", express.static(path.join(__dirname, "public")));
@@ -58,7 +58,7 @@ sequelize
   .then(async () => {
     console.log("✅ Database connected successfully");
 
-    await sequelize.sync({ alter: false });
+    await sequelize.sync({ alter: true });
     console.log("🔁 Models synchronized with database (force: true)");
 
     const { findingAlready } = require("./src/CreateData/create_data");
@@ -200,7 +200,12 @@ app.use("/api", Recovery);
 const ORCGst = require("./src/orcgst/gst_routes");
 app.use("/api", ORCGst);
 
+const RentalDeviceRoutes = require("./src/rental device/rental_device_routes");
+app.use("/api", RentalDeviceRoutes);
 
+
+const RentalRequestRoutes = require("./src/retanl request/rental_request_routes");
+app.use("/api", RentalRequestRoutes);
 
 
 const PORT = process.env.PORT || 5000;

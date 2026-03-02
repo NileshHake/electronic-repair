@@ -99,6 +99,8 @@ import { generationSaga } from "./Generation";
 import { ramSaga } from "./Ram";
 import { quotationSaga } from "./Inquiry";
 import { recoverySaga } from "./recovery";
+import { rentalRequestSaga } from "./RentalRequest";
+import { rentalDeviceSaga } from "./RentalDevice";
 export default function* rootSaga() {
   yield all([
     //public
@@ -136,6 +138,8 @@ export default function* rootSaga() {
     fork(ramSaga),
     fork(AccountSaga),
     fork(repairSaga),
+    fork(rentalRequestSaga),
+    fork(rentalDeviceSaga),
     fork(supplierSaga),
     fork(AuthSaga),
     fork(ForgetSaga),

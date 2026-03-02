@@ -36,7 +36,7 @@ const Navdata = () => {
   const [isBeading, setIsBeading] = useState(false);
   const [isReqToSupplier, setIsReqToSupplier] = useState(false);
   const [isInquiry, setIsInquiry] = useState(false);
-
+  const [isRentalDevice, setIsRentalDevice] = useState(false);
   const [isLanding, setIsLanding] = useState(false);
 
   // Charts
@@ -91,6 +91,9 @@ const Navdata = () => {
     }
     if (iscurrentState !== "Inquiry") {
       setIsInquiry(false);
+    }
+    if (iscurrentState !== "RentalDevice") {
+      setIsRentalDevice(false);
     }
 
     if (iscurrentState !== "Products") {
@@ -267,7 +270,20 @@ const Navdata = () => {
         history("/inquiry-list");
       },
     },
-
+    {
+      id: "RENTAL_DEVICE",
+      label: "Rental Device",
+      icon: "mdi mdi-laptop",
+      link: "/rental-device-list",
+      stateVariables: isRentalDevice,
+      click: function (e) {
+        e.preventDefault();
+        setIsRentalDevice(!isRentalDevice);
+        setIscurrentState("RentalDevice");
+        updateIconSidebar(e);
+        history("/rental-device-list");
+      },
+    },
     {
       id: "BEADING",
       label: "Beading",

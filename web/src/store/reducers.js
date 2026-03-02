@@ -107,6 +107,8 @@ import { GenerationReducer } from "./Generation";
 import { RamReducer } from "./Ram";
 import { QuotationReducer } from "./Inquiry";
 import { RecoveryReducer } from "./recovery";
+import { RentalDeviceReducer } from "./RentalDevice";
+import { RentalRequestReducer } from "./RentalRequest";
 
 const rootReducer = combineReducers({
   // public
@@ -155,6 +157,8 @@ const rootReducer = combineReducers({
   RepairTypeReducer,
   UserReducer,
   DeliveryBoyReducer,
+  RentalDeviceReducer,
+  RentalRequestReducer,
   TechnicianReducer,
   CategoryReducer,
   BrandReducer,
