@@ -1,3 +1,4 @@
+// BeadingList.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Button,
@@ -13,22 +14,38 @@ import { useDispatch, useSelector } from "react-redux";
 import { api } from "../../config";
 import {
     getBeadingList,
+    getVendorOffersByRequest,
     resetUpdateBeadingResponse,
-    updateBeading,
+    upsertVendorOffer, // ✅ NEW (calls /beading/vendor-offer)
 } from "../../store/Beading/index";
 import BeadingDetailsModal from "./BeadingDetailsModal";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/material_blue.css";
+import AuthUser from "../../helpers/AuthType/AuthUser";
 
-const statusText = (s) =>
-    Number(s) === 0 ? "Pending" : Number(s) === 1 ? "Accepted" : "Unknown";
+const statusText = (row, currentVendorId) => {
+    const acceptedVendorId = Number(row?.beading_vender_accepted_id || 0);
 
-const statusClass = (s) =>
-    Number(s) === 0
-        ? "badge bg-warning text-dark"
-        : Number(s) === 1
-            ? "badge bg-success"
-            : "badge bg-secondary";
+    if (!acceptedVendorId) return "Pending";
+
+    if (acceptedVendorId === Number(currentVendorId)) {
+        return "Accepted";
+    }
+
+    return "Rejected";
+};
+
+const statusClass = (row, currentVendorId) => {
+    const acceptedVendorId = Number(row?.beading_vender_accepted_id || 0);
+
+    if (!acceptedVendorId) return "badge bg-warning text-dark";
+
+    if (acceptedVendorId === Number(currentVendorId)) {
+        return "badge bg-success";
+    }
+
+    return "badge bg-danger";
+};
 
 const parseImgs = (imagesString) =>
     !imagesString
@@ -46,9 +63,11 @@ const sliceText = (text, limit = 20) => {
 
 const BeadingList = () => {
     document.title = "Beading Orders";
-
+    const { user } = AuthUser();
+    const currentVendorId = user?.user_id;
     const dispatch = useDispatch();
-    const { list, loading, hasMore, updateBeadingResponse } = useSelector(
+
+    const { list, vendorOffers, loading, hasMore, upsertVendorOfferResponse } = useSelector(
         (state) => state.BeadingReducer
     );
 
@@ -103,38 +122,65 @@ const BeadingList = () => {
         return () => obs.disconnect();
     }, [loading, hasMore]);
 
+    const [selectedRequestId, setSelectedRequestId] = useState(null);
+
     const openDetails = (row) => {
-        setDetailsData(row);
+        const id = row?.beading_request_id;
+        if (!id) return;
+
+        setSelectedRequestId(id);
         setIsDetailsOpen(true);
+
+        // ✅ set row immediately (vendorOffers empty for now)
+        setDetailsData({ ...row, vendorOffers: [] });
+
+        // ✅ fetch offers
+        dispatch(getVendorOffersByRequest(id));
     };
+
+    // ✅ whenever vendorOffers changes, update modal data
+    useEffect(() => {
+        if (!isDetailsOpen) return;
+        if (!selectedRequestId) return;
+
+        setDetailsData((prev) => {
+            if (!prev) return prev;
+            // ensure we are updating same request
+            if (Number(prev.beading_request_id) !== Number(selectedRequestId)) return prev;
+
+            return {
+                ...prev,
+                vendorOffers: Array.isArray(vendorOffers) ? vendorOffers : [],
+            };
+        });
+    }, [vendorOffers, isDetailsOpen, selectedRequestId]);
+
 
     const closeDetails = () => {
         setIsDetailsOpen(false);
         setDetailsData(null);
     };
 
-    const handleAcceptBeading = (row) => {
-        dispatch(
-            updateBeading({
-                beading_request_id: row.beading_request_id,
-                vendor_beading_amount: row.vendor_beading_amount,
-
-            })
-        );
+    // ✅ Vendor Offer store (child)
+    const handleVendorOffer = (payload) => {
+        dispatch(upsertVendorOffer(payload));
     };
 
-    // ✅ after accept: reload from page 1
+    // ✅ after offer saved: reload from page 1
     useEffect(() => {
-        if (updateBeadingResponse) {
+        if (upsertVendorOfferResponse) {
             setIsDetailsOpen(false);
-            setDetailsData(null); dispatch(getBeadingList({ page, limit, ...filters }));
+            setDetailsData(null);
+
+            setPage(1);
+            dispatch(getBeadingList({ page: 1, limit, ...filters }));
             dispatch(resetUpdateBeadingResponse());
         }
-    }, [updateBeadingResponse, dispatch]);
+    }, [upsertVendorOfferResponse, dispatch]);
 
     // ✅ filter actions
     const applyFilter = () => {
-        setPage(1); // ✅ reset page
+        setPage(1);
         dispatch(getBeadingList({ page: 1, limit, ...filters }));
     };
 
@@ -167,7 +213,9 @@ const BeadingList = () => {
                                     <Col md="9" className="ms-auto">
                                         <Row className="align-items-end g-2 justify-content-end">
                                             <Col md="3">
-                                                <Label className="form-label fw-bold mb-1">Start Date</Label>
+                                                <Label className="form-label fw-bold mb-1">
+                                                    Start Date
+                                                </Label>
                                                 <Flatpickr
                                                     className="form-control"
                                                     placeholder="Start date"
@@ -176,14 +224,18 @@ const BeadingList = () => {
                                                     onChange={([date]) =>
                                                         setFilters((p) => ({
                                                             ...p,
-                                                            start_date: date ? date.toISOString().slice(0, 10) : "",
+                                                            start_date: date
+                                                                ? date.toISOString().slice(0, 10)
+                                                                : "",
                                                         }))
                                                     }
                                                 />
                                             </Col>
 
                                             <Col md="3">
-                                                <Label className="form-label fw-bold mb-1">End Date</Label>
+                                                <Label className="form-label fw-bold mb-1">
+                                                    End Date
+                                                </Label>
                                                 <Flatpickr
                                                     className="form-control"
                                                     placeholder="End date"
@@ -200,11 +252,19 @@ const BeadingList = () => {
 
                                             {/* Buttons */}
                                             <Col md="4" className="d-flex gap-2 justify-content-end">
-                                                <Button color="success" className="mt-auto" onClick={applyFilter}>
+                                                <Button
+                                                    color="success"
+                                                    className="mt-auto"
+                                                    onClick={applyFilter}
+                                                >
                                                     Apply
                                                 </Button>
 
-                                                <Button color="secondary" className="mt-auto" onClick={clearFilter}>
+                                                <Button
+                                                    color="secondary"
+                                                    className="mt-auto"
+                                                    onClick={clearFilter}
+                                                >
                                                     Clear
                                                 </Button>
 
@@ -216,7 +276,6 @@ const BeadingList = () => {
                                     </Col>
                                 </Row>
                             </CardHeader>
-
 
                             <CardBody className="pt-0">
                                 {/* ✅ scroll container root */}
@@ -267,7 +326,9 @@ const BeadingList = () => {
                                                                             borderRadius: 8,
                                                                             border: "1px solid #e9ecef",
                                                                         }}
-                                                                        onError={(e) => (e.currentTarget.style.opacity = 0.2)}
+                                                                        onError={(e) =>
+                                                                            (e.currentTarget.style.opacity = 0.2)
+                                                                        }
                                                                     />
                                                                 ) : (
                                                                     <span className="text-muted small">No image</span>
@@ -297,16 +358,16 @@ const BeadingList = () => {
                                                             </td>
 
                                                             <td>
-                                                                ₹{o?.beading_budget_min || 0} - ₹{o?.beading_budget_max || 0}
+                                                                ₹{o?.beading_budget_min || 0} - ₹
+                                                                {o?.beading_budget_max || 0}
                                                             </td>
 
                                                             <td title={o?.beading_location || ""}>
                                                                 {sliceText(o?.beading_location, 16)}
                                                             </td>
-
                                                             <td>
-                                                                <span className={statusClass(o?.beading_request_status)}>
-                                                                    {statusText(o?.beading_request_status)}
+                                                                <span className={statusClass(o, currentVendorId)}>
+                                                                    {statusText(o, currentVendorId)}
                                                                 </span>
                                                             </td>
 
@@ -352,8 +413,6 @@ const BeadingList = () => {
                                                     </td>
                                                 </tr>
                                             )}
-
-
                                         </tbody>
                                     </table>
                                 </div>
@@ -363,13 +422,13 @@ const BeadingList = () => {
                 </Row>
             </Container>
 
-            {/* DETAILS MODAL */}
+            {/* DETAILS MODAL (Vendor offer store) */}
             <BeadingDetailsModal
                 isOpen={isDetailsOpen}
                 toggle={closeDetails}
                 data={detailsData}
                 imgBaseUrl={baseURL}
-                onAccept={handleAcceptBeading}
+                onVendorOffer={handleVendorOffer} // ✅ THIS stores in child table
             />
         </div>
     );

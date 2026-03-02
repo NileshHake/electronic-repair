@@ -157,7 +157,7 @@ function* getUsersListSaga() {
 function* getSingleUserSaga({ payload }) {
   try {
     const response = yield call(getSingleUserApi, payload);
-    yield put(userApiResponseSuccess(GET_SINGLE_USER, response));
+    yield put(userApiResponseSuccess(GET_SINGLE_USER, response.data));
   } catch (error) {
     yield put(userApiResponseError(GET_SINGLE_USER, error));
     toast.error("Failed to fetch user details!");

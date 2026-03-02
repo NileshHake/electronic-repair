@@ -24,11 +24,7 @@ const BeadingRequest = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    beading_vendor_details: {
-      type: DataTypes.TEXT("long"), // mysql
-      allowNull: true,
-    }
-    ,
+     
     beading_request_description: {
       type: DataTypes.TEXT,
       allowNull: true,
