@@ -93,54 +93,63 @@ const Header = () => {
 
 
           {/* header bottom start */}
-          <div className="tp-header-bottom tp-header-bottom-border d-none d-lg-block">
-            <div className="container">
-              <div className="tp-mega-menu-wrapper p-relative">
-                <div className="row align-items-center">
-                  <div className="col-xl-3 col-lg-3">
-                    {/* category start */}
-                    <div className="tp-header-category tp-category-menu tp-header-category-toggle">
-                      <button
-                        onClick={() => setIsCategoryActive(!isCategoryActive)}
-                        className="tp-category-menu-btn tp-category-menu-toggle"
-                      >
-                        <span>
-                          <CategoryMenu />
-                        </span>
-                        All Departments
-                      </button>
-                      <nav className="tp-category-menu-content">
-                        <HeaderCategory categoryType="electronics" isCategoryActive={isCategoryActive} />
-                      </nav>
-                    </div>
-                    {/* category end */}
-                  </div>
-                  <div className="col-xl-6 col-lg-6">
-                    <div className="main-menu menu-style-1">
-                      <nav className="tp-main-menu-content">
-                        <Menus />
-                      </nav>
-                    </div>
-                  </div>
-                  <div className="col-xl-3 col-lg-3">
-                    <div className="tp-header-contact d-flex align-items-center justify-content-end">
-                      <div className="tp-header-contact-icon">
-                        <span>
-                          <Phone />
-                        </span>
-                      </div>
-                      <div className="tp-header-contact-content">
-                        <h5>Hotline:</h5>
-                        <p>
-                          <a href="tel:966-595-035-008">+(966) 595 035 008</a>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          {/* header bottom start */}
+<div className="tp-header-bottom tp-header-bottom-border d-none d-lg-block">
+  <div className="container">
+    <div className="tp-mega-menu-wrapper p-relative">
+      <div className="row align-items-center">
+
+        {/* CATEGORY */}
+        <div className="col-xl-3 col-lg-3">
+          <div className="tp-header-category tp-category-menu tp-header-category-toggle">
+            <button
+              onClick={() => setIsCategoryActive(!isCategoryActive)}
+              className="tp-category-menu-btn tp-category-menu-toggle w-100"
+            >
+              <span>
+                <CategoryMenu />
+              </span>
+              All Departments
+            </button>
+            <nav className="tp-category-menu-content">
+              <HeaderCategory
+                categoryType="electronics"
+                isCategoryActive={isCategoryActive}
+              />
+            </nav>
+          </div>
+        </div>
+
+        {/* MENU */}
+        <div className="col-xl-7 col-lg-7">
+          <div className="main-menu menu-style-1 text-center">
+            <nav className="tp-main-menu-content">
+              <Menus />
+            </nav>
+          </div>
+        </div>
+
+        {/* CONTACT */}
+        <div className="col-xl-2 col-lg-2">
+          <div className="tp-header-contact d-flex align-items-center justify-content-end">
+            <div className="tp-header-contact-icon">
+              <span>
+                <Phone />
+              </span>
+            </div>
+            <div className="tp-header-contact-content">
+              <h6 className="mb-0">Hotline:</h6>
+              <p className="mb-0">
+                <a href="tel:966595035008">+(966) 595 035 008</a>
+              </p>
             </div>
           </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
         </div>
       </header>
 

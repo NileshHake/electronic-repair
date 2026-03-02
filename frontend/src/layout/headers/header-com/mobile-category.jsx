@@ -1,88 +1,77 @@
-import { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-// internal
-import { useGetProductTypeCategoryQuery } from "@/redux/features/categoryApi";
+import { useGetCategoriesWithSubQuery } from "@/redux/features/categoryApi";
 import ErrorMsg from "@/components/common/error-msg";
 import Loader from "@/components/loader/loader";
+import { api } from "../../../../config";
+import defaultIMG from "../../../../public/assets/img/istockphoto-1055079680-612x612.jpg";
 
-const MobileCategory = ({ isCategoryActive, categoryType }) => {
-  const {data: categories,isError,isLoading} = useGetProductTypeCategoryQuery(categoryType);
-  const [isActiveSubMenu,setIsActiveSubMenu] = useState("")
+const MobileCategory = ({ isCategoryActive }) => {
+  const { data: categories, isLoading, isError } =
+    useGetCategoriesWithSubQuery();
   const router = useRouter();
 
-  // handleOpenSubMenu
-  const handleOpenSubMenu = (title) => {
-    if(title === isActiveSubMenu){
-      setIsActiveSubMenu("")
-    }
-    else {
-      setIsActiveSubMenu(title)
-    }
-  }
-
-  // handle category route
-  const handleCategoryRoute = (title, route) => {
-    if (route === "parent") {
-      router.push(
-        `/shop?category=${title
-          .toLowerCase()
-          .replace("&", "")
-          .split(" ")
-          .join("-")}`
-      );
-    } else {
-      router.push(
-        `/shop?subCategory=${title
-          .toLowerCase()
-          .replace("&", "")
-          .split(" ")
-          .join("-")}`
-      );
-    }
+  // ✅ Common router function
+  const goShop = (category_id) => {
+    router.push({
+      pathname: "/shop",
+      query: {
+        category_id: category_id,
+      },
+    });
   };
-  // decide what to render
+
   let content = null;
 
-  if (isLoading) {
-    content = (
-      <div className="py-5">
-        <Loader loading={isLoading} />
-      </div>
-    );
-  }
-  if (!isLoading && isError) {
-    content = <ErrorMsg msg="There was an error" />;
-  }
-  if (!isLoading && !isError && categories?.result?.length === 0) {
+  if (isLoading) content = <Loader loading />;
+  if (!isLoading && isError) content = <ErrorMsg msg="There was an error" />;
+  if (!isLoading && !isError && (!categories || categories?.length === 0))
     content = <ErrorMsg msg="No Category found!" />;
-  }
-  if (!isLoading && !isError && categories?.result?.length > 0) {
-    const category_items = categories.result;
-    content = category_items.map((item) => (
-      <li className="has-dropdown" key={item._id}>
-        <a className="cursor-pointer">
-          {item.img && (
-            <span>
-              <Image src={item.img} alt="cate img" width={50} height={50} />
-            </span>
-          )}
-          {item.parent}
-          {item.children && (
-            <button onClick={()=> handleOpenSubMenu(item.parent)} className="dropdown-toggle-btn">
-              <i className="fa-regular fa-angle-right"></i>
-            </button>
-          )}
+
+  if (!isLoading && !isError && categories?.length > 0) {
+    content = categories.map((item) => (
+      <li className="has-dropdown" key={item.category_id}>
+        
+        {/* ✅ Parent Category */}
+        <a
+          className="cursor-pointer"
+          onClick={(e) => {
+            e.preventDefault();
+            goShop(item.category_id); // send parent id
+          }}
+        >
+          <span>
+            <Image
+              src={
+                item.category_img
+                  ? `${api.IMG_URL}category_img/${item.category_img}`
+                  : defaultIMG
+              }
+              alt={item.category_name}
+              width={50}
+              height={50}
+            />
+          </span>
+          {item.category_name}
         </a>
 
-        {item.children && (
-          <ul className={`tp-submenu ${isActiveSubMenu === item.parent ? 'active':''}`}>
-            {item.children.map((child, i) => (
-              <li
-                key={i}
-                onClick={() => handleCategoryRoute(child, "children")}
-              >
-                <a className="cursor-pointer">{child}</a>
+        {/* ✅ Sub Categories */}
+        {item.children?.length > 0 && (
+          <ul className="tp-submenu">
+            {item.children.map((child) => (
+              <li key={child.category_id}>
+                <a
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    // 🔥 Send category_main_id instead of child id
+                    goShop(child.category_main_id);
+                  }}
+                >
+                  {child.category_name}
+                </a>
               </li>
             ))}
           </ul>
@@ -90,6 +79,7 @@ const MobileCategory = ({ isCategoryActive, categoryType }) => {
       </li>
     ));
   }
+
   return <ul className={isCategoryActive ? "active" : ""}>{content}</ul>;
 };
 

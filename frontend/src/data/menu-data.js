@@ -10,49 +10,56 @@ const menu_data = [
     title: 'Home',
     link: '/',
   },
-
   {
-    id: 3,
+    id: 2,
     sub_menu: true,
     title: 'Shop',
     link: '/shop',
   },
-
+  {
+    id: 3,
+    single_link: true,
+    title: 'Rental Device',
+    link: '/rental-device',
+  },
   {
     id: 4,
+    single_link: true,
+    title: 'AMC',
+    link: '/amc',
+  },
+  {
+    id: 5,
+    single_link: true,
+    title: 'CCTV Quote',
+    link: '/cctv-quotation',
+  },
+  {
+    id: 6,
+    single_link: true,
+    title: 'PC Quote',
+    link: '/pc-quotation',
+  },
+  {
+    id: 7,
     single_link: true,
     title: 'Our Services',
     link: '/coupon',
   },
-
-  {
-    id: 7,
-    single_link: true,
-    title: 'CCTV Quotation',
-    link: '/cctv-quotation',
-  },
-
   {
     id: 8,
-    single_link: true,
-    title: 'PC Quotation',
-    link: '/pc-quotation',
-  },
-
-  {
-    id: 6,
     single_link: true,
     title: 'Contact',
     link: '/contact',
   },
-
 ];
-
 
 export default menu_data;
 
-// mobile_menu
-export const mobile_menu = [
+
+// ✅ Mobile Menu (Same Priority Order)
+
+export const  mobile_menu = [
   {
     id: 1,
     single_link: true,
@@ -68,23 +75,35 @@ export const mobile_menu = [
   {
     id: 3,
     single_link: true,
-    title: 'Our Services',
-    link: '/coupon',
+    title: 'Rental Device',
+    link: '/rental-device',
   },
   {
     id: 4,
+    single_link: true,
+    title: 'AMC',
+    link: '/amc',
+  },
+  {
+    id: 5,
     single_link: true,
     title: 'CCTV Quotation',
     link: '/cctv-quotation',
   },
   {
-    id: 5,
+    id: 6,
     single_link: true,
     title: 'PC Quotation',
     link: '/pc-quotation',
   },
   {
-    id: 6,
+    id: 7,
+    single_link: true,
+    title: 'Our Services',
+    link: '/coupon',
+  },
+  {
+    id: 8,
     single_link: true,
     title: 'Contact',
     link: '/contact',

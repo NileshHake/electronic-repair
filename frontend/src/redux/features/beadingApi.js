@@ -103,7 +103,7 @@ export const beadingApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success("✅ Vendor offer saved!");
+          toast.success("  Vendor offer saved!");
         } catch (err) {
           toast.error("❌ Failed to save vendor offer!");
         }
@@ -142,7 +142,7 @@ export const beadingApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success("✅ Vendor offer updated!");
+          toast.success(" Vendor offer updated!");
         } catch (err) {
           toast.error("❌ Failed to update vendor offer!");
         }
@@ -162,7 +162,7 @@ export const beadingApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success("🗑️ Vendor offer deleted!");
+          toast.success("  Vendor offer deleted!");
         } catch (err) {
           toast.error("❌ Failed to delete vendor offer!");
         }
