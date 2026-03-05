@@ -27,6 +27,7 @@
     "chart.js": "^4.3.0",
     "classnames": "^2.5.1",
     "cleave.js": "^1.6.0",
+    "cross-env": "^10.1.0",
     "echarts": "^5.4.2",
     "echarts-for-react": "^3.0.2",
     "emoji-picker-react": "^4.4.9",
@@ -101,9 +102,9 @@
     "yup": "^1.2.0"
   },
   "scripts": {
-    "start": "cross-env NODE_OPTIONS=--max_old_space_size=4096 craco start",
-    "build": "cross-env DISABLE_ESLINT_PLUGIN=true NODE_OPTIONS=--max_old_space_size=4096 craco build",
-    "test": "craco test",
+    "start": "cross-env NODE_OPTIONS=--max_old_space_size=4096 react-scripts start",
+    "build": "cross-env DISABLE_ESLINT_PLUGIN=true NODE_OPTIONS=--max_old_space_size=4096 react-scripts build",
+    "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
@@ -167,6 +168,8 @@
     "autoprefixer": "10.4.5"
   },
   "devDependencies": {
+    "ajv": "^8.18.0",
+    "ajv-keywords": "^5.1.0",
     "sass": "^1.97.2"
   }
 }

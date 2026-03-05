@@ -74,7 +74,7 @@ const SuccessOrderModal = ({ open, onClose, orderId }) => {
               onClick={onClose}
             >
               <span className="shine" />
-              <span className="btn-text">Continue Shopping</span>
+              <span className="btn-text" >Continue Shopping</span>
               <span className="arrow">→</span>
             </Link>
 

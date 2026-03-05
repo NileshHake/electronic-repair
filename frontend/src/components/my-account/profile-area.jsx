@@ -9,6 +9,7 @@ import ChangePassword from "./change-password";
 import MyOrders from "./my-orders";
 import QuotationTab from "./quotations";
 import GSTVerification from "./gst-verification";
+import RentalRequests from "./RentalRequests";
 
 const ProfileArea = ({ orderData, quotationData }) => {
   const router = useRouter();
@@ -119,6 +120,14 @@ const ProfileArea = ({ orderData, quotationData }) => {
                     aria-labelledby="nav-gst-tab"
                   >
                     <GSTVerification />
+                  </div>
+                  <div
+                    className="tab-pane fade"
+                    id="nav-rental"
+                    role="tabpanel"
+                    aria-labelledby="nav-rental-tab"
+                  >
+                    <RentalRequests />
                   </div>
                 </div>
               </div>

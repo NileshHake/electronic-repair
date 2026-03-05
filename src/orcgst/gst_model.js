@@ -14,7 +14,7 @@ const Gst = sequelize.define(
         gst_gstin: {
             type: DataTypes.STRING(15),
             allowNull: false,
-            unique: true,
+         
         },
 
         gst_legal_name: {

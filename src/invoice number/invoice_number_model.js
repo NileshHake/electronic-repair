@@ -16,6 +16,11 @@ const InvoiceNumberGenerator = sequelize.define(
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
     },
+    request_invoice_number_generator_count: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0,
+    },
 
     invoice_number_generator_count: {
       type: DataTypes.INTEGER.UNSIGNED,

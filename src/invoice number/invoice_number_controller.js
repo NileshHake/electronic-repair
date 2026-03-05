@@ -14,6 +14,9 @@ const FIELD_MAP = {
 
   recoveryinvoice: "recovery_invoice_number_generator_count",
   recoveryquotation: "recovery_quotation_number_generator_count",
+
+
+  requestinvoice: "request_invoice_number_generator_count", 
 };
 
 async function generateNumber({ businessId, type }) {

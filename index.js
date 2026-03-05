@@ -73,9 +73,11 @@ app.get("/", (req, res) => {
 });
 
 const { startBeadingAutoDeleteJob } = require("./src/jobs/beadingAutoDelete");
+const { startRentalExpireJob } = require("./src/jobs/startRentalExpireJob");
 
 // ✅ start cron once
 startBeadingAutoDeleteJob();
+startRentalExpireJob();
 
 const userRoutes = require("./src/auth/user_route");
 app.use("/api", userRoutes);

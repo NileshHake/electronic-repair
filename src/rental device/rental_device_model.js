@@ -10,7 +10,7 @@ const RentalDevice = sequelize.define(
             primaryKey: true,
         },
 
-        vendor_id: {
+        selected_vendor_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },

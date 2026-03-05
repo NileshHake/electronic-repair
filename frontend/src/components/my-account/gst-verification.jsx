@@ -7,7 +7,7 @@ const toText = (v) => (v === null || v === undefined || v === "" ? "-" : String(
 const GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
 
 const GSTVerification = () => {
-  const [gstin, setGstin] = useState("27BSSPR5055B1ZF");
+  const [gstin, setGstin] = useState("27BSSPR5055XXXX");
   const [data, setData] = useState(null); // external api data (json.data)
   const [apiMessage, setApiMessage] = useState("");
   const [error, setError] = useState("");

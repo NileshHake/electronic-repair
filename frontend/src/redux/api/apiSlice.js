@@ -22,5 +22,5 @@
       },
     }),
     endpoints: (builder) => ({}),
-    tagTypes: ["Products","Coupon","Product","RelatedProducts","UserOrder","UserOrders","ProductType","OfferProducts","PopularProducts","Repair","Recovery","Beading"]
+    tagTypes: ["Products","Coupon","Product","RelatedProducts","UserOrder","UserOrders","ProductType","OfferProducts","PopularProducts","Repair","Recovery","Beading","RentalRequest"]
   });

@@ -12,7 +12,7 @@ const QuotationMaster = sequelize.define(
     quotation_no: {
       type: DataTypes.STRING(50),
       allowNull: false,
-      unique: true,
+     
     },
     business_id: {
       type: DataTypes.BIGINT,

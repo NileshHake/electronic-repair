@@ -23,6 +23,7 @@ const Slider = require("../slider/slider_model");
 const StoreFeature = require("../store_features/store_feature_model");
 const Generations = require("../Generation/generation_model");
 const Ram = require("../Ram/ram_model");
+const RentalDevice = require("../rental device/rental_device_model");
 
 const createSuperAdmin = async () => {
   const t = await sequelize.transaction();
@@ -72,10 +73,8 @@ const createSuperAdmin = async () => {
       { permission_name: "Update", permission_path: 3, permission_category: "RECOVERY" },
       { permission_name: "Delete", permission_path: 4, permission_category: "RECOVERY" },
 
-      { permission_name: "List", permission_path: 1, permission_category: "RENTAL_DEVICE" },
-      { permission_name: "Create", permission_path: 2, permission_category: "RENTAL_DEVICE" },
-      { permission_name: "Update", permission_path: 3, permission_category: "RENTAL_DEVICE" },
-      { permission_name: "Delete", permission_path: 4, permission_category: "RENTAL_DEVICE" },
+      { permission_name: "Device", permission_path: 1, permission_category: "RENTAL_DEVICE" },
+      { permission_name: "Request", permission_path: 2, permission_category: "RENTAL_DEVICE" }, 
 
       { permission_name: "List", permission_path: 1, permission_category: "QUOTATION_BILLING" },
       { permission_name: "Create", permission_path: 2, permission_category: "QUOTATION_BILLING" },
@@ -1005,6 +1004,240 @@ const createSuperAdmin = async () => {
         ignoreDuplicates: true, // optional (add unique index on ram_name)
       }
     );
+    await RentalDevice.bulkCreate(
+      [
+        {
+          "vendor_id": 1,
+          "device_sub_category_id": 2,
+          "device_name": "MacBook Pro M1 13-inch",
+          "device_brand": "Apple",
+          "device_category": "Laptop",
+          "device_model": "M1 2020",
+          "specs_json": {
+            "ram": "16GB",
+            "storage": "512GB SSD",
+            "processor": "Apple M1"
+          },
+          "stock_qty": 5,
+          "available_qty": 5,
+          "base_rent_per_day": 900,
+          "base_rent_per_week": 5000,
+          "base_rent_per_month": 18000,
+          "security_deposit": 15000,
+          "min_rental_days": 1,
+          "delivery_available": 1,
+          "delivery_fee": 100,
+          "status": "active"
+        },
+        {
+          "vendor_id": 1,
+          "device_sub_category_id": 2,
+          "device_name": "Dell XPS 15",
+          "device_brand": "Dell",
+          "device_category": "Laptop",
+          "device_model": "XPS 9520",
+          "specs_json": {
+            "ram": "16GB",
+            "storage": "1TB SSD",
+            "processor": "Intel i7"
+          },
+          "stock_qty": 4,
+          "available_qty": 4,
+          "base_rent_per_day": 850,
+          "base_rent_per_week": 4700,
+          "base_rent_per_month": 17000,
+          "security_deposit": 12000,
+          "min_rental_days": 2,
+          "delivery_available": 1,
+          "delivery_fee": 120,
+          "status": "active"
+        },
+        {
+          "vendor_id": 2,
+          "device_sub_category_id": 3,
+          "device_name": "iPhone 14 Pro",
+          "device_brand": "Apple",
+          "device_category": "Mobile",
+          "device_model": "14 Pro",
+          "specs_json": {
+            "storage": "256GB",
+            "camera": "48MP",
+            "battery": "3200mAh"
+          },
+          "stock_qty": 10,
+          "available_qty": 10,
+          "base_rent_per_day": 600,
+          "base_rent_per_week": 3500,
+          "base_rent_per_month": 12000,
+          "security_deposit": 10000,
+          "min_rental_days": 1,
+          "delivery_available": 1,
+          "delivery_fee": 80,
+          "status": "active"
+        },
+        {
+          "vendor_id": 2,
+          "device_sub_category_id": 3,
+          "device_name": "Samsung Galaxy S23 Ultra",
+          "device_brand": "Samsung",
+          "device_category": "Mobile",
+          "device_model": "S23 Ultra",
+          "specs_json": {
+            "storage": "256GB",
+            "camera": "200MP",
+            "battery": "5000mAh"
+          },
+          "stock_qty": 8,
+          "available_qty": 8,
+          "base_rent_per_day": 550,
+          "base_rent_per_week": 3200,
+          "base_rent_per_month": 11000,
+          "security_deposit": 9000,
+          "min_rental_days": 1,
+          "delivery_available": 1,
+          "delivery_fee": 80,
+          "status": "active"
+        },
+        {
+          "vendor_id": 3,
+          "device_sub_category_id": 4,
+          "device_name": "Canon EOS R6 Camera",
+          "device_brand": "Canon",
+          "device_category": "Camera",
+          "device_model": "EOS R6",
+          "specs_json": {
+            "sensor": "20MP Full Frame",
+            "video": "4K",
+            "stabilization": "IBIS"
+          },
+          "stock_qty": 3,
+          "available_qty": 3,
+          "base_rent_per_day": 1200,
+          "base_rent_per_week": 6500,
+          "base_rent_per_month": 24000,
+          "security_deposit": 20000,
+          "min_rental_days": 2,
+          "delivery_available": 1,
+          "delivery_fee": 150,
+          "status": "active"
+        },
+        {
+          "vendor_id": 3,
+          "device_sub_category_id": 4,
+          "device_name": "Sony A7 IV",
+          "device_brand": "Sony",
+          "device_category": "Camera",
+          "device_model": "A7 IV",
+          "specs_json": {
+            "sensor": "33MP",
+            "video": "4K 60fps",
+            "mount": "Sony E"
+          },
+          "stock_qty": 4,
+          "available_qty": 4,
+          "base_rent_per_day": 1300,
+          "base_rent_per_week": 7200,
+          "base_rent_per_month": 26000,
+          "security_deposit": 22000,
+          "min_rental_days": 2,
+          "delivery_available": 1,
+          "delivery_fee": 150,
+          "status": "active"
+        },
+        {
+          "vendor_id": 4,
+          "device_sub_category_id": 5,
+          "device_name": "iPad Pro 12.9",
+          "device_brand": "Apple",
+          "device_category": "Tablet",
+          "device_model": "M2",
+          "specs_json": {
+            "ram": "8GB",
+            "storage": "256GB",
+            "display": "Liquid Retina"
+          },
+          "stock_qty": 6,
+          "available_qty": 6,
+          "base_rent_per_day": 500,
+          "base_rent_per_week": 2800,
+          "base_rent_per_month": 9500,
+          "security_deposit": 8000,
+          "min_rental_days": 1,
+          "delivery_available": 1,
+          "delivery_fee": 70,
+          "status": "active"
+        },
+        {
+          "vendor_id": 4,
+          "device_sub_category_id": 5,
+          "device_name": "Samsung Galaxy Tab S9",
+          "device_brand": "Samsung",
+          "device_category": "Tablet",
+          "device_model": "Tab S9",
+          "specs_json": {
+            "ram": "8GB",
+            "storage": "128GB",
+            "display": "AMOLED"
+          },
+          "stock_qty": 5,
+          "available_qty": 5,
+          "base_rent_per_day": 450,
+          "base_rent_per_week": 2600,
+          "base_rent_per_month": 9000,
+          "security_deposit": 7500,
+          "min_rental_days": 1,
+          "delivery_available": 1,
+          "delivery_fee": 70,
+          "status": "active"
+        },
+        {
+          "vendor_id": 5,
+          "device_sub_category_id": 6,
+          "device_name": "DJI Mini 3 Pro Drone",
+          "device_brand": "DJI",
+          "device_category": "Drone",
+          "device_model": "Mini 3 Pro",
+          "specs_json": {
+            "camera": "4K HDR",
+            "flight_time": "34 min",
+            "weight": "249g"
+          },
+          "stock_qty": 3,
+          "available_qty": 3,
+          "base_rent_per_day": 1400,
+          "base_rent_per_week": 8000,
+          "base_rent_per_month": 28000,
+          "security_deposit": 25000,
+          "min_rental_days": 2,
+          "delivery_available": 1,
+          "delivery_fee": 200,
+          "status": "active"
+        },
+        {
+          "vendor_id": 5,
+          "device_sub_category_id": 6,
+          "device_name": "GoPro Hero 11",
+          "device_brand": "GoPro",
+          "device_category": "Action Camera",
+          "device_model": "Hero 11",
+          "specs_json": {
+            "video": "5.3K",
+            "waterproof": "10m",
+            "stabilization": "HyperSmooth"
+          },
+          "stock_qty": 6,
+          "available_qty": 6,
+          "base_rent_per_day": 400,
+          "base_rent_per_week": 2200,
+          "base_rent_per_month": 7500,
+          "security_deposit": 6000,
+          "min_rental_days": 1,
+          "delivery_available": 1,
+          "delivery_fee": 60,
+          "status": "active"
+        }
+      ]
+    )
     return true;
 
   } catch (error) {

@@ -284,6 +284,7 @@ import InquiryList from "../pages/Inquiry/InquiryList";
 import RecoveryList from "../pages/Recovery/RecoveryList";
 import RecoveryOverView from "../pages/Recovery/component/RecoveryOverView";
 import RentalDeviceList from "../pages/RentalDevice/RentalDeviceList";
+import RentalRequestList from "../pages/Rentalrequset/RentalRequsetlist";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -343,6 +344,7 @@ const authProtectedRoutes = [
   { path: "/recovery/overview/:recovery_id", component: <RecoveryOverView /> },
   { path: "/slider-list", component: <SliderList /> },
   { path: "/supplier-list", component: <SupplierList /> },
+  { path: "/rental-request-list", component: <RentalRequestList /> },
   { path: "/inquiry-list", component: <InquiryList /> },
   // ORDER TRACKING ROUTES
   { path: "/order-list", component: <OrderList /> },

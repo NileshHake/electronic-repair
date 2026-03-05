@@ -272,17 +272,29 @@ const Navdata = () => {
     },
     {
       id: "RENTAL_DEVICE",
-      label: "Rental Device",
+      label: "Rental  ",
       icon: "mdi mdi-laptop",
-      link: "/rental-device-list",
       stateVariables: isRentalDevice,
       click: function (e) {
         e.preventDefault();
         setIsRentalDevice(!isRentalDevice);
         setIscurrentState("RentalDevice");
         updateIconSidebar(e);
-        history("/rental-device-list");
       },
+      subItems: [
+        {
+          id: "RENTAL_DEVICE_LIST",
+          label: "Device List",
+          link: "/rental-device-list",
+          parentId: "RENTAL_DEVICE",
+        },
+        {
+          id: "RENTAL_REQUEST_LIST",
+          label: "Rental Request",
+          link: "/rental-request-list",
+          parentId: "RENTAL_DEVICE",
+        },
+      ],
     },
     {
       id: "BEADING",

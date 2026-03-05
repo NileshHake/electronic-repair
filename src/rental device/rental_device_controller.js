@@ -55,6 +55,20 @@ const store = async (req, res) => {
 };
 
 // ✅ READ ALL
+
+
+const listindex = async (req, res) => {
+  try {
+    const rentalDevices = await RentalDevice.findAll();  // ✅ await
+    return res.status(200).json(rentalDevices);
+  } catch (error) {
+    console.log("Error", error);
+    return res.status(500).json({
+      message: "Error fetching rental devices",
+      error: error.message,
+    });
+  }
+};
 const index = async (req, res) => {
     try {
         // ✅ Get Vendor ID from login
@@ -224,7 +238,8 @@ const deleted = async (req, res) => {
 
 module.exports = {
     store,
-    index,
+    index, 
+    listindex, 
     Get,
     update,
     deleted,

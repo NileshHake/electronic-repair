@@ -63,7 +63,7 @@ const RentalDeviceList = () => {
     }, [dispatch]);
 
     // ✅ keyboard shortcuts
-    useEffect(() => {
+    useEffect(() => {   
         const handleKeyDown = (event) => {
             if (event.altKey && event.key.toLowerCase() === "a") {
                 event.preventDefault();

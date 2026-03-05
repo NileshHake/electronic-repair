@@ -16,7 +16,7 @@ const CheckoutArea = () => {
     submitHandler,
     register,
     errors, 
-  } = checkoutData;
+  } = checkoutData; 
   const { data: cartData = {}, isLoading } = useGetCartListQuery();
   const cart_products = cartData?.items || [];
   const [selectedAddress, setSelectedAddress] = useState(null);
