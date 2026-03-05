@@ -168,8 +168,6 @@
     "autoprefixer": "10.4.5"
   },
   "devDependencies": {
-    "ajv": "^8.18.0",
-    "ajv-keywords": "^5.1.0",
     "sass": "^1.97.2"
   }
 }
