@@ -313,7 +313,6 @@ const QuotationView = ({
                                             <tr>
                                                 <th className="border-0">#</th>
                                                 <th className="border-0">Item Name</th>
-                                                <th className="border-0">Description</th>
                                                 <th className="border-0 text-center">Qty</th>
                                                 <th className="border-0 text-end">Rate</th>
                                                 <th className="border-0 text-end">Total</th>
@@ -324,14 +323,12 @@ const QuotationView = ({
                                                 childQuotationItems.map((item, index) => (
                                                     <tr key={item.quotation_item_id || index}>
                                                         <td>{index + 1}</td>
+                                                        {console.log(item)
+                                                        }
                                                         <td className="fw-semibold">
-                                                            {item.product_name || item.product_name || "-"}
+                                                            {item?.product_name || item.product_name || "-"}
                                                         </td>
-                                                        <td className="text-muted">
-                                                            {item.problem_note ||
-                                                                item.problem_note ||
-                                                                "-"}
-                                                        </td>
+
                                                         <td className="text-center">
                                                             {item.qty || item.quantity || "-"}
                                                         </td>

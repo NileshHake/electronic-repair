@@ -271,10 +271,7 @@ const Statusupdate = async (req, res) => {
 
 const childGet = async (req, res) => {
     try {
-        const { id } = req.params; // Destructuring for cleaner code
-
-        console.log(id);
-
+        const { id } = req.params;
         const requests = await AMCRequestItems.findAll({
             where: { request_id: id }
         });

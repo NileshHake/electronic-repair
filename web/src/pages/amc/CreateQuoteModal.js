@@ -122,8 +122,8 @@ const CreateQuoteModal = ({ isOpen, toggle, requestData }) => {
 
             items: items.map((item) => ({
                 product_id: item.product_id,
-                product_name: item.product_name || item.child_name || item.title,
-                problem_note: item.problem_note || item.child_name || item.title,
+                product_name: item.product_name,
+
                 qty: Number(item.qty || 1),
                 price: Number(item.price || 0),
                 total: Number(item.qty || 1) * Number(item.price || 0)
@@ -193,7 +193,7 @@ const CreateQuoteModal = ({ isOpen, toggle, requestData }) => {
 
 
                         <CardBody>
-                            <Row className=" d-flex justify-content-end">
+                            {/* <Row className=" d-flex justify-content-end">
                                 <Col md="3">
                                     <label>Service Visits</label>
                                     <Input
@@ -215,7 +215,7 @@ const CreateQuoteModal = ({ isOpen, toggle, requestData }) => {
 
                                 </Col>
 
-                            </Row>
+                            </Row> */}
 
 
                             <h5 className="mb-3 fw-bold">AMC Products</h5>

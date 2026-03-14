@@ -147,7 +147,7 @@ const UpdateQuotationModal = ({
 
                         <CardBody>
 
-                            <Row className="d-flex justify-content-end">
+                            {/* <Row className="d-flex justify-content-end">
 
                                 <Col md="3">
                                     <label>Service Visits</label>
@@ -170,7 +170,7 @@ const UpdateQuotationModal = ({
                                     />
                                 </Col>
 
-                            </Row>
+                            </Row> */}
 
                             <h5 className="mb-3 fw-bold">AMC Products</h5>
 

@@ -316,7 +316,6 @@ const AmcRequestView = ({ isOpen, toggle, requestData }) => {
                                                         <th className="border-0">#</th>
                                                         <th className="border-0">Product Name</th>
                                                         <th className="border-0 text-center">Qty</th>
-                                                        <th className="border-0">Problem Note</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -332,9 +331,7 @@ const AmcRequestView = ({ isOpen, toggle, requestData }) => {
                                                             <td className="text-center">
                                                                 {item.qty || item.quantity || "-"}
                                                             </td>
-                                                            <td className="text-muted">
-                                                                {item.problem_note || "-"}
-                                                            </td>
+                                                          
                                                         </tr>
                                                     ))}
                                                 </tbody>

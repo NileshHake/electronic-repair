@@ -28,7 +28,7 @@ const store = async (req, res) => {
       gst_percent
     } = req.body;
 
-    /* Convert FormData items to array */
+
 
     const formattedItems = [];
 
@@ -91,6 +91,7 @@ const store = async (req, res) => {
     });
 
     for (let item of items) {
+ 
 
       await AMCQuotationItems.create({
 
@@ -515,7 +516,7 @@ const statusupdate = async (req, res) => {
         customer_id: quotation.customer_id,
         vendor_id: quotation.vendor_id,
         start_date: startDate,
-        end_date: endDate,      
+        end_date: endDate,
         total_visits: 4,
         remaining_visits: 4,
         contract_status: "active",
