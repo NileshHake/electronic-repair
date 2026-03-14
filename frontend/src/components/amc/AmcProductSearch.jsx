@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
-import { useLazySearchProductsQuery } from "@/redux/features/productApi";
+import { useLazySearchDeviceTypeQuery } from "@/redux/features/devicetypeApi";
 
 const AmcProductSearch = ({ onSelect }) => {
 
   const [triggerSearch, { data = [], isLoading }] =
-    useLazySearchProductsQuery();
+    useLazySearchDeviceTypeQuery();
 
   const [selected, setSelected] = useState([]);
 
@@ -13,10 +13,7 @@ const AmcProductSearch = ({ onSelect }) => {
 
     if (query.length < 2) return;
 
-    triggerSearch({
-      search: query,
-      type: "amc"
-    });
+    triggerSearch(query);
 
   };
 
@@ -26,7 +23,7 @@ const AmcProductSearch = ({ onSelect }) => {
 
       onSelect(items[0]);
 
-      // ✅ clear search
+      // clear search
       setSelected([]);
 
     }
@@ -35,29 +32,30 @@ const AmcProductSearch = ({ onSelect }) => {
 
   return (
     <AsyncTypeahead
-      id="amc-product-search"
+      id="device-type-search"
       isLoading={isLoading}
-      options={data?.data || []}
-      labelKey="product_name"
+      options={data || []}
+      labelKey="device_type_name"
       minLength={2}
       onSearch={handleSearch}
       onChange={handleChange}
       selected={selected}
-      placeholder="Search Product..."
+      placeholder="Search Device Type..."
       clearButton
       maxResults={50}
       paginate={false}
       filterBy={() => true}
       renderMenuItemChildren={(option) => (
 
-        <div key={option.product_id}>
+        <div key={option.device_type_id}>
 
           <div className="fw-semibold">
-            {option.product_name}
+            {option.device_type_name}
           </div>
 
           <div style={{ fontSize: 12, color: "#666" }}>
-            Brand: {option.brand_name || "-"} | Category: {option.category_name || "-"}
+            Carry / Month: ₹{Number(option.carry_price_per_month)} |
+            Onsite / Month: ₹{Number(option.onsite_price_per_month)}
           </div>
 
         </div>

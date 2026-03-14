@@ -94,15 +94,30 @@ const DeviceTypeList = () => {
                       <tr>
                         <th>#</th>
                         <th>Device Type</th>
+                        <th>Carry Price / Month</th>
+                        <th>Onsite Price / Month</th>
+                        <th>Carry Price / Year</th>
+                        <th>Onsite Price / Year</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
+
                     <tbody>
                       {!loading && deviceTypes.length > 0 ? (
                         deviceTypes.map((device, index) => (
                           <tr key={device.device_type_id}>
                             <td>{index + 1}</td>
+
                             <td>{device.device_type_name}</td>
+
+                            <td>{Number(device.carry_price_per_month)}</td>
+
+                            <td>{Number(device.onsite_price_per_month)}</td>
+
+                            <td>{Number(device.carry_price_per_year)}</td>
+
+                            <td>{Number(device.onsite_price_per_year)}</td>
+
                             <td>
                               <button
                                 className="text-primary border-0 bg-transparent me-2"
@@ -113,6 +128,7 @@ const DeviceTypeList = () => {
                               >
                                 <i className="ri-pencil-fill fs-16"></i>
                               </button>
+
                               <button
                                 className="text-danger border-0 bg-transparent"
                                 onClick={() => onClickDelete(device)}
@@ -124,15 +140,16 @@ const DeviceTypeList = () => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="3" className="text-center py-4">
+                          <td colSpan="7" className="text-center py-4">
                             <lord-icon
                               src="https://cdn.lordicon.com/msoeawqm.json"
                               trigger="loop"
                               colors="primary:#405189,secondary:#0ab39c"
                               style={{ width: "72px", height: "72px" }}
                             ></lord-icon>
+
                             <h6 className="mt-3 text-muted">
-                              No Accessories Found
+                              No Device Types Found
                             </h6>
                           </td>
                         </tr>

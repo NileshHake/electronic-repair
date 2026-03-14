@@ -18,6 +18,21 @@ const AmcRequests = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+
+    service_type: {
+      type: DataTypes.ENUM("carry_in", "on_site"),
+      allowNull: true
+    },
+
+    billing_type: {
+      type: DataTypes.ENUM("monthly", "annual"),
+      allowNull: true
+    },
+
+    autopay: {
+      type: DataTypes.ENUM("on", "off"),
+      allowNull: true
+    },
     vendor_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -30,8 +45,8 @@ const AmcRequests = sequelize.define(
       type: DataTypes.STRING,
       defaultValue: "pending",
     },
-   
-    
+
+
   },
   {
     timestamps: true,

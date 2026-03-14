@@ -1,18 +1,22 @@
 import { apiSlice } from "../api/apiSlice";
 
-export const deviceApi = apiSlice.injectEndpoints({
-  overrideExisting:true,
+export const deviceTypeApi = apiSlice.injectEndpoints({
+  overrideExisting: true,
+
   endpoints: (builder) => ({
-    getActiveBrands: builder.query({
-      query: () => `https://shofy-backend-dlt.vercel.app/api/brand/active`
+
+    getDeviceTypes: builder.query({
+      query: () => `/device-type/list`,
     }),
-    GetallDeviceType: builder.query({
-      query: () => `/device-type/list`
+
+    searchDeviceType: builder.query({
+      query: (search) => `/device-type/search?search=${search}`,
     }),
+
   }),
 });
 
 export const {
-  useGetActiveBrandsQuery,
-  useGetallDeviceTypeQuery,
-} = deviceApi;
+  useGetDeviceTypesQuery,
+  useLazySearchDeviceTypeQuery, // ✅ lazy search
+} = deviceTypeApi;

@@ -7,11 +7,12 @@ const { verifyToken } = require("../auth/Middleware/authMiddleware");
 router.post("/device-type/store", verifyToken, controller.store);
 
 // 🟡 READ ALL
-router.get("/device-type/list",   controller.index);
+router.get("/device-type/list", controller.index);
 
 // 🔵 READ SINGLE
 router.get("/device-type/single/:id", verifyToken, controller.Get);
 
+router.get("/device-type/search", controller.searchDevice);
 // 🟠 UPDATE
 router.put("/device-type/update", verifyToken, controller.update);
 

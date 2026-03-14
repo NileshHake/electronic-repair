@@ -16,12 +16,17 @@ const store = async (req, res) => {
         const {
 
             customer_address_id,
+            service_type,
+            billing_type,
+            autopay,
             items
         } = req.body;
 
         const request = await AMCRequest.create({
             customer_id: req.currentUser.user_id,
-
+            service_type: service_type || "carry_in",
+            billing_type: billing_type || "monthly",
+            autopay: autopay || "off",
             customer_address_id,
             vendor_id: 1
         });
@@ -180,12 +185,22 @@ const update = async (req, res) => {
 
         const {
             request_id,
-
+            service_type,
+            billing_type,
+            autopay,
+            customer_address_id,
             items
         } = req.body;
 
         const request = await AMCRequest.findByPk(request_id);
 
+
+        await request.update({
+            service_type: service_type || "carry_in",
+            billing_type: billing_type || "monthly",
+            autopay: autopay || "off",
+            customer_address_id,
+        })
         if (!request)
             return res.status(404).json({ message: "Request not found" });
 
@@ -226,7 +241,7 @@ const Statusupdate = async (req, res) => {
     try {
 
         const {
-            request_id, 
+            request_id,
             request_status,
 
 

@@ -1,3 +1,5 @@
+const { QueryTypes } = require("sequelize");
+const sequelize = require("../../config/db");
 const { getCreatedBy } = require("../helper/CurrentUser");
 const DeviceType = require("./device_type_model");
 
@@ -48,6 +50,42 @@ const Get = async (req, res) => {
   }
 };
 
+const searchDevice = async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    let query = `
+      SELECT *
+      FROM tbl_device_types
+      WHERE 1 = 1
+    `;
+
+    const replacements = {};
+
+    if (search) {
+      query += ` AND device_type_name LIKE :search`;
+      replacements.search = `%${search}%`;
+    }
+
+    query += ` ORDER BY device_type_id DESC`;
+
+    const result = await sequelize.query(query, {
+      replacements,
+      type: QueryTypes.SELECT,
+    });
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.log(error);
+    
+    res.status(500).json({
+      message: "Error fetching device types",
+      error: error.message,
+    });
+  }
+};
+
 // 🟠 UPDATE
 const update = async (req, res) => {
   try {
@@ -93,4 +131,5 @@ module.exports = {
   Get,
   update,
   deleted,
+  searchDevice,
 };

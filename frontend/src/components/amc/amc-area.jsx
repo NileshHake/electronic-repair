@@ -86,6 +86,7 @@ const AmcArea = () => {
                                 <table className="table align-middle table-hover">
 
                                     <thead className="table-light text-uppercase text-muted">
+
                                         <tr>
                                             <th>#</th>
                                             <th>Customer</th>
@@ -93,128 +94,176 @@ const AmcArea = () => {
                                             <th>City</th>
                                             <th>Mobile</th>
                                             <th>Status</th>
+                                            <th>Service Settings</th>
                                             <th>Actions</th>
                                         </tr>
+
                                     </thead>
 
                                     <tbody>
 
+                                        {/* Loading */}
+
                                         {isLoading && (
                                             <tr>
-                                                <td colSpan="7" className="text-center py-4">
+                                                <td colSpan="8" className="text-center py-4">
                                                     Loading...
                                                 </td>
                                             </tr>
                                         )}
 
+                                        {/* Error */}
+
                                         {isError && (
                                             <tr>
-                                                <td colSpan="7" className="text-center text-danger py-4">
+                                                <td colSpan="8" className="text-center text-danger py-4">
                                                     Failed to load AMC Requests
                                                 </td>
                                             </tr>
                                         )}
 
+                                        {/* Data */}
+
                                         {!isLoading && amcList.length > 0 ? (
 
-                                            amcList.map((amc, index) => (
+                                            amcList.map((amc, index) => {
 
-                                                <tr key={amc.amc_request_id}>
+                                                const status = statusOptions.find(
+                                                    (s) => s.value == amc.request_status
+                                                );
 
-                                                    <td>{index + 1}</td>
+                                                return (
 
-                                                    <td>
-                                                        {amc.customer_name}
-                                                        <br />
-                                                        <small className="text-muted">
-                                                            {amc.customer_email}
-                                                        </small>
-                                                    </td>
+                                                    <tr key={amc.request_id}>
 
-                                                    <td>
-                                                        {amc.vendor_name}
-                                                        <br />
-                                                        <small className="text-muted">
-                                                            {amc.vendor_phone}
-                                                        </small>
-                                                    </td>
+                                                        <td>{index + 1}</td>
 
-                                                    <td>{amc.customer_address_city}</td>
+                                                        {/* Customer */}
 
-                                                    <td>{amc.customer_address_mobile}</td>
+                                                        <td>
+                                                            {amc.customer_name}
+                                                            <br />
+                                                            <small className="text-muted">
+                                                                {amc.customer_email}
+                                                            </small>
+                                                        </td>
 
-                                                    <td>
-                                                        {(() => {
+                                                        {/* Vendor */}
 
-                                                            const status = statusOptions.find(
-                                                                (s) => s.value == amc.request_status
-                                                            );
+                                                        <td>
+                                                            {amc.vendor_name}
+                                                            <br />
+                                                            <small className="text-muted">
+                                                                {amc.vendor_phone}
+                                                            </small>
+                                                        </td>
 
-                                                            return (
-                                                                <span
-                                                                    className="badge"
-                                                                    style={{
-                                                                        backgroundColor: status?.color || "#6c757d",
-                                                                        color: "#fff",
-                                                                        padding: "6px 10px",
-                                                                        fontSize: "12px"
-                                                                    }}
-                                                                >
-                                                                    {status?.label || amc.request_status}
-                                                                </span>
-                                                            );
+                                                        {/* City */}
 
-                                                        })()}
-                                                    </td>
+                                                        <td>{amc.customer_address_city}</td>
 
-                                                    <td>
+                                                        {/* Mobile */}
 
-                                                        <ul className="list-inline hstack gap-2 mb-0">
+                                                        <td>{amc.customer_address_mobile}</td>
 
-                                                            {amc.request_status === "Quotation Created" && (
+                                                        {/* Status */}
+
+                                                        <td>
+
+                                                            <span
+                                                                className="badge"
+                                                                style={{
+                                                                    backgroundColor: status?.color || "#6c757d",
+                                                                    color: "#fff",
+                                                                    padding: "6px 10px",
+                                                                    fontSize: "12px"
+                                                                }}
+                                                            >
+                                                                {status?.label || amc.request_status}
+                                                            </span>
+
+                                                        </td>
+
+                                                        {/* Service Settings */}
+
+                                                      <td>
+
+  <div className="small">
+
+    <div>
+      <strong>Service:</strong>{" "}
+      {amc.service_type === "carry_in" ? "Carry In" : "On Site"}
+    </div>
+
+    <div>
+      <strong>Billing:</strong>{" "}
+      {amc.billing_type === "monthly" ? "Monthly Billing" : "Annual Billing"}
+    </div>
+
+    <div>
+      <strong>AutoPay:</strong>{" "}
+      {amc.autopay === "on" ? "Enabled" : "Disabled"}
+    </div>
+
+  </div>
+
+</td>
+
+                                                        {/* Actions */}
+
+                                                        <td>
+
+                                                            <ul className="list-inline hstack gap-2 mb-0">
+
+                                                                {amc.request_status === "Quotation Created" && (
+
+                                                                    <li className="list-inline-item">
+
+                                                                        <button
+                                                                            className="text-primary border-0 bg-transparent"
+                                                                            onClick={() =>
+                                                                                amc.quotation_id &&
+                                                                                setViewId(amc.quotation_id)
+                                                                            }
+                                                                        >
+                                                                            View
+                                                                        </button>
+
+                                                                    </li>
+
+                                                                )}
 
                                                                 <li className="list-inline-item">
 
                                                                     <button
                                                                         className="text-primary border-0 bg-transparent"
-                                                                        onClick={() => amc.quotation_id && setViewId(amc.quotation_id)}
+                                                                        onClick={() => handleUpdate(amc)}
                                                                     >
-                                                                        View
+                                                                        Edit
                                                                     </button>
 
                                                                 </li>
 
-                                                            )}
+                                                                <li className="list-inline-item">
 
-                                                            <li className="list-inline-item">
+                                                                    <button
+                                                                        className="text-danger border-0 bg-transparent"
+                                                                        onClick={() => handleDelete(amc.request_id)}
+                                                                    >
+                                                                        Delete
+                                                                    </button>
 
-                                                                <button
-                                                                    className="text-primary border-0 bg-transparent"
-                                                                    onClick={() => handleUpdate(amc)}
-                                                                >
-                                                                    Edit
-                                                                </button>
+                                                                </li>
 
-                                                            </li>
+                                                            </ul>
 
-                                                            <li className="list-inline-item">
+                                                        </td>
 
-                                                                <button
-                                                                    className="text-danger border-0 bg-transparent"
-                                                                    onClick={() => handleDelete(amc.request_id)}
-                                                                >
-                                                                    Delete
-                                                                </button>
+                                                    </tr>
 
-                                                            </li>
+                                                );
 
-                                                        </ul>
-
-                                                    </td>
-
-                                                </tr>
-
-                                            ))
+                                            })
 
                                         ) : (
 
@@ -222,7 +271,7 @@ const AmcArea = () => {
 
                                                 <tr>
 
-                                                    <td colSpan="7" className="text-center py-4">
+                                                    <td colSpan="8" className="text-center py-4">
 
                                                         <lord-icon
                                                             src="https://cdn.lordicon.com/msoeawqm.json"
