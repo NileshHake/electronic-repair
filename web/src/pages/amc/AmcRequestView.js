@@ -129,9 +129,55 @@ const AmcRequestView = ({ isOpen, toggle, requestData }) => {
                                     </div>
                                 </Col>
                             </Row>
+
                         </CardBody>
                     </Card>
+                    <Card className="border-0 shadow-sm mb-4 p-3">
 
+                        <Row className="mt-3 text-center">
+
+                            <Col md={4} className="text-center">
+                                <InfoItem
+                                    label="Service Type"
+                                    value={
+                                        requestData.service_type === "carry_in"
+                                            ? "Carry In Service"
+                                            : requestData.service_type === "on_site"
+                                                ? "On Site Service"
+                                                : "-"
+                                    }
+                                />
+                            </Col>
+
+                            <Col md={4} className="text-center">
+                                <InfoItem
+                                    label="Billing Type"
+                                    value={
+                                        requestData.billing_type === "monthly"
+                                            ? "Monthly Billing"
+                                            : requestData.billing_type === "annual"
+                                                ? "Annual Billing"
+                                                : "-"
+                                    }
+                                />
+                            </Col>
+
+                            <Col md={4} className="text-center">
+                                <InfoItem
+                                    label="AutoPay"
+                                    value={
+                                        requestData.autopay === "on"
+                                            ? "Enabled"
+                                            : requestData.autopay === "off"
+                                                ? "Disabled"
+                                                : "-"
+                                    }
+                                />
+                            </Col>
+
+                        </Row>
+
+                    </Card>
                     <Row>
                         {/* Customer Details */}
                         <Col lg={6} className="mb-4">

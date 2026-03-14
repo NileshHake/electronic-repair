@@ -104,6 +104,7 @@ const AmcRequestList = () => {
                                                 <th>#</th>
                                                 <th>Customer</th>
                                                 <th>Vendor</th>
+                                                <th>Service Settings</th>
                                                 <th style={{ minWidth: "250px" }}>Status</th>
                                                 <th>Created</th>
                                                 <th>Actions</th>
@@ -142,6 +143,22 @@ const AmcRequestList = () => {
                                                                 <br />
                                                                 {req.vendor_phone || ""}
                                                             </div>
+                                                        </td>
+                                                        <td>
+                                                          
+                                                                <strong>Service:</strong>{" "}
+                                                                {req.service_type === "carry_in" ? "Carry In" : "On Site"}
+                                                             
+                                                                <br />
+                                                            
+
+                                                                <strong>Billing:</strong>{" "}
+                                                                {req.billing_type === "monthly" ? "Monthly Billing" : "Annual Billing"}
+
+                                                                <br />
+                                                                <strong>AutoPay:</strong>{" "}
+                                                                {req.autopay === "on" ? "Enabled" : "Disabled"}
+                                                           
                                                         </td>
 
                                                         <td>
