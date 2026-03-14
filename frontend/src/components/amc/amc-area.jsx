@@ -186,28 +186,28 @@ const AmcArea = () => {
 
                                                         {/* Service Settings */}
 
-                                                      <td>
+                                                        <td>
 
-  <div className="small">
+                                                            <div className="small">
 
-    <div>
-      <strong>Service:</strong>{" "}
-      {amc.service_type === "carry_in" ? "Carry In" : "On Site"}
-    </div>
+                                                                <div>
+                                                                    <strong>Service:</strong>{" "}
+                                                                    {amc.service_type === "carry_in" ? "Carry In" : "On Site"}
+                                                                </div>
 
-    <div>
-      <strong>Billing:</strong>{" "}
-      {amc.billing_type === "monthly" ? "Monthly Billing" : "Annual Billing"}
-    </div>
+                                                                <div>
+                                                                    <strong>Billing:</strong>{" "}
+                                                                    {amc.billing_type === "monthly" ? "Monthly Billing" : "Annual Billing"}
+                                                                </div>
 
-    <div>
-      <strong>AutoPay:</strong>{" "}
-      {amc.autopay === "on" ? "Enabled" : "Disabled"}
-    </div>
+                                                                <div>
+                                                                    <strong>AutoPay:</strong>{" "}
+                                                                    {amc.autopay === "on" ? "Enabled" : "Disabled"}
+                                                                </div>
 
-  </div>
+                                                            </div>
 
-</td>
+                                                        </td>
 
                                                         {/* Actions */}
 
