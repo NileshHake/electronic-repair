@@ -55,53 +55,64 @@ const HeaderTwo = ({ style_2 = false }) => {
             </div>
           </div>
 
-          <div id="header-sticky" className={`tp-header-bottom-2 tp-header-sticky ${sticky ? 'header-sticky' : ''}`}>
-            <div className="container">
-              <div className="tp-mega-menu-wrapper p-relative">
-                <div className="row align-items-center">
-                  <div className="col-xl-2 col-lg-5 col-md-5 col-sm-4 col-6">
-                    <div className="logo">
-                      <Link href="/">
-                        <Image src={logo} alt="logo" priority />
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="col-xl-6   d-none d-xl-block">
-                    <div className="main-menu menu-style-2">
-                      <nav className="tp-main-menu-content">
-                        <Menus />
-                      </nav>
-                    </div>
-                  </div>
-                  <div className="col-xl-4 col-lg-7 col-md-7 col-sm-8 col-6">
-                    <div className="tp-header-bottom-right d-flex align-items-center justify-content-end pl-30">
-                     
-                      <div className="tp-header-action d-flex align-items-center ml-30">
-                        
-                        {/* <div className="tp-header-action-item d-none d-lg-block">
-                          <Link href="/wishlist" className="tp-header-action-btn">
-                           
-                            <span className="tp-header-action-badge">{wishlist.length}</span>
-                          </Link>
-                        </div> */}
-                        <div className="tp-header-action-item">
-                          <button onClick={() => dispatch(openCartMini())} className="tp-header-action-btn cartmini-open-btn" >
-                            <CartTwo />
-                            <span className="tp-header-action-badge">{quantity}</span>
-                          </button>
-                        </div>
-                        <div className="tp-header-action-item tp-header-hamburger mr-20 d-xl-none">
-                          <button onClick={() => setIsCanvasOpen(true)} type="button" className="tp-offcanvas-open-btn">
-                            <Menu />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+         <div id="header-sticky" className={`tp-header-bottom-2 tp-header-sticky ${sticky ? 'header-sticky' : ''}`}>
+  <div className="container">
+    <div className="tp-mega-menu-wrapper p-relative">
+      <div className="row align-items-center">
+
+        {/* Logo */}
+        <div className="col-xl-2 col-lg-3 col-md-3 col-sm-4 col-6">
+          <div className="logo">
+            <Link href="/">
+              <Image src={logo} alt="logo" priority />
+            </Link>
           </div>
+        </div>
+
+        {/* Menu */}
+        <div className="col-xl-7 col-lg-6 d-none d-lg-block">
+          <div className="main-menu menu-style-2">
+            <nav className="tp-main-menu-content">
+              <Menus />
+            </nav>
+          </div>
+        </div>
+
+        {/* Right Icons */}
+        <div className="col-xl-3 col-lg-3 col-md-9 col-sm-8 col-6">
+          <div className="tp-header-bottom-right d-flex align-items-center justify-content-end">
+
+            <div className="tp-header-action d-flex align-items-center">
+
+              <div className="tp-header-action-item">
+                <button
+                  onClick={() => dispatch(openCartMini())}
+                  className="tp-header-action-btn cartmini-open-btn"
+                >
+                  <CartTwo />
+                  <span className="tp-header-action-badge">{quantity}</span>
+                </button>
+              </div>
+
+              <div className="tp-header-action-item tp-header-hamburger ms-3 d-xl-none">
+                <button
+                  onClick={() => setIsCanvasOpen(true)}
+                  type="button"
+                  className="tp-offcanvas-open-btn"
+                >
+                  <Menu />
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
         </div>
       </header>
 

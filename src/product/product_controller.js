@@ -132,8 +132,8 @@ const AdminProductList = async (req, res) => {
       ? `WHERE ${whereParts.join(" AND ")}`
       : ""; // ✅ empty => no WHERE => all products
 
-   const products = await sequelize.query(
-  `
+    const products = await sequelize.query(
+      `
   SELECT 
     pro.*,
 
@@ -195,11 +195,11 @@ const AdminProductList = async (req, res) => {
   GROUP BY pro.product_id
   ORDER BY pro.product_id ASC
   `,
-  {
-    replacements,
-    type: sequelize.QueryTypes.SELECT,
-  }
-);
+      {
+        replacements,
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
 
     return res.status(200).json(products
 
@@ -471,7 +471,8 @@ const filterProducts = async (req, res) => {
 
 const SearchProducts = async (req, res) => {
   try {
-    const { search } = req.body;
+    const { search, type = "search" } = req.body;
+
 
     if (!search || search.trim().length < 1) {
       return res.status(400).json({
@@ -479,6 +480,9 @@ const SearchProducts = async (req, res) => {
         message: "Search must be at least 1 characters",
       });
     }
+
+    // ✅ AMC condition
+    const amcCondition = type === "amc" ? "AND pro.product_amc = 1" : "";
 
     const products = await sequelize.query(
       `
@@ -507,6 +511,7 @@ const SearchProducts = async (req, res) => {
         ON subcat.category_id = pro.product_sub_category
 
       WHERE pro.product_status = 2
+        ${amcCondition}   -- ✅ only apply when type=amc
         AND (
           LOWER(TRIM(pro.product_name)) COLLATE utf8mb4_general_ci
             LIKE CONCAT('%', LOWER(TRIM(:search)), '%') COLLATE utf8mb4_general_ci
@@ -530,11 +535,17 @@ const SearchProducts = async (req, res) => {
       }
     );
 
-    return res.status(200).json({ success: true, data: products });
+    return res.status(200).json({
+      success: true,
+      data: products,
+    });
 
   } catch (error) {
     console.error("Search Error:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 

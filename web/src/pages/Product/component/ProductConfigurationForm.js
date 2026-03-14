@@ -304,7 +304,7 @@ export const UsageField = ({ productData, setField, usageOptions }) => (
     </Col>
 );
 
- 
+
 export const BasicAttributes = ({ productData, setField }) => (
     <>
         {/* Product Color */}
@@ -402,6 +402,29 @@ export const DeliveryToggle = ({ productData, setField }) => (
                 onChange={(e) => setField("product_delivery_charge", Number(e.target.value))}
             />
         )}
+    </Col>
+);
+export const AMCToggle = ({ productData, setField }) => (
+    <Col lg={4} className="mt-2">
+        <div className="d-flex align-items-center justify-content-between">
+            <Label className="form-label fw-bold mb-0">
+                {productData.product_amc === 1 ? "AMC Enabled" : "AMC Disabled"}
+            </Label>
+
+            <div className="form-check form-switch me-3">
+                <Input
+                    type="switch"
+                    className="form-check-input"
+                    checked={productData.product_amc === 1}
+                    onChange={(e) => {
+                        const isAmc = e.target.checked ? 1 : 0;
+                        setField("product_amc", isAmc);
+                    }}
+                />
+            </div>
+        </div>
+
+        
     </Col>
 );
 

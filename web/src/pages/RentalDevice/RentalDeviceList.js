@@ -116,7 +116,6 @@ const RentalDeviceList = () => {
                                     </div>
                                 </Row>
                             </CardHeader>
-
                             <CardBody className="pt-0">
                                 <div className="table-responsive">
                                     <table className="table align-middle table-hover mb-0">

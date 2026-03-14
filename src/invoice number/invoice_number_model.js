@@ -47,6 +47,16 @@ const InvoiceNumberGenerator = sequelize.define(
       allowNull: false,
       defaultValue: 0,
     },
+    amc_invoice_number_generator_count: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    amc_quotation_number_generator_count: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0,
+    },
     recovery_invoice_number_generator_count: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,

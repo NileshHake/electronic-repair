@@ -10,6 +10,7 @@ const Navdata = () => {
 
   const [isDashboard, setIsDashboard] = useState(false);
   const [isProducts, setIsProducts] = useState(false);
+  const [isAmc, setIsAmc] = useState(false);
   const [isBusiness, setIsBusiness] = useState(false);
   const [isRepairing, setIsRepairing] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
@@ -98,6 +99,9 @@ const Navdata = () => {
 
     if (iscurrentState !== "Products") {
       setIsProducts(false);
+    }
+    if (iscurrentState !== "AMC") {
+      setIsAmc(false);
     }
     if (iscurrentState !== "Business") {
       setIsBusiness(false);
@@ -349,6 +353,45 @@ const Navdata = () => {
         setIscurrentState("Products");
         updateIconSidebar(e);
       },
+    },
+    {
+      id: "AMC",
+      label: "AMC",
+      icon: "mdi mdi-wrench-outline",
+      link: "/#",
+      stateVariables: isAmc,
+      click: function (e) {
+        e.preventDefault();
+        setIsAmc(!isAmc);
+        setIscurrentState("AMC");
+        updateIconSidebar(e);
+      },
+      subItems: [
+        {
+          id: "amcRequest",
+          label: "AMC Request",
+          link: "/amc-request-list",
+          parentId: "AMC",
+        },
+        {
+          id: "amcQuotation",
+          label: "AMC Quotation",
+          link: "/amc-quotation-list",
+          parentId: "AMC",
+        },
+        {
+          id: "amcContract",
+          label: "AMC Contract",
+          link: "/amc-contract-list",
+          parentId: "AMC",
+        },
+        {
+          id: "amcServiceVisit",
+          label: "Service Visit",
+          link: "/amc-service-visit-list",
+          parentId: "AMC",
+        },
+      ],
     },
     {
       id: "CUSTOMER",

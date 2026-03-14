@@ -109,6 +109,8 @@ import { QuotationReducer } from "./Inquiry";
 import { RecoveryReducer } from "./recovery";
 import { RentalDeviceReducer } from "./RentalDevice";
 import { RentalRequestReducer } from "./RentalRequest";
+import { AmcRequestReducer } from "./amc/AmcRequest";
+import { AmcQuotationReducer } from "./amc/AmcQuotation";
 
 const rootReducer = combineReducers({
   // public
@@ -156,6 +158,7 @@ const rootReducer = combineReducers({
   DeviceTypeReducer,
   RepairTypeReducer,
   UserReducer,
+  AmcRequestReducer,
   DeliveryBoyReducer,
   RentalDeviceReducer,
   RentalRequestReducer,
@@ -168,6 +171,7 @@ const rootReducer = combineReducers({
   DashboardEcommerce,
   DashboardCrypto,
   DashboardProject,
+  AmcQuotationReducer,
   DashboardNFT,
   ProductReducer,
   AccessoriesReducer,

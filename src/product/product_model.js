@@ -40,6 +40,10 @@ const Product = sequelize.define("tbl_product", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  product_amc: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
  
   
   product_sub_category: {

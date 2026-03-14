@@ -12,7 +12,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+  origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
@@ -208,6 +208,22 @@ app.use("/api", RentalDeviceRoutes);
 
 const RentalRequestRoutes = require("./src/retanl request/rental_request_routes");
 app.use("/api", RentalRequestRoutes);
+
+const AmcRequestRoutes = require("./src/amc/routes/amc_request_routes");
+app.use("/api", AmcRequestRoutes);
+
+const AmcQuotationRoutes = require("./src/amc/routes/amc_quotation_routes");
+app.use("/api", AmcQuotationRoutes);
+
+
+const AmcContractRoutes = require("./src/amc/routes/amc_contract_routes");
+app.use("/api", AmcContractRoutes);
+
+
+
+const AmcServiceVisitRoutes = require("./src/amc/routes/amc_service_visit_routes");
+app.use("/api", AmcServiceVisitRoutes);
+
 
 
 const PORT = process.env.PORT || 5000;

@@ -16,6 +16,10 @@ const FIELD_MAP = {
   recoveryquotation: "recovery_quotation_number_generator_count",
 
 
+  amcinvoice: "amc_invoice_number_generator_count",
+  amcquotation: "amc_quotation_number_generator_count",
+
+
   requestinvoice: "request_invoice_number_generator_count", 
 };
 

@@ -101,6 +101,8 @@ import { quotationSaga } from "./Inquiry";
 import { recoverySaga } from "./recovery";
 import { rentalRequestSaga } from "./RentalRequest";
 import { rentalDeviceSaga } from "./RentalDevice";
+import { amcRequestSaga } from "./amc/AmcRequest";
+import { amcQuotationSaga } from "./amc/AmcQuotation";
 export default function* rootSaga() {
   yield all([
     //public
@@ -117,6 +119,7 @@ export default function* rootSaga() {
     fork(requestsSaga),
     fork(beadingSaga),
     fork(serviceSaga),
+    fork(amcRequestSaga),
     fork(deviceModelSaga),
     fork(workflowSaga),
     fork(accessoriesSaga),
@@ -126,6 +129,7 @@ export default function* rootSaga() {
     fork(roleSaga),
     fork(recoverySaga),
     fork(sourceSaga),
+    fork(amcQuotationSaga),
     fork(technicianSaga),
     fork(deliveryBoySaga),
     fork(storeFeatureSaga),

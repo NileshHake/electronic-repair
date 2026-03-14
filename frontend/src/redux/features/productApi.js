@@ -18,10 +18,10 @@ export const productApi = apiSlice.injectEndpoints({
     }),
 
     searchProducts: builder.query({
-      query: (search) => ({
+      query: ({ search, type = "search" }) => ({
         url: "/search-products",
         method: "POST",
-        body: { search },
+        body: { search, type },
       }),
     }),
 

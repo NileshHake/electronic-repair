@@ -22,6 +22,7 @@ export const useProductForm = ({ toggle, mode = "add", initialData = null }) => 
         product_weight: "",
         product_hsn_code: "",
         product_dvr_or_nvr_channel: 0,
+        product_amc: 0,
 
         product_generation_id: "",
         product_ram_id: "",

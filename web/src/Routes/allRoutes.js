@@ -285,6 +285,8 @@ import RecoveryList from "../pages/Recovery/RecoveryList";
 import RecoveryOverView from "../pages/Recovery/component/RecoveryOverView";
 import RentalDeviceList from "../pages/RentalDevice/RentalDeviceList";
 import RentalRequestList from "../pages/Rentalrequset/RentalRequsetlist";
+import AmcRequestList from "../pages/amc/AmcRequestList";
+import QuotationList from "../pages/amc/Quotation/Quotationlist";
 
 const authProtectedRoutes = [
   { path: "/dashboard-analytics", component: <DashboardAnalytics /> },
@@ -346,6 +348,8 @@ const authProtectedRoutes = [
   { path: "/supplier-list", component: <SupplierList /> },
   { path: "/rental-request-list", component: <RentalRequestList /> },
   { path: "/inquiry-list", component: <InquiryList /> },
+  { path: "/amc-request-list", component: < AmcRequestList/> },
+  { path: "/amc-quotation-list", component: < QuotationList/> },
   // ORDER TRACKING ROUTES
   { path: "/order-list", component: <OrderList /> },
   { path: "/order-new", component: <NewOrderList /> },

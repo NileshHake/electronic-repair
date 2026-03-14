@@ -4,7 +4,7 @@ import Select from "react-select";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import SelectWithAdd from "./SelectWithAdd";
-import { BasicAttributes, BrandField, CategoryAndSubCategory, DeliveryToggle, DescriptionField, MainGenerationSection, PricesTable, ProductNameField, RamForCategory4, SaleToggle, SupportGenSection, TaxField, UsageField } from "./ProductConfigurationForm";
+import { AMCToggle, BasicAttributes, BrandField, CategoryAndSubCategory, DeliveryToggle, DescriptionField, MainGenerationSection, PricesTable, ProductNameField, RamForCategory4, SaleToggle, SupportGenSection, TaxField, UsageField } from "./ProductConfigurationForm";
 
 /* =========================
    helpers (same logic)
@@ -15,7 +15,7 @@ const toNum = (v) => {
 };
 
 
- 
+
 
 /* =========================
    MAIN COMPONENT
@@ -169,6 +169,8 @@ const PrimaryInfoTab = ({ form, lookups }) => {
 
             <SaleToggle productData={productData} setField={setField} />
             <DeliveryToggle productData={productData} setField={setField} />
+            
+            <AMCToggle productData={productData} setField={setField} />
 
             <PricesTable productData={productData} setField={setField} />
 
