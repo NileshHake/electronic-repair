@@ -1,12 +1,12 @@
 // components/RepairForm.js
 import React, { useEffect, useRef, useState } from "react";
 import { useGetallBrandsQuery } from "@/redux/features/brandApi";
-import { useGetallDeviceTypeQuery } from "@/redux/features/devicetypeApi";
+import { useGetDeviceTypesQuery } from "@/redux/features/devicetypeApi";
 import { useStoreRepairMutation } from "@/redux/features/repairApi";
 
 const RepairForm = () => {
   const { data: brands = [] } = useGetallBrandsQuery();
-  const { data: deviceTypes = [] } = useGetallDeviceTypeQuery();
+  const { data: deviceTypes = [] } = useGetDeviceTypesQuery();
 
   const [storeRepair, { isLoading }] = useStoreRepairMutation();
 
@@ -20,9 +20,9 @@ const RepairForm = () => {
     repair_workflow_id: 1,
     repair_workflow_stage_id: 1,
     repair_received_date: getToday(),
-    repair_image: [], 
+    repair_image: [],
     repair_video: null,
-    repair_created_by: "1", 
+    repair_created_by: "1",
   };
 
   const [formData, setFormData] = useState(initialForm);
@@ -107,14 +107,14 @@ const RepairForm = () => {
     previewImages.forEach((u) => {
       try {
         URL.revokeObjectURL(u);
-      } catch {}
+      } catch { }
     });
 
     // ✅ revoke video preview
     if (previewVideo) {
       try {
         URL.revokeObjectURL(previewVideo);
-      } catch {}
+      } catch { }
     }
 
     // ✅ reset state
