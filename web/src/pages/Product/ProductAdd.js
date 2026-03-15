@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { resetAddProductResponse, resetUpdateProductResponse } from "../../store/product";
 
 
+
 const ProductAdd = ({ isOpen, toggle }) => {
   const lookups = useProductLookups();
   const form = useProductForm({ toggle });
